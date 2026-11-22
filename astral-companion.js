@@ -1,4 +1,4 @@
-/* v1.13.1 ASTRAL COMPANION WALK UPDATE — game-only; no Cloudflare changes.
+/* v1.15.0 ASTRAL COMPANION / MASS-PRODUCED SUPPORT PILOT — game-only; no Cloudflare changes.
    ASTRAL-SUIT: modest constant support. ASTRAEA No.3: once per run,
    manually deployable for 12s after DEVORA boss defeat + 75s + SYNCHRO 100%.
    Sprites are stylized game interpretations of the supplied character sheets.
@@ -83,9 +83,12 @@ function hitAssist(e,dmg,api){
 }
 function fireSuit(g,api,q){
  const e=targetList(g,z.allyX,z.allyY,520,1)[0];if(!e)return;
- const damage=clamp(8.5+(g.level||1)*.48,9,15.5)*(e.kind==='boss'||e.kind==='final'?.6:1);
- api?.hit?.(e,damage,gold);fxLine(z.allyX+25,z.allyY-49,e.x,e.y,gold,2,.20);
- fxSparks(e.x,e.y,gold,5,75,q);z.shots++;api?.sound?.('shoot');
+ const pilot=window.RUU_PILOTS,base=clamp(8.5+(g.level||1)*.48,9,15.5)*(e.kind==='boss'||e.kind==='final'?.6:1);
+ const color=pilot?.shotColor?.()||gold,rapid=pilot?.isKai?.()===true;
+ const hits=rapid?2:1,damage=rapid?base*.70:base;
+ for(let n=0;n<hits;n++)api?.hit?.(e,damage,color);
+ fxLine(z.allyX+25,z.allyY-49,e.x,e.y,color,rapid?3:2,.20);
+ fxSparks(e.x,e.y,color,rapid?8:5,75,q);z.shots+=hits;api?.sound?.('shoot');
 }
 function defend(g,api,q){
  const p=g.player;
@@ -93,7 +96,7 @@ function defend(g,api,q){
   const b=g.ebullets[i];
   if((b.x-p.x)**2+(b.y-p.y)**2>90*90||(b.x-z.allyX)**2+(b.y-z.allyY)**2>250*250)continue;
   g.ebullets.splice(i,1);fxLine(z.allyX,z.allyY-44,b.x,b.y,silver,3,.36);
-  fxSparks(b.x,b.y,silver,14,140,q);z.blocked++;z.intercept=9.5;api?.sound?.('shield');return;
+  fxSparks(b.x,b.y,silver,14,140,q);z.blocked++;z.intercept=window.RUU_PILOTS?.interceptRate?.()||9.5;api?.sound?.('shield');return;
  }
 }
 function burstAstraea(g,api,q){
@@ -126,16 +129,27 @@ function tick(dt,g,api,q='auto'){
   p.vx*=Math.exp(-3*dt);p.vy*=Math.exp(-3*dt);if(p.life<=0)z.sparks.splice(i,1);
  }
  const p=g.player,f=1-Math.exp(-dt*6),X=p.x-80*(p.face||1),Y=p.y+21;
- if(z.allyX===null){z.allyX=X;z.allyY=Y}
- const beforeX=z.allyX,beforeY=z.allyY;
- z.allyX+=(X-z.allyX)*f;z.allyY+=(Y-z.allyY)*f;
- const moveX=z.allyX-beforeX,moveY=z.allyY-beforeY;
- z.walkSpeed=Math.hypot(moveX,moveY)/Math.max(dt,.001);
- z.allyMoving=z.walkSpeed>18;
- if(Math.abs(moveX)>.12)z.allyFacing=moveX>0?1:-1;
- if(z.allyMoving)z.walkClock+=dt*clamp(z.walkSpeed/160,.65,1.5);
- z.attack-=dt;if(z.attack<=0){z.attack=1.5;fireSuit(g,api,q)}
- z.intercept-=dt;if(z.intercept<=0){z.intercept=.12;defend(g,api,q)}
+ const incoming=window.RUU_PILOTS?.entering?.();
+ if(incoming){
+   // Run from off-screen right to the ordinary follow position.
+   const prog=incoming.progress;
+   z.allyX=p.x+640*(1-prog)-80*prog;z.allyY=Y;
+   z.allyFacing=-1;z.allyMoving=incoming.running;
+   z.walkSpeed=incoming.running?420:0;
+   if(incoming.running)z.walkClock+=dt*1.8;
+   z.attack=Math.max(z.attack,.3);
+ }else{
+   if(z.allyX===null){z.allyX=X;z.allyY=Y}
+   const beforeX=z.allyX,beforeY=z.allyY;
+   z.allyX+=(X-z.allyX)*f;z.allyY+=(Y-z.allyY)*f;
+   const moveX=z.allyX-beforeX,moveY=z.allyY-beforeY;
+   z.walkSpeed=Math.hypot(moveX,moveY)/Math.max(dt,.001);
+   z.allyMoving=z.walkSpeed>18;
+   if(Math.abs(moveX)>.12)z.allyFacing=moveX>0?1:-1;
+   if(z.allyMoving)z.walkClock+=dt*clamp(z.walkSpeed/160,.65,1.5);
+   z.attack-=dt;if(z.attack<=0){z.attack=window.RUU_PILOTS?.shotRate?.()||1.5;fireSuit(g,api,q)}
+   z.intercept-=dt;if(z.intercept<=0){z.intercept=.12;defend(g,api,q)}
+ }
  if(z.t<=0)return;
  z.t=Math.max(0,z.t-dt);
  const alpha=1-Math.exp(-4*dt);
@@ -154,6 +168,7 @@ function fallback(ctx,astro){
 }
 function drawGround(ctx,cam,g){
  if(!g?.player||z.allyX===null)return;
+ if(window.RUU_PILOTS?.entering?.()?.running===false)return;
  ctx.save();ctx.globalAlpha=.35;ctx.fillStyle='#070911';
  ctx.beginPath();ctx.ellipse(z.allyX-cam.x,z.allyY-cam.y,30,10,0,0,PI);ctx.fill();
  if(z.t>0){ctx.strokeStyle=pink;ctx.lineWidth=3;ctx.beginPath();ctx.ellipse(z.astraX+93-cam.x,z.astraY+20-cam.y,120,34,0,0,PI);ctx.stroke()}
@@ -166,6 +181,7 @@ function drawImage(ctx,img,x,y,w,h,opacity,astro){
 }
 function drawUnits(ctx,cam,g,q='auto'){
  if(!g?.player||z.allyX===null)return;
+ if(window.RUU_PILOTS?.entering?.()?.running===false)return;
  // Reduced from 86x125 to 64x94 logical pixels, about 25% smaller.
  // Source GIF faces right. Flip the drawing when escort moves left.
  const xSuit=z.allyX-cam.x,ySuit=z.allyY-cam.y+6,suitW=64,suitH=94;
@@ -212,5 +228,5 @@ function drawScreen(ctx,W,H,g,q='auto'){
  }
  if(z.flash>0&&q!=='lite'){ctx.save();ctx.globalAlpha=z.flash*.18;ctx.strokeStyle=pink;ctx.lineWidth=8;ctx.strokeRect(7,7,W-14,H-14);ctx.restore()}
 }
-window.RUU_COMPANION={VERSION:'1.13.1',reset,canDeploy,status,onKill,deploy,tick,drawGround,drawUnits,drawFront,drawScreen};
+window.RUU_COMPANION={VERSION:'1.15.0',reset,canDeploy,status,onKill,deploy,tick,drawGround,drawUnits,drawFront,drawScreen,position:()=>z.allyX===null?null:{x:z.allyX,y:z.allyY}};
 })();
