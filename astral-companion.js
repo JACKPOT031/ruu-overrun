@@ -105,6 +105,7 @@ function activateEmergency(g,api,q='auto'){
 }
 function hitAssist(e,dmg,api){
  if(!e||e.hp<=0||!api?.hit)return;
+ if(e.trueDevora&&window.RUU_TRUE_END?.isIntro?.())return; // No phantom assist damage while the cut-in protects the cores.
  if(e.kind==='boss'||e.kind==='final'||e.trueDevora){
   // Per-boss cap: at most 28% of max HP from ASTRAEA, never a lethal blow.
   dmg=Math.max(0,Math.min(dmg,e.maxHp*.28-(e.astraeaAssistDamage||0),e.hp-1));
