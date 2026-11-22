@@ -265,7 +265,7 @@ body{background:radial-gradient(ellipse 80% 66% at 52% 24%,#2a2934 0%,#11131d 55
 </head>
 <body>
 <div class="shell">
- <div class="upper"><div class="brand">JACKPOT<b>Ø</b>31 <span style="color:#667f95">/ ORIGINAL GAMES</span></div><div class="build">RUU//OVERRUN <b>v1.7.0</b> · 16 TRACKS / CINEMATIC ENDING</div></div>
+ <div class="upper"><div class="brand">JACKPOT<b>Ø</b>31 <span style="color:#667f95">/ ORIGINAL GAMES</span></div><div class="build">RUU//OVERRUN <b>v1.8.0</b> · 16 TRACKS / SHORT ENDING</div></div>
  <main class="frame" id="frame">
   <canvas id="game" width="1200" height="675" aria-label="ルーのサバイバルアクションゲーム"></canvas>
   <div class="hud" id="hud">
@@ -291,10 +291,10 @@ body{background:radial-gradient(ellipse 80% 66% at 52% 24%,#2a2934 0%,#11131d 55
     <div class="ending-vignette"></div><div class="ending-line"></div>
     <div class="ending-head"><span class="ending-title">RUU//OVERRUN <span style="color:#d9af7d">/ EPILOGUE</span></span><span class="ending-tag">JACKPOTØ31<br>ENDING THEME さすらえば</span></div>
     <div class="ending-wordmark" id="endingOpening"><b>RUU//OVERRUN</b><strong>THE JOURNEY CONTINUES</strong></div>
-    <div class="ending-captions" id="endingCaption"><div class="ep-index" id="endingIndex">01 / 10 — EPILOGUE</div><div class="ep-caption" id="endingCaptionMain">まだ知らない景色へ。</div><div class="ep-sub" id="endingCaptionSub">THE JOURNEY CONTINUES</div></div>
+    <div class="ending-captions" id="endingCaption"><div class="ep-index" id="endingIndex">01 / 01 — EPILOGUE</div><div class="ep-caption" id="endingCaptionMain">また会いましょう。</div><div class="ep-sub" id="endingCaptionSub">ENDING THEME // さすらえば</div></div>
     <div class="ending-credits" id="endingCredits" hidden><div class="credit-body"><div class="credit-eyebrow">MISSION COMPLETE // EPILOGUE</div><h2>RUU//OVERRUN</h2><div class="credit-sub">また会いましょう。</div><div class="credit-artist">ENDING THEME // さすらえば<br>MUSIC & VISUAL ART // JACKPOTØ31<br>THANK YOU FOR PLAYING.</div></div></div>
     <div class="ending-progress" id="endingProgress" role="slider" tabindex="0" aria-label="エンディング再生位置" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div id="endingProgressFill"></div></div>
-    <div class="ending-controls"><div class="ending-buttons"><button type="button" class="ending-control" id="endingPrev" title="前のシーン">◀</button><button type="button" class="ending-control" id="endingPause">Ⅱ PAUSE</button><button type="button" class="ending-control" id="endingNext" title="次のシーン">▶</button><button type="button" class="ending-control" id="endingSound">♫ MUSIC ON</button><button type="button" class="ending-control primary-ed" id="endingSkip">RESULTS / 結果へ</button></div><span class="ending-time" id="endingTime">00:00 / 03:25</span></div>
+    <div class="ending-controls"><div class="ending-buttons"><button type="button" class="ending-control" id="endingPrev" title="10秒戻る">◀ 10s</button><button type="button" class="ending-control" id="endingPause">Ⅱ PAUSE</button><button type="button" class="ending-control" id="endingNext" title="10秒進む">10s ▶</button><button type="button" class="ending-control" id="endingSound">♫ MUSIC ON</button><button type="button" class="ending-control primary-ed" id="endingSkip">RESULTS / 結果へ</button></div><span class="ending-time" id="endingTime">00:00 / 00:53</span></div>
   </section>
  </main>
  <audio id="bossTrack" preload="none" playsinline></audio>
@@ -491,63 +491,67 @@ body{background:radial-gradient(ellipse 80% 66% at 52% 24%,#2a2934 0%,#11131d 55
 
  // ===== v1.5.3 / EPILOGUE CINEMATIC =====
  const ENDING_UNLOCK_KEY='RUU_OVERRUN_ENDING_UNLOCK';
- const ENDING_DURATION_FALLBACK=205.105;
- const ENDING_SCENES=[
-  {src:'assets/ending_01.webp',name:'旅のはじまり',sub:'01 / WHERE THE SIGNAL BEGINS'},
-  {src:'assets/ending_02.webp',name:'声をたどって',sub:'02 / MEMORIES IN MOTION'},
-  {src:'assets/ending_03.webp',name:'まだ知らない空へ',sub:'03 / OPEN SKY'},
-  {src:'assets/ending_04.webp',name:'夜の向こう側',sub:'04 / THROUGH THE NIGHT'},
-  {src:'assets/ending_05.webp',name:'すれ違う光',sub:'05 / CROSSING LIGHTS'},
-  {src:'assets/ending_06.webp',name:'どこかで重なる',sub:'06 / OVERLAPS'},
-  {src:'assets/ending_07.webp',name:'この景色を、覚えている',sub:'07 / FRAGMENTS'},
-  {src:'assets/ending_08.webp',name:'夢のつづき',sub:'08 / STILL DREAMING'},
-  {src:'assets/ending_09.webp',name:'はじめまして',sub:'09 / HELLO AGAIN'},
-  {src:'assets/ending_10.webp',name:'また会いましょう',sub:'10 / SEE YOU AGAIN'}
- ];
- const ENDING_POSTER='assets/ending_11.webp';
- const endingDom={pane:document.getElementById('endingCinema'),a:document.getElementById('endingPhotoA'),b:document.getElementById('endingPhotoB'),
+ const ENDING_DURATION_FALLBACK=53.452;
+ // The user-supplied 53.452s WAV is the final segment of the published master track.
+ const ENDING_AUDIO_CUE=151.687;
+ const ENDING_SCENES=[{src:'assets/ending_11.webp',name:'また会いましょう',sub:'ENDING THEME // さすらえば'}];
+  const ENDING_POSTER='assets/ending_11.webp';
+ const endingDom={pane:document.getElementById('endingCinema'),a:document.getElementById('endingPhotoA'),b:document.getElementById('endingPhotoB'),sparkles:document.getElementById('endingSparkles'),
   credits:document.getElementById('endingCredits'),opening:document.getElementById('endingOpening'),index:document.getElementById('endingIndex'),
   caption:document.getElementById('endingCaptionMain'),sub:document.getElementById('endingCaptionSub'),captionBox:document.getElementById('endingCaption'),
   progress:document.getElementById('endingProgress'),fill:document.getElementById('endingProgressFill'),time:document.getElementById('endingTime'),
   prev:document.getElementById('endingPrev'),next:document.getElementById('endingNext'),pause:document.getElementById('endingPause'),
   sound:document.getElementById('endingSound'),skip:document.getElementById('endingSkip')};
- let endingState=null;
+ let endingState=null,endingSparklesBuilt=false;
+ function buildEndingSparkles(){
+   if(endingSparklesBuilt||!endingDom.sparkles)return;
+   endingSparklesBuilt=true;
+   const frag=document.createDocumentFragment();
+   for(let i=0;i<28;i++){
+     const el=document.createElement('i');el.className='ending-spark';
+     el.style.left=(5+Math.random()*89).toFixed(2)+'%';
+     el.style.top=(7+Math.random()*78).toFixed(2)+'%';
+     el.style.setProperty('--dx',(Math.random()*30-15).toFixed(1)+'px');
+     el.style.setProperty('--dy',(-5-Math.random()*28).toFixed(1)+'px');
+     el.style.setProperty('--dx2',(Math.random()*40-20).toFixed(1)+'px');
+     el.style.setProperty('--dy2',(-15-Math.random()*45).toFixed(1)+'px');
+     el.style.setProperty('--dur',(5+Math.random()*5).toFixed(2)+'s');
+     el.style.setProperty('--twinkle',(2.5+Math.random()*3.7).toFixed(2)+'s');
+     el.style.setProperty('--delay',(-Math.random()*9).toFixed(2)+'s');
+     frag.appendChild(el);
+   }
+   endingDom.sparkles.appendChild(frag);
+ }
  function endingUnlocked(){try{return localStorage.getItem(ENDING_UNLOCK_KEY)==='1'}catch(e){return false}}
- function endingDuration(){const a=musicEls[ENDING_TRACK_INDEX];return Number.isFinite(a.duration)&&a.duration>20?a.duration:ENDING_DURATION_FALLBACK}
- function endingSceneSpan(){return (endingDuration()-17)/ENDING_SCENES.length}
+ function endingDuration(){const a=musicEls[ENDING_TRACK_INDEX];return Number.isFinite(a.duration)&&a.duration>ENDING_AUDIO_CUE?Math.min(ENDING_DURATION_FALLBACK,a.duration-ENDING_AUDIO_CUE):ENDING_DURATION_FALLBACK}
+ function endingSceneSpan(){return (endingDuration()-8)/ENDING_SCENES.length}
  function endingClock(){
    if(!endingState)return 0;
    const audio=musicEls[ENDING_TRACK_INDEX];
    if(endingState.paused)return endingState.heldTime;
    const wall=Math.max(0,(performance.now()-endingState.wallStart-endingState.pauseAccum)/1000);
-   if(!audio.paused&&audio.currentTime>=0.1)return audio.currentTime;
+   if(!audio.paused&&audio.currentTime>=ENDING_AUDIO_CUE-.1)return Math.max(0,audio.currentTime-ENDING_AUDIO_CUE);
    return wall;
  }
  function setEndingScene(i,immediate=false){
    if(!endingState)return;
    i=Math.max(0,Math.min(ENDING_SCENES.length,i));
-   if(i===endingState.scene)return;
+   if(i===endingState.scene&&!immediate)return;
    endingState.scene=i;
-   const src=i===ENDING_SCENES.length?ENDING_POSTER:ENDING_SCENES[i].src;
-   const visible=endingState.top==='a'?endingDom.a:endingDom.b;
-   const incoming=visible===endingDom.a?endingDom.b:endingDom.a;
-   if(immediate){endingDom.a.classList.remove('active');endingDom.b.classList.remove('active');}
-   incoming.src=src;
-   incoming.onload=()=>{if(endingState&&endingState.scene===i){incoming.classList.add('active');visible.classList.remove('active')}};
-   if(incoming.complete&&incoming.naturalWidth){incoming.classList.add('active');visible.classList.remove('active')}
-   endingState.top=incoming===endingDom.a?'a':'b';
+   if(endingDom.a.getAttribute('src')!==ENDING_POSTER)endingDom.a.src=ENDING_POSTER;
+   endingDom.a.classList.add('active');endingDom.b.classList.remove('active');
    const credit=i===ENDING_SCENES.length;
    endingDom.credits.hidden=!credit;
    endingDom.captionBox.style.display=credit?'none':'';
-   if(!credit){const s=ENDING_SCENES[i];endingDom.index.textContent=String(i+1).padStart(2,'0')+' / 10 — EPILOGUE';endingDom.caption.textContent=s.name;endingDom.sub.textContent=s.sub}
+   if(!credit){endingDom.index.textContent='01 / 01 — EPILOGUE';endingDom.caption.textContent='また会いましょう。';endingDom.sub.textContent='ENDING THEME // さすらえば';}
  }
  function updateEndingCinema(now){
    if(state!=='ending'||!endingState)return;
    if(endingState.paused)return;
    const d=endingDuration(),time=Math.min(d,endingClock());
-   const idx=time>=d-17?ENDING_SCENES.length:Math.min(ENDING_SCENES.length-1,Math.floor(time/endingSceneSpan()));
+   const idx=time>=d-8?ENDING_SCENES.length:0;
    setEndingScene(idx);
-   endingDom.opening.classList.toggle('show',time<5);
+   endingDom.opening.classList.remove('show');
    endingDom.fill.style.width=(Math.min(1,time/d)*100).toFixed(2)+'%';
    endingDom.progress.setAttribute('aria-valuenow',String(Math.round(time/d*100)));
    endingDom.time.textContent=formatTime(time)+' / '+formatTime(d);
@@ -559,7 +563,7 @@ body{background:radial-gradient(ellipse 80% 66% at 52% 24%,#2a2934 0%,#11131d 55
    if(!endingState)return;
    const d=endingDuration(),target=Math.max(0,Math.min(d-.2,seconds));
    const audio=musicEls[ENDING_TRACK_INDEX];
-   try{audio.currentTime=target}catch(e){}
+   try{audio.currentTime=ENDING_AUDIO_CUE+target}catch(e){}
    endingState.wallStart=performance.now()-target*1000-endingState.pauseAccum;
    if(endingState.paused)endingState.heldTime=target;
    endingState.scene=-1;updateEndingCinema(performance.now());
@@ -571,7 +575,7 @@ body{background:radial-gradient(ellipse 80% 66% at 52% 24%,#2a2934 0%,#11131d 55
    state='ending';
    ui.pause.disabled=true;ui.hud.style.display='none';ui.bossbar.style.display='none';
    ui.toasts.innerHTML='';bossAlert.classList.remove('active');hideOverlay();
-   endingDom.pane.hidden=false;endingDom.pause.textContent='Ⅱ PAUSE';endingDom.sound.textContent=soundOn?'♫ MUSIC ON':'♫ MUSIC OFF';
+   endingDom.pane.hidden=false;endingDom.pane.classList.remove('is-paused');buildEndingSparkles();endingDom.pause.textContent='Ⅱ PAUSE';endingDom.sound.textContent=soundOn?'♫ MUSIC ON':'♫ MUSIC OFF';
    endingDom.credits.hidden=true;endingDom.opening.classList.remove('show');
    endingDom.a.classList.remove('active');endingDom.b.classList.remove('active');
    setEndingScene(0,true);
@@ -588,16 +592,16 @@ body{background:radial-gradient(ellipse 80% 66% at 52% 24%,#2a2934 0%,#11131d 55
    if(preview){showStart();return}
    state='won';
    const t=formatTime(g.time);
-   setOverlay(`<div class="eyebrow">MISSION COMPLETE // EPILOGUE</div><h2 class="result-title">SURVIVED</h2><p class="intro">旅は、まだ続いている。<br><span style="color:#e9c695">エンディングテーマ：さすらえば / JACKPOTØ31</span></p><div class="result-stats"><div>TIME<strong>${t}</strong></div><div>KILLS<strong>${g.kills}</strong></div><div>LEVEL<strong>${g.level}</strong></div><div>SCORE<strong>${Math.floor(g.score).toLocaleString('ja-JP')}</strong></div><div>RARE<strong>${g.rareFinds}</strong></div><div>RELICS<strong>${g.crates}</strong></div><div>MYTHIC<strong>${g.mythicFinds}</strong></div></div><button class="primary" id="retryBtn">↻ もう一度</button><button class="primary" id="endingReplay" style="margin-left:12px">♫ EDをもう一度</button><div class="help">RUU//OVERRUN v1.7.0 PUBLIC BETA · © JACKPOTØ31</div>`);
+   setOverlay(`<div class="eyebrow">MISSION COMPLETE // EPILOGUE</div><h2 class="result-title">SURVIVED</h2><p class="intro">旅は、まだ続いている。<br><span style="color:#e9c695">エンディングテーマ：さすらえば / JACKPOTØ31</span></p><div class="result-stats"><div>TIME<strong>${t}</strong></div><div>KILLS<strong>${g.kills}</strong></div><div>LEVEL<strong>${g.level}</strong></div><div>SCORE<strong>${Math.floor(g.score).toLocaleString('ja-JP')}</strong></div><div>RARE<strong>${g.rareFinds}</strong></div><div>RELICS<strong>${g.crates}</strong></div><div>MYTHIC<strong>${g.mythicFinds}</strong></div></div><button class="primary" id="retryBtn">↻ もう一度</button><button class="primary" id="endingReplay" style="margin-left:12px">♫ EDをもう一度</button><div class="help">RUU//OVERRUN v1.8.0 PUBLIC BETA · © JACKPOTØ31</div>`);
    document.getElementById('retryBtn').onclick=()=>startGame();
    document.getElementById('endingReplay').onclick=()=>startEndingCinema(true);
  }
- // Outcome screens never force the player to sit through all 3:25 of the song.
+ // Short 53-second ending can always be skipped.
  endingDom.skip.onclick=()=>finishEndingCinema();
  endingDom.pause.onclick=()=>{
    if(!endingState)return;
-   if(!endingState.paused){endingState.heldTime=endingClock();endingState.paused=true;musicEls[ENDING_TRACK_INDEX].pause();endingDom.pause.textContent='▶ RESUME';}
-   else{endingState.paused=false;endingState.wallStart=performance.now()-endingState.heldTime*1000-endingState.pauseAccum;endingDom.pause.textContent='Ⅱ PAUSE';if(soundOn){const p=musicEls[ENDING_TRACK_INDEX].play();if(p?.catch)p.catch(()=>showMusicRetry(true))}}
+   if(!endingState.paused){endingState.heldTime=endingClock();endingState.paused=true;endingDom.pane.classList.add('is-paused');musicEls[ENDING_TRACK_INDEX].pause();endingDom.pause.textContent='▶ RESUME';}
+   else{endingState.paused=false;endingDom.pane.classList.remove('is-paused');endingState.wallStart=performance.now()-endingState.heldTime*1000-endingState.pauseAccum;endingDom.pause.textContent='Ⅱ PAUSE';if(soundOn){const p=musicEls[ENDING_TRACK_INDEX].play();if(p?.catch)p.catch(()=>showMusicRetry(true))}}
  };
  endingDom.sound.onclick=()=>{
    if(state!=='ending'||!endingState)return;
@@ -606,13 +610,13 @@ body{background:radial-gradient(ellipse 80% 66% at 52% 24%,#2a2934 0%,#11131d 55
    endingDom.sound.textContent=soundOn?'♫ MUSIC ON':'♫ MUSIC OFF';
    if(soundOn&&!endingState.paused){const p=a.play();if(p?.catch)p.catch(()=>showMusicRetry(true))}
  };
- endingDom.next.onclick=()=>seekEnding((Math.floor(endingClock()/endingSceneSpan())+1)*endingSceneSpan());
- endingDom.prev.onclick=()=>seekEnding((Math.ceil(endingClock()/endingSceneSpan())-1)*endingSceneSpan());
+ endingDom.next.onclick=()=>seekEnding(endingClock()+10);
+ endingDom.prev.onclick=()=>seekEnding(endingClock()-10);
  endingDom.progress.onclick=ev=>{const r=endingDom.progress.getBoundingClientRect();if(r.width>0)seekEnding((ev.clientX-r.left)/r.width*endingDuration())};
  endingDom.progress.addEventListener('keydown',ev=>{if(ev.key==='ArrowRight'){ev.preventDefault();seekEnding(endingClock()+5)}else if(ev.key==='ArrowLeft'){ev.preventDefault();seekEnding(endingClock()-5)}});
  musicEls[ENDING_TRACK_INDEX].addEventListener('ended',()=>{if(state==='ending')finishEndingCinema()});
 
- function showStart(){state='start';ui.hud.style.display='none';ui.pause.disabled=true;musicIndicator.classList.remove('visible');musicMeter.classList.remove('visible');showMusicRetry(false);bossAlert.classList.remove('active');const best=getBest();setOverlay(`<div class="menu-grid"><div class="menu-copy"><div class="menu-tick">JACKPOT<strong>Ø</strong>31 / ORIGINAL GAME <span style="color:#dcc2a2">— v1.7.0 PUBLIC BETA</span></div><h1 class="menu-logo"><span class="ruu">RUU</span><span class="slashes">//</span>OVERRUN</h1><div class="menu-nameplate">SURVIVE THE SWARM. BREAK THE LIMIT.</div><div class="menu-separator"></div><p class="menu-intro">群れを生き抜け。限界を突破しろ。<br><strong>移動するだけで自動攻撃。</strong> 経験値を集めてスキルを進化させよう。<br><span class="minor">AUTO MIXはボス戦の節目で切替。侵食体DEVORA敵8種・9種類の自動必殺技・平面2Dワールド追従アリーナ3種・視認性調整を実装。通常戦闘12曲＋特別3曲＋ED『さすらえば』の全16曲・100秒の生存戦。クリア後の専用エンディングを追加。背景演出はSCENEボタンで切替可能。</span></p><div class="start-row"><button class="primary" id="startBtn" type="button">▶ START // DEPLOY  ·  ENTER</button><button class="enemy-archive-btn" id="enemyArchive" type="button">☷ DEVORA FILES</button>${endingUnlocked()?`<button class="enemy-archive-btn" id="endingTheater" type="button">♫ ENDING THEATER</button>`:``}<div class="run-record">PERSONAL BEST<strong>${best?best.score.toLocaleString('ja-JP'):'— — —'}</strong></div></div><div class="menu-controls"><span class="key">WASD</span> MOVE　<span class="key">SPACE</span> DASH　<span class="key">1–3</span> UPGRADE　<span class="key">ESC</span> PAUSE<br><span style="color:#bd9e79">♪ MUSIC CONTINUES DURING LEVEL UP // 9 ULTIMATE CUT-INS / 16 TRACKS / JACKPOT MODE</span><br><span style="color:#e0bfa1">起動できない場合はZIPを展開してChrome／Edgeで開いてください。</span></div></div><div class="hero-figure" id="heroArt"><div class="hero-hint">RUU / CHARACTER DATA</div></div></div>`);setupTitleGallery();const unlockBtn=document.getElementById('endingTheater');if(unlockBtn)unlockBtn.onclick=()=>startEndingCinema(true);document.getElementById('startBtn').addEventListener('click',()=>{try{startGame()}catch(e){console.error(e);const btn=document.getElementById('startBtn');if(btn){btn.textContent='START エラー — ENTER / 再読込';btn.title=String(e)}}});document.getElementById('enemyArchive').addEventListener('click',showDevoraFiles)}
+ function showStart(){state='start';ui.hud.style.display='none';ui.pause.disabled=true;musicIndicator.classList.remove('visible');musicMeter.classList.remove('visible');showMusicRetry(false);bossAlert.classList.remove('active');const best=getBest();setOverlay(`<div class="menu-grid"><div class="menu-copy"><div class="menu-tick">JACKPOT<strong>Ø</strong>31 / ORIGINAL GAME <span style="color:#dcc2a2">— v1.8.0 PUBLIC BETA</span></div><h1 class="menu-logo"><span class="ruu">RUU</span><span class="slashes">//</span>OVERRUN</h1><div class="menu-nameplate">SURVIVE THE SWARM. BREAK THE LIMIT.</div><div class="menu-separator"></div><p class="menu-intro">群れを生き抜け。限界を突破しろ。<br><strong>移動するだけで自動攻撃。</strong> 経験値を集めてスキルを進化させよう。<br><span class="minor">AUTO MIXはボス戦の節目で切替。侵食体DEVORA敵8種・9種類の自動必殺技・平面2Dワールド追従アリーナ3種・視認性調整を実装。通常戦闘12曲＋特別3曲＋ED『さすらえば』の全16曲・100秒の生存戦。約53秒のキラキラEDを追加。背景演出はSCENEボタンで切替可能。</span></p><div class="start-row"><button class="primary" id="startBtn" type="button">▶ START // DEPLOY  ·  ENTER</button><button class="enemy-archive-btn" id="enemyArchive" type="button">☷ DEVORA FILES</button>${endingUnlocked()?`<button class="enemy-archive-btn" id="endingTheater" type="button">♫ ENDING THEATER</button>`:``}<div class="run-record">PERSONAL BEST<strong>${best?best.score.toLocaleString('ja-JP'):'— — —'}</strong></div></div><div class="menu-controls"><span class="key">WASD</span> MOVE　<span class="key">SPACE</span> DASH　<span class="key">1–3</span> UPGRADE　<span class="key">ESC</span> PAUSE<br><span style="color:#bd9e79">♪ MUSIC CONTINUES DURING LEVEL UP // 9 ULTIMATE CUT-INS / 16 TRACKS / JACKPOT MODE</span><br><span style="color:#e0bfa1">起動できない場合はZIPを展開してChrome／Edgeで開いてください。</span></div></div><div class="hero-figure" id="heroArt"><div class="hero-hint">RUU / CHARACTER DATA</div></div></div>`);setupTitleGallery();const unlockBtn=document.getElementById('endingTheater');if(unlockBtn)unlockBtn.onclick=()=>startEndingCinema(true);document.getElementById('startBtn').addEventListener('click',()=>{try{startGame()}catch(e){console.error(e);const btn=document.getElementById('startBtn');if(btn){btn.textContent='START エラー — ENTER / 再読込';btn.title=String(e)}}});document.getElementById('enemyArchive').addEventListener('click',showDevoraFiles)}
  function resetGame(){g={time:0,kills:0,level:1,rareFinds:0,combo:0,comboTimer:0,comboMilestones:0,stageBlend:0,stageReveal:0,scenePulse:0,sceneUlt:0,sceneBoss:0,sceneShift:0,crates:0,rerolls:2,mythicFinds:0,driveGauge:0,driveTime:0,finisherGauge:0,finisherTime:0,finisherPulse:0,finisherCooldown:0,finisherType:0,finisherCursor:0,finisherCount:0,finisherHits:0,finisherChain:0,signatureFx:[],jackpotTime:0,jackpotIntro:0,jackpotPulse:0,jackpotType:-1,jackpotCount:0,jackpotFx:[],jackpotResumeIndex:0,cutin:0,elites:0,elite1:false,elite2:false,xp:0,need:26,spawnT:0,shotT:.1,novaT:0,lightT:0,meteorT:1.4,railT:1.7,frostT:1.1,wellT:2.4,missileT:1.3,sonicT:1.6,prismT:2.3,shardT:1.3,satelliteT:2.0,riftT:2.2,fireworksT:1.7,crossT:2.6,beat:0,flash:0,shake:0,boss1:false,boss2:false,evolved:false,finalBossDead:false,phase:1,score:0,levelChoices:[],enemies:[],bullets:[],ebullets:[],gems:[],particles:[],texts:[],waves:[],lightningFx:[],shards:[],impacts:[],ghosts:[],muzzle:[],meteors:[],wells:[],missiles:[],weaponFx:[],chests:[],crystals:[],evoGravity:false,evoPrism:false,evoSat:false,evoRift:false,evoBloom:false,hexAnnounced:false,fxPulse:0,fxBeat:0,ghostClock:0,player:{x:0,y:0,px:0,py:0,r:20,hp:115,maxHp:115,shield:0,maxShield:0,inv:0,speed:208,damage:13,haste:1,magnet:110,crit:0,dash:0,dashRemain:0,dashX:0,dashY:0,face:1,dir:'down',isMoving:false,hexSlow:0,animPhase:0,wasMoving:false,mods:{pulse:1,orbit:0,nova:0,lightning:0,meteor:0,rail:0,frost:0,well:0,missile:0,sonic:0,prism:0,shard:0,satellite:0,rift:0,fireworks:0,cross:0,echo:0,crit:0,damage:0,haste:0,speed:0,magnet:0,vital:0,shield:0}}};window.RUU_SPECTACLE?.reset();keys.clear();joy.active=false}
  function startGame(){
    if(endingState){endingState=null;endingDom.pane.hidden=true;}
@@ -643,7 +647,7 @@ body{background:radial-gradient(ellipse 80% 66% at 52% 24%,#2a2934 0%,#11131d 55
    sfx(win?'victory':'defeat');saveBest();pauseAllMusic();ui.pause.disabled=true;ui.bossbar.style.display='none';
    if(win){startEndingCinema(false);return;}
    state='lost';musicIndicator.classList.remove('visible');musicMeter.classList.remove('visible');
-   setOverlay(`<div class="eyebrow">SIGNAL LOST // MISSION FAILED</div><h2 class="result-title defeat">GAME OVER</h2><p class="intro">終わりじゃない。次は、もう少し遠くまで。</p><div class="result-stats"><div>TIME<strong>${formatTime(g.time)}</strong></div><div>KILLS<strong>${g.kills}</strong></div><div>LEVEL<strong>${g.level}</strong></div><div>SCORE<strong>${Math.floor(g.score).toLocaleString('ja-JP')}</strong></div><div>RARE<strong>${g.rareFinds}</strong></div><div>RELICS<strong>${g.crates}</strong></div><div>MYTHIC<strong>${g.mythicFinds}</strong></div></div><button class="primary" id="retryBtn">↻ もう一度</button><div class="help">RUU//OVERRUN v1.7.0 PUBLIC BETA · © JACKPOTØ31</div>`);
+   setOverlay(`<div class="eyebrow">SIGNAL LOST // MISSION FAILED</div><h2 class="result-title defeat">GAME OVER</h2><p class="intro">終わりじゃない。次は、もう少し遠くまで。</p><div class="result-stats"><div>TIME<strong>${formatTime(g.time)}</strong></div><div>KILLS<strong>${g.kills}</strong></div><div>LEVEL<strong>${g.level}</strong></div><div>SCORE<strong>${Math.floor(g.score).toLocaleString('ja-JP')}</strong></div><div>RARE<strong>${g.rareFinds}</strong></div><div>RELICS<strong>${g.crates}</strong></div><div>MYTHIC<strong>${g.mythicFinds}</strong></div></div><button class="primary" id="retryBtn">↻ もう一度</button><div class="help">RUU//OVERRUN v1.8.0 PUBLIC BETA · © JACKPOTØ31</div>`);
    document.getElementById('retryBtn').onclick=()=>startGame();
  }
 
@@ -2226,7 +2230,12 @@ ui.healthFill.style.width=`${100*p.hp/p.maxHp}%`;ui.healthText.textContent=`${Ma
    if(!musicStarted)musicStarted=true;
    activeTrack=ENDING_TRACK_INDEX;const el=ensureTrackLoaded(ENDING_TRACK_INDEX);
    el.loop=false;el.muted=!soundOn;el.volume=.8;
-   if(restart)try{el.currentTime=0}catch(e){}
+   if(restart){
+     try{el.currentTime=ENDING_AUDIO_CUE}catch(e){}
+     if(el.readyState===0)el.addEventListener('loadedmetadata',()=>{
+       if(state==='ending'&&endingState&&el.currentTime<ENDING_AUDIO_CUE-1)try{el.currentTime=ENDING_AUDIO_CUE}catch(e){}
+     },{once:true});
+   }
    musicIndicator.classList.add('visible');musicMeter.classList.add('visible');
    musicLabel('♫ ENDING // '+ENDING_TITLE);
    if(soundOn)try{const prom=el.play();if(prom&&prom.catch)prom.catch(()=>{showMusicRetry(true)})}catch(e){showMusicRetry(true)}
