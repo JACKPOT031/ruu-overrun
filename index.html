@@ -334,8 +334,8 @@ body{background:radial-gradient(ellipse 80% 66% at 52% 24%,#2a2934 0%,#11131d 55
   {key:'caster',title:'HALO SENTINEL',name:'円環監視体',role:'SHOOTER',note:'間合いを保ちながら遠距離射撃。',color:'#a4acff'},
   {key:'hex',title:'HEX CHOIR',name:'紫呪唱体',role:'DEBUFF',note:'紫の弾に触れると一時的に減速。',color:'#ff91e2'},
   {key:'elite',title:'GILT EXECUTIONER',name:'黒金の処刑機',role:'ELITE',note:'レリックを運ぶ高耐久の特務個体。',color:'#ffe6aa'},
-  {key:'boss',title:'DEVORA',name:'侵食の王',role:'BOSS / 00:45',note:'強力な環状弾幕を展開する。',color:'#ff8ad0'},
-  {key:'final',title:'NULL EMPEROR',name:'虚無の皇帝',role:'FINAL / 01:24',note:'最終戦。より密度の高い弾幕を放つ。',color:'#ffdd91'}
+  {key:'boss',title:'DEVORA',name:'侵食の王',role:'BOSS / 00:45',note:'強力な環状弾幕。HP55％以下で第二形態に変異し、予兆付きの狙撃弾幕を展開。',color:'#ff8ad0'},
+  {key:'final',title:'NULL EMPEROR',name:'虚無の皇帝',role:'FINAL / 01:24',note:'最終戦。HP55％以下で第二形態に変異し、予兆付きの強力な狙撃弾幕を展開。',color:'#ffdd91'}
  ];
  const ENEMY_URLS={wisp:'assets/enemy_wisp.webp',runner:'assets/enemy_runner.webp',brute:'assets/enemy_brute.webp',caster:'assets/enemy_caster.webp',hex:'assets/enemy_hex.webp',elite:'assets/enemy_elite.webp',boss:'assets/enemy_boss.webp',final:'assets/enemy_final.webp'};
  const DEVORA_ART={};
@@ -343,7 +343,7 @@ body{background:radial-gradient(ellipse 80% 66% at 52% 24%,#2a2934 0%,#11131d 55
  function enemyPortraitReady(kind){const im=DEVORA_ART[kind];return !!(im&&im.complete&&im.naturalWidth>0)}
  function showDevoraFiles(){
    const cards=DEVORA_CATALOG.map((c,i)=>`<article class="codex-card" style="border-color:${c.color}6c"><div class="codex-no">FILE ${String(i+1).padStart(2,'0')} // ${c.name}</div><img class="codex-art" src="${ENEMY_URLS[c.key]}" alt="${c.name}"><div class="codex-name">${c.title}</div><div class="codex-role" style="color:${c.color}">${c.role}</div><p class="codex-note">${c.note}</p></article>`).join('');
-   setOverlay(`<section class="codex-panel"><div class="eyebrow">CLASSIFIED // JACKPOTØ31</div><h2 class="codex-title">DEVORA FILES</h2><p class="codex-deck">ENEMY FACTION INDEX / 8 IDENTIFIED SIGNALS</p><div class="codex-grid">${cards}</div><button class="primary codex-back" id="codexBack" type="button">← RETURN TO DEPLOY</button></section>`);
+   setOverlay(`<section class="codex-panel"><div class="eyebrow">CLASSIFIED // JACKPOTØ31</div><h2 class="codex-title">DEVORA FILES</h2><p class="codex-deck">ENEMY FACTION INDEX / 8 IDENTIFIED SIGNALS</p><p class="codex-deck" style="max-width:920px;line-height:1.9;color:#dfc4a8"><b>NEW // DEVORA MUTATION</b>　<span style="color:#ff8798">FRENZY：予兆後に突進</span> ／ <span style="color:#ffc27a">OVERLOAD：円形予兆から自爆</span> ／ <span style="color:#ccb1ff">FRACTURE：撃破時に分裂</span> ／ <span style="color:#9dffe5">BULWARK：装甲を破壊可能</span><br>赤い攻撃線と橙の危険円を見たら、位置を変えるかDASHで回避しよう。</p><div class="codex-grid">${cards}</div><button class="primary codex-back" id="codexBack" type="button">← RETURN TO DEPLOY</button></section>`);
    document.getElementById('codexBack').addEventListener('click',()=>showStart());
  }
 
@@ -1854,7 +1854,8 @@ function rollRareChoice(choices){
  g.lightT-=dt;if(g.lightT<=0&&p.mods.lightning){g.lightT=clamp(2.3/p.haste, .45,2.5);strikeLightning()}
  updateNewWeapons(dt);applyNova(dt);updateFinisher(dt);updateJackpot(dt);
   window.RUU_EXPANSION?.fusionStep(dt,g,{hit:(e,d,c)=>applyDamage(e,d,0,0,c),wave:(x,y,r,c)=>shockwave(x,y,r,c),sound:name=>sfx(name)},fxPreset);
-  for(let e of g.enemies){e.t+=dt;e.attack=Math.max(0,e.attack-dt);e.shoot-=dt;e.orbCd=Math.max(0,e.orbCd-dt);e.slow=Math.max(0,e.slow-dt);e.flash=Math.max(0,e.flash-dt);if(e.hp<=0)continue;window.RUU_MUTATION?.step(e,dt,g,{hurt:damagePlayer,wave:shockwave,burst,sfx,text:floatText,toast},fxPreset);if(e.hp<=0)continue;let dx=p.x-e.x,dy=p.y-e.y,n=norm(dx,dy),d=Math.hypot(dx,dy);let step=e.speed*(e.slow>0?.56:1),mvX=n.x,mvY=n.y;if(e.mutation?.stun>0)step=0;else if(e.mutation?.wind>0)step*=e.mutation.type==='volatile'?.19:.28;else if(e.mutation?.dash>0)step*=.6;
+  const mutationApi={hurt:damagePlayer,wave:shockwave,burst,sfx,text:floatText,toast};
+  for(let e of g.enemies){e.t+=dt;e.attack=Math.max(0,e.attack-dt);e.shoot-=dt;e.orbCd=Math.max(0,e.orbCd-dt);e.slow=Math.max(0,e.slow-dt);e.flash=Math.max(0,e.flash-dt);if(e.hp<=0)continue;window.RUU_MUTATION?.step(e,dt,g,mutationApi,fxPreset);if(e.hp<=0)continue;let dx=p.x-e.x,dy=p.y-e.y,n=norm(dx,dy),d=Math.hypot(dx,dy);let step=e.speed*(e.slow>0?.56:1),mvX=n.x,mvY=n.y;if(e.mutation?.stun>0)step=0;else if(e.mutation?.wind>0)step*=e.mutation.type==='volatile'?.19:.28;else if(e.mutation?.dash>0)step*=.6;
  if(e.kind==='runner'&&d<205)step*=1.12;
  if((e.kind==='caster'||e.kind==='hex')&&!e.elite){
    if(d<195){mvX=-n.x*.56;mvY=-n.y*.56}
