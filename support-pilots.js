@@ -400,5 +400,5 @@ function drawWorld(ctx,cam,g){
  ctx.restore();
 }
 
-window.RUU_PILOTS={VERSION:'1.15.3',PILOTS,PROBABILITY,DELAY,RUN_TIME,start,active,hasEscort,status,entering,ready,shotRate,interceptRate,shotColor,isKai,xpMultiplier,markedMultiplier,onInvasionRepelled,onEscortShot,onIntercept,onGemPickup,tick,drawScreen,drawWorld,drawGround,drawFront};
+window.RUU_PILOTS={VERSION:'1.19.0',PILOTS,PROBABILITY,DELAY,RUN_TIME,start,active,hasEscort,status,entering,ready,shotRate,interceptRate,shotColor,isKai,xpMultiplier,markedMultiplier,onInvasionRepelled,onEscortShot,onIntercept,onGemPickup,tick,drawScreen,drawWorld,drawGround,drawFront};
 })();
