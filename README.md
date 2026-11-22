@@ -1,5 +1,9 @@
 # RUU//OVERRUN — PUBLIC BETA (v1.11.0)
 
+## Balance hotfix — JACKPOT MODE 1% (2026-11-22)
+
+JACKPOT MODE now appears with a **1% chance per level-up choice screen** (each reroll independently rechecks), reduced from 3%. All three JACKPOT modes still last 13 seconds and retain their exclusive music and effects. The separate **JACKPOT +3** rare-upgrade rate remains **3%**. No Cloudflare backend update is necessary for this gameplay-only adjustment.
+
 ## v1.11.0 — OVERDRIVE EXPANSION (5-FEATURE UPDATE)
 
 1. **Boss destruction cinema** — standard DEVORA boss: “DEVORA BREAK” (~1.85s), final NULL EMPEROR: “FINAL ANNIHILATION” (~2.65s). The battlefield freezes temporarily and returns to play or starts the ending as appropriate.
@@ -17,7 +21,7 @@ Follow [backend/UPGRADE_v111_JA.md](./backend/UPGRADE_v111_JA.md):
 - In the **existing** `ruu-overrun-leaderboard` Worker, replace the code with [backend/src/index.js](./backend/src/index.js) and Deploy.
 - Check `/api/health` for `"rankingModes":["normal","endless"]`.
 
-Your game URL, shared NORMAL leaderboard, original 16 music tracks, 3 JACKPOT modes, 3% JACKPOT chance, 53-second ending and X result share are preserved.
+Your game URL, shared NORMAL leaderboard, original 16 music tracks, 3 JACKPOT modes, 1% JACKPOT chance (updated by the balance hotfix), 53-second ending and X result share are preserved.
 
 
 
