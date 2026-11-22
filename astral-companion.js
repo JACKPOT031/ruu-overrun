@@ -1,4 +1,4 @@
-/* v1.13.0 ASTRAL COMPANION PROTOCOL — game-only; no Cloudflare changes.
+/* v1.13.1 ASTRAL COMPANION WALK UPDATE — game-only; no Cloudflare changes.
    ASTRAL-SUIT: modest constant support. ASTRAEA No.3: once per run,
    manually deployable for 12s after DEVORA boss defeat + 75s + SYNCHRO 100%.
    Sprites are stylized game interpretations of the supplied character sheets.
@@ -11,7 +11,23 @@ for(const [id,src] of Object.entries({suit:'assets/astral-suit-companion.svg',as
  if(typeof Image==='undefined'){IMG[id]=null;continue}
  const img=new Image();img.src=src;IMG[id]=img;
 }
-function init(){return{sync:0,bossDown:false,used:false,t:0,intro:0,allyX:null,allyY:null,astraX:0,astraY:0,attack:.5,intercept:7,volley:.2,finished:false,rays:[],sparks:[],flash:0,shots:0,blocked:0}}
+// Chrome/Edge: decode the approved eight-frame animated GIF once, then advance
+// the frame in game-time. Pausing the game or standing still freezes the pose.
+const WALK_GIF='assets/astral-suit-walk.gif', walk={img:null,frames:[],duration:.12};
+if(typeof Image!=='undefined'){walk.img=new Image();walk.img.src=WALK_GIF}
+if(typeof ImageDecoder!=='undefined'&&typeof fetch==='function'){
+ fetch(WALK_GIF).then(r=>{if(!r.ok)throw Error('GIF '+r.status);return r.arrayBuffer()}).then(async bytes=>{
+   const decoder=new ImageDecoder({data:bytes,type:'image/gif'});
+   try{
+     await decoder.tracks.ready;
+     const count=Math.min(8,decoder.tracks.selectedTrack?.frameCount||8);
+     const frames=[];
+     for(let i=0;i<count;i++){const data=await decoder.decode({frameIndex:i});frames.push(data.image)}
+     if(frames.length)walk.frames=frames;
+   }finally{decoder.close()}
+ }).catch(()=>{}); // Local file:// and older browsers fall back to the GIF element.
+}
+function init(){return{sync:0,bossDown:false,used:false,t:0,intro:0,allyX:null,allyY:null,astraX:0,astraY:0,attack:.5,intercept:7,volley:.2,finished:false,rays:[],sparks:[],flash:0,shots:0,blocked:0,allyMoving:false,allyFacing:1,walkClock:0,walkSpeed:0}}
 let z=init();function reset(){z=init()}
 function canDeploy(g){return!!g&&g.time>=75&&z.bossDown&&z.sync>=100&&!z.used&&!(g.jackpotTime>0)&&!(g.finisherTime>0)}
 function status(g){
@@ -111,7 +127,13 @@ function tick(dt,g,api,q='auto'){
  }
  const p=g.player,f=1-Math.exp(-dt*6),X=p.x-80*(p.face||1),Y=p.y+21;
  if(z.allyX===null){z.allyX=X;z.allyY=Y}
+ const beforeX=z.allyX,beforeY=z.allyY;
  z.allyX+=(X-z.allyX)*f;z.allyY+=(Y-z.allyY)*f;
+ const moveX=z.allyX-beforeX,moveY=z.allyY-beforeY;
+ z.walkSpeed=Math.hypot(moveX,moveY)/Math.max(dt,.001);
+ z.allyMoving=z.walkSpeed>18;
+ if(Math.abs(moveX)>.12)z.allyFacing=moveX>0?1:-1;
+ if(z.allyMoving)z.walkClock+=dt*clamp(z.walkSpeed/160,.65,1.5);
  z.attack-=dt;if(z.attack<=0){z.attack=1.5;fireSuit(g,api,q)}
  z.intercept-=dt;if(z.intercept<=0){z.intercept=.12;defend(g,api,q)}
  if(z.t<=0)return;
@@ -144,7 +166,21 @@ function drawImage(ctx,img,x,y,w,h,opacity,astro){
 }
 function drawUnits(ctx,cam,g,q='auto'){
  if(!g?.player||z.allyX===null)return;
- drawImage(ctx,IMG.suit,z.allyX-cam.x,z.allyY-cam.y+7,86,125,.95,false);
+ // Reduced from 86x125 to 64x94 logical pixels, about 25% smaller.
+ // Source GIF faces right. Flip the drawing when escort moves left.
+ const xSuit=z.allyX-cam.x,ySuit=z.allyY-cam.y+6,suitW=64,suitH=94;
+ ctx.save();ctx.translate(xSuit,ySuit);
+ if(z.allyFacing<0)ctx.scale(-1,1);
+ ctx.globalAlpha=.97;
+ if(walk.frames.length){
+   const index=z.allyMoving?Math.floor(z.walkClock/walk.duration)%walk.frames.length:0;
+   ctx.drawImage(walk.frames[index],-suitW/2,-suitH,suitW,suitH);
+ }else if(z.allyMoving&&isReady(walk.img)){
+   ctx.drawImage(walk.img,-suitW/2,-suitH,suitW,suitH);
+ }else if(isReady(IMG.suit)){
+   ctx.drawImage(IMG.suit,-suitW/2,-suitH,suitW,suitH);
+ }else fallback(ctx,false);
+ ctx.restore();
  if(z.t<=0)return;
  const alpha=clamp(Math.min((12-z.t)*2.4,z.t*1.7),0,1),x=z.astraX+93-cam.x,y=z.astraY+20-cam.y;
  if(q!=='lite'){ctx.save();ctx.globalCompositeOperation='screen';const glow=ctx.createRadialGradient(x,y-115,12,x,y-115,150);glow.addColorStop(0,'rgba(255,148,228,.24)');glow.addColorStop(1,'rgba(255,148,228,0)');ctx.fillStyle=glow;ctx.beginPath();ctx.arc(x,y-115,150,0,PI);ctx.fill();ctx.restore()}
@@ -176,5 +212,5 @@ function drawScreen(ctx,W,H,g,q='auto'){
  }
  if(z.flash>0&&q!=='lite'){ctx.save();ctx.globalAlpha=z.flash*.18;ctx.strokeStyle=pink;ctx.lineWidth=8;ctx.strokeRect(7,7,W-14,H-14);ctx.restore()}
 }
-window.RUU_COMPANION={VERSION:'1.13.0',reset,canDeploy,status,onKill,deploy,tick,drawGround,drawUnits,drawFront,drawScreen};
+window.RUU_COMPANION={VERSION:'1.13.1',reset,canDeploy,status,onKill,deploy,tick,drawGround,drawUnits,drawFront,drawScreen};
 })();
