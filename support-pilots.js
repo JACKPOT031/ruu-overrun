@@ -1,4 +1,4 @@
-/* RUU//OVERRUN v1.15.1 MASS-PRODUCED SUPPORT PILOT / VISUAL SIGNALS
+/* RUU//OVERRUN v1.15.2 MASS-PRODUCED SUPPORT PILOT / VISUAL SIGNALS
    Roll once per run (25%); five Guardian Genome pilots equally likely. */
 (()=>{
 'use strict';
@@ -12,6 +12,10 @@ const PILOTS=[
 ];
 const PROBABILITY=.25,DELAY=.95,RUN_TIME=1.55,END=3.25;
 const img=typeof Image==='undefined'?null:new Image();if(img)img.src='assets/support-pilot-faces.webp';
+// Cinematic poster atlas, ordered Elio / Oz / Kai / Sera / Mina.
+const CUTIN_TILE_W=320,CUTIN_TILE_H=569;
+const poster=typeof Image==='undefined'?null:new Image();
+if(poster)poster.src='assets/support-pilot-cutins.avif';
 const blank=()=>({pilot:null,index:-1,t:0,arrived:false,cd:0,bonus:0,shields:0,marks:0,shots:0,slows:0,
  rays:[],rings:[],sparks:[],labels:[],flash:0,collectCd:0,bonusPending:0,fxQuality:'auto'});
 let S=blank();
@@ -279,7 +283,34 @@ function drawScreen(ctx,W,H,g,q='auto'){
  if(S.t>=DELAY&&S.t<=END){
   const t=S.t-DELAY,alpha=clamp(Math.min(t*5,(END-S.t)*3.2),0,1);
   if(alpha>0){
-   const p=S.pilot,x=W*.585,y=H*.18,w=W*.397,h=H*.73;
+   const p=S.pilot;
+   if(poster?.complete&&poster.naturalWidth>=CUTIN_TILE_W*5&&poster.naturalHeight>=CUTIN_TILE_H){
+     // Draw all 569 vertical pixels, from the top of the hair to the complete nameplate.
+     const h=H*.72,w=h*CUTIN_TILE_W/CUTIN_TILE_H;
+     const appear=Math.min(1,t*5),slide=(1-appear)*60;
+     const x=W-w-19+slide,y=H*.19;
+     ctx.save();ctx.globalAlpha=alpha;
+     ctx.shadowColor='#020611';ctx.shadowBlur=18;ctx.shadowOffsetX=-10;ctx.shadowOffsetY=8;
+     ctx.fillStyle='#080e1b';ctx.fillRect(x-5,y-5,w+10,h+10);
+     ctx.shadowBlur=0;ctx.shadowOffsetX=0;ctx.shadowOffsetY=0;
+     ctx.drawImage(poster,S.index*CUTIN_TILE_W,0,CUTIN_TILE_W,CUTIN_TILE_H,x,y,w,h);
+     ctx.strokeStyle=p.color;ctx.lineWidth=2;ctx.globalAlpha=alpha*.85;ctx.strokeRect(x-2,y-2,w+4,h+4);
+     // Separate crisp crossover caption so it stays legible on small screens.
+     const labelX=W*.59,labelY=H*.30;
+     ctx.fillStyle='#0a101cba';ctx.fillRect(labelX-11,labelY-39,Math.max(200,x-labelX+12),142);
+     ctx.globalAlpha=alpha;ctx.textAlign='left';
+     ctx.fillStyle='#fff2e6';ctx.font='900 25px Yu Gothic,Meiryo,system-ui,sans-serif';
+     ctx.fillText('星屑の鎧',labelX,labelY);
+     ctx.fillStyle=p.color;ctx.font='800 12px ui-monospace,Consolas,monospace';
+     ctx.fillText('- Guardian Genome -',labelX,labelY+26);
+     ctx.fillStyle='#fff1da';ctx.font='900 20px Yu Gothic,Meiryo,system-ui,sans-serif';
+     ctx.fillText('から参戦',labelX,labelY+62);
+     ctx.strokeStyle=p.color;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(labelX,labelY+75);ctx.lineTo(x-12,labelY+75);ctx.stroke();
+     ctx.restore();
+     return;
+   }
+   // Browsers that cannot decode AVIF continue to show the previous portrait.
+   const x=W*.585,y=H*.18,w=W*.397,h=H*.73;
    ctx.save();ctx.globalAlpha=alpha;
    const grad=ctx.createLinearGradient(x,0,x+w,0);
    grad.addColorStop(0,'rgba(8,12,23,.12)');grad.addColorStop(.24,'rgba(8,12,23,.79)');grad.addColorStop(1,'rgba(8,12,23,.91)');
@@ -316,5 +347,5 @@ function drawWorld(ctx,cam,g){
  ctx.restore();
 }
 
-window.RUU_PILOTS={VERSION:'1.15.1',PILOTS,PROBABILITY,DELAY,RUN_TIME,start,active,hasEscort,status,entering,ready,shotRate,interceptRate,shotColor,isKai,xpMultiplier,markedMultiplier,onInvasionRepelled,onEscortShot,onIntercept,onGemPickup,tick,drawScreen,drawWorld,drawGround,drawFront};
+window.RUU_PILOTS={VERSION:'1.15.2',PILOTS,PROBABILITY,DELAY,RUN_TIME,start,active,hasEscort,status,entering,ready,shotRate,interceptRate,shotColor,isKai,xpMultiplier,markedMultiplier,onInvasionRepelled,onEscortShot,onIntercept,onGemPickup,tick,drawScreen,drawWorld,drawGround,drawFront};
 })();
