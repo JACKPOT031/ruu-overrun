@@ -1,4 +1,14 @@
-# RUU//OVERRUN — GitHub公開・更新手順（v1.14.0 PUBLIC BETA）
+# RUU//OVERRUN — GitHub公開・更新手順（v1.15.0 PUBLIC BETA）
+
+## v1.15.0 MASS-PRODUCED SUPPORT PILOT の更新
+
+- 新規 `support-pilots.js` と `assets/support-pilot-faces.webp` を配置。あわせて更新版 `index.html`、`astral-companion.js`、`survival-trials.js` を使う。
+- 各ランの開始時に1回だけ **25％** の確率で増援抽選。選ばれた場合はエリオ・オズ・カイ・セラ・ミナの5人から均等抽選（各人5％）。外れた場合は従来の匿名量産機が同行する。
+- 当選すると右側のカットイン（提供されたキャラクターシートから加工した顔写真）を表示し、量産型ASTRAL-SUITが右側から走ってルーに合流する。以後、パイロット別の支援性能が適用される。
+- ASTRAEA No.3は別枠の特殊支援機。従来の出撃条件・12秒継続を維持。
+- スタート画面は簡潔なままにする。抽選条件を長文で書き足さない。
+- CloudflareのデータベースやWorkerには変更なし。既存のNORMAL／ENDLESSランキングとCHALLENGEローカル記録はそのまま。
+- GitHub Pagesの反映後、`Ctrl + Shift + R` でキャッシュを更新して確認。
 
 ## v1.14.0 SURVIVAL TRIALS 追加情報
 
