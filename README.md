@@ -1,4 +1,28 @@
-# RUU//OVERRUN — PUBLIC BETA (v1.11.0)
+# RUU//OVERRUN — PUBLIC BETA (v1.12.0)
+
+## v1.12.0 — DEVORA MUTATION / IMPACT SURGE
+
+**Goal: tougher but readable combat, and more satisfying enemy destruction.** This update adds four mutated variants to the existing DEVORA enemies from ~24s onward (their frequency increases later, with an active cap):
+
+- **FRENZY** — charges up an aimed rush. A red directional warning gives time to move or dash before it accelerates.
+- **OVERLOAD** — begins a ~1s explosive countdown at close range. The amber danger ring indicates the actual blast radius; defeating it first causes a visual-only victory explosion.
+- **FRACTURE** — splits into two weaker, non-mutating enemies on defeat (or one if the arena is crowded).
+- **BULWARK** — has additional health and temporary damage resistance. Repeated hits break its armor and briefly stun it.
+
+Both existing bosses now have modestly increased HP (+10% for the DEVORA boss, +13% for NULL EMPEROR). At **55% HP**, they shift to **PHASE II**, attack faster and add a **clearly telegraphed aimed projectile fan**. Their current radial attacks are preserved with a projectile cap.
+
+**IMPACT SURGE** adds enhanced death sparks, colored shatter rings, short hit-stop on special kills, screen-edge impact feedback, armor-break effects, and a readable on-screen mutation marker. New visual effects scale with existing **FX AUTO / HIGH / LITE** preferences, and no new artwork or audio files are needed.
+
+**Preserved:** NORMAL 100-second clear conditions, ENDLESS mode, all 16 soundtrack files, three JACKPOT modes at **1%** per level-up / reroll, 13s JACKPOT invulnerability, 53-second ending, achievements, and cloud leaderboards. This gameplay-only update requires **no Cloudflare migration**. Keep `devora-mutation.js` beside `index.html`; deleting it disables the new mutation system.
+
+### v1.12 smoke-test checklist
+
+1. Play NORMAL past 24 seconds and look for colored mutation labels. FRENZY and OVERLOAD should show warning lines/rings before their attacks.
+2. Destroy FRACTURE and BULWARK enemies and verify split offspring, armor breaks and hit effects.
+3. Lower a boss below 55% HP and check the PHASE II callout and aimed volleys, then defeat the final boss to confirm the original ending.
+4. Check FX LITE on a lower-power device and verify that warnings remain visible, then check NORMAL and ENDLESS online rankings.
+
+
 
 ## Balance hotfix — JACKPOT MODE 1% (2026-11-22)
 
@@ -12,9 +36,9 @@ JACKPOT MODE now appears with a **1% chance per level-up choice screen** (each r
 4. **12 local achievements & selectable titles** — the title-screen ACHIEVEMENTS archive stores unlocks in localStorage. Players may choose an earned title for their results and X posts, and for the shared ranking once the updated backend is deployed.
 5. **ENDLESS MODE** — unlocked after the original 100-second campaign is cleared, with escalating waves and a new boss every ~45 seconds after the initial 100 seconds. Independent local high score; ENDLESS never triggers the original 100-second win condition.
 
-### Global ranking — migration still required
+### Global ranking — v1.11 migration completed (2026-11-22)
 
-**NORMAL ranking remains connected to the current Cloudflare Worker. ENDLESS online ranking and titles require a manual Cloudflare D1 + Worker upgrade.** Until the Worker advertises the two modes, ENDLESS shows a local record and never sends an ENDLESS score into NORMAL ranking. Existing NORMAL records are not deleted.
+The production Cloudflare D1/Worker migration has been performed. The owner verified `/api/health` with `rankingModes:["normal","endless"]`, three preserved NORMAL records, and a valid empty ENDLESS list. Real ENDLESS score submission still needs an in-game end-to-end test. Existing NORMAL records were retained.
 
 Follow [backend/UPGRADE_v111_JA.md](./backend/UPGRADE_v111_JA.md):
 - Run `backend/migrate_v111.sql` **once** in the existing Cloudflare D1 Console (adds an optional title field to normal scores and a separate `endless_scores` table).
@@ -75,6 +99,7 @@ JACKPOTØ31 original browser survival game. Includes all 16 approved soundtracks
 - `index.html` — GitHub Pages entrypoint. Loads the game and public-ranking UI.
 - `assets/` — all game images and music. **Do not omit this directory.**
 - `public-features.js`, `public-features.css`, `leaderboard-config.js` — ranking and X share UI.
+- `devora-mutation.js` — mutation variants, boss PHASE II attack behavior and IMPACT SURGE effects (required for v1.12.0).
 - `backend/` — separate Cloudflare Workers + D1 API for a **shared** ranking. This folder is code only; GitHub Pages does not run it.
 - `.nojekyll` — avoid processing source assets with Jekyll.
 
