@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS endless_scores (
   score INTEGER NOT NULL CHECK (score>=0),
   kills INTEGER NOT NULL CHECK (kills>=0),
   level INTEGER NOT NULL CHECK (level>=1),
-  time_seconds INTEGER NOT NULL CHECK (time_seconds>=100),
+  time_seconds INTEGER NOT NULL CHECK (time_seconds>=0),
   won INTEGER NOT NULL CHECK (won=0),
   updated_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ','now'))
 );
