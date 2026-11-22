@@ -1,4 +1,14 @@
-# RUU//OVERRUN — GitHub公開・更新手順（v1.12.0 PUBLIC BETA）
+# RUU//OVERRUN — GitHub公開・更新手順（v1.14.0 PUBLIC BETA）
+
+## v1.14.0 SURVIVAL TRIALS 追加情報
+
+- 新しい `survival-trials.js` を `index.html` と同じリポジトリ直下に置く。GitHub Pages上では通常の自動更新対象になる。
+- 戦闘中の30秒、60秒、90秒のDEVORA INVASION、HP25%以下のLAST STAND、およびクリア後のCHALLENGE MISSIONS（3種）を実装。
+- チャレンジ記録はブラウザのlocalStorageで管理し、**NORMAL/ENDLESSのオンラインランキングには絶対に送信しない。** 専用称号を解放して選択できる。
+- チャレンジ中も元の100秒生存・最終ボス撃破という条件は維持する。
+- JAM/PACKなど既存のゲームモード、BGM16曲、JACKPOT MODE 1％、ASTRAEA出撃、53秒EDは継続。
+- Cloudflare D1 / Workerには新しい作業は不要。GitHub側の `index.html`、`public-features.js`、`survival-trials.js` が整合していればよい。
+- ブラウザで `Ctrl + Shift + R` を実行し、タイトルのv1.14.0表記、通常戦闘の侵攻予告、クリア後のチャレンジメニュー、結果のランキング送信防止を確認する。
 
 ## 既存の公開環境を更新する場合（v1.12.0）
 
