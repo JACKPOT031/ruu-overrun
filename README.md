@@ -1,4 +1,25 @@
-# RUU//OVERRUN — PUBLIC BETA (v1.10.0)
+# RUU//OVERRUN — PUBLIC BETA (v1.11.0)
+
+## v1.11.0 — OVERDRIVE EXPANSION (5-FEATURE UPDATE)
+
+1. **Boss destruction cinema** — standard DEVORA boss: “DEVORA BREAK” (~1.85s), final NULL EMPEROR: “FINAL ANNIHILATION” (~2.65s). The battlefield freezes temporarily and returns to play or starts the ending as appropriate.
+2. **4 new fusion attacks** — 氷雷絶唱 (frost+lightning), 天焦焔華 (meteor+fireworks), 断界弾道 (rail+rift), 終末共鳴 (sonic+cross). These are earned from level-up choices once both component weapons are at LV2+. The six pre-existing evolutions remain available.
+3. **Combo celebration** — 50 / 100 / 200 / 500 CHAIN overlays and a new audio cue; max combo appears in the result screen.
+4. **12 local achievements & selectable titles** — the title-screen ACHIEVEMENTS archive stores unlocks in localStorage. Players may choose an earned title for their results and X posts, and for the shared ranking once the updated backend is deployed.
+5. **ENDLESS MODE** — unlocked after the original 100-second campaign is cleared, with escalating waves and a new boss every ~45 seconds after the initial 100 seconds. Independent local high score; ENDLESS never triggers the original 100-second win condition.
+
+### Global ranking — migration still required
+
+**NORMAL ranking remains connected to the current Cloudflare Worker. ENDLESS online ranking and titles require a manual Cloudflare D1 + Worker upgrade.** Until the Worker advertises the two modes, ENDLESS shows a local record and never sends an ENDLESS score into NORMAL ranking. Existing NORMAL records are not deleted.
+
+Follow [backend/UPGRADE_v111_JA.md](./backend/UPGRADE_v111_JA.md):
+- Run `backend/migrate_v111.sql` **once** in the existing Cloudflare D1 Console (adds an optional title field to normal scores and a separate `endless_scores` table).
+- In the **existing** `ruu-overrun-leaderboard` Worker, replace the code with [backend/src/index.js](./backend/src/index.js) and Deploy.
+- Check `/api/health` for `"rankingModes":["normal","endless"]`.
+
+Your game URL, shared NORMAL leaderboard, original 16 music tracks, 3 JACKPOT modes, 3% JACKPOT chance, 53-second ending and X result share are preserved.
+
+
 
 ## v1.10.0 — SIGNAL LOST / DEFEAT CINEMATIC
 
