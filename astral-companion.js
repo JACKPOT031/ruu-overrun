@@ -1,4 +1,4 @@
-/* v1.15.0 ASTRAL COMPANION / MASS-PRODUCED SUPPORT PILOT — game-only; no Cloudflare changes.
+/* v1.15.1 ASTRAL COMPANION / MASS-PRODUCED SUPPORT PILOT — game-only; no Cloudflare changes.
    ASTRAL-SUIT: modest constant support. ASTRAEA No.3: once per run,
    manually deployable for 12s after DEVORA boss defeat + 75s + SYNCHRO 100%.
    Sprites are stylized game interpretations of the supplied character sheets.
@@ -88,7 +88,7 @@ function fireSuit(g,api,q){
  const hits=rapid?2:1,damage=rapid?base*.70:base;
  for(let n=0;n<hits;n++)api?.hit?.(e,damage,color);
  fxLine(z.allyX+25,z.allyY-49,e.x,e.y,color,rapid?3:2,.20);
- fxSparks(e.x,e.y,color,rapid?8:5,75,q);z.shots+=hits;api?.sound?.('shoot');
+ fxSparks(e.x,e.y,color,rapid?8:5,75,q);window.RUU_PILOTS?.onEscortShot?.({x:z.allyX+25,y:z.allyY-49},{x:e.x,y:e.y},g,q);z.shots+=hits;api?.sound?.('shoot');
 }
 function defend(g,api,q){
  const p=g.player;
@@ -96,7 +96,7 @@ function defend(g,api,q){
   const b=g.ebullets[i];
   if((b.x-p.x)**2+(b.y-p.y)**2>90*90||(b.x-z.allyX)**2+(b.y-z.allyY)**2>250*250)continue;
   g.ebullets.splice(i,1);fxLine(z.allyX,z.allyY-44,b.x,b.y,silver,3,.36);
-  fxSparks(b.x,b.y,silver,14,140,q);z.blocked++;z.intercept=window.RUU_PILOTS?.interceptRate?.()||9.5;api?.sound?.('shield');return;
+  fxSparks(b.x,b.y,silver,14,140,q);window.RUU_PILOTS?.onIntercept?.(b.x,b.y,g,q);z.blocked++;z.intercept=window.RUU_PILOTS?.interceptRate?.()||9.5;api?.sound?.('shield');return;
  }
 }
 function burstAstraea(g,api,q){
@@ -128,7 +128,9 @@ function tick(dt,g,api,q='auto'){
   const p=z.sparks[i];p.life-=dt;p.x+=p.vx*dt;p.y+=p.vy*dt;
   p.vx*=Math.exp(-3*dt);p.vy*=Math.exp(-3*dt);if(p.life<=0)z.sparks.splice(i,1);
  }
- const p=g.player,f=1-Math.exp(-dt*6),X=p.x-80*(p.face||1),Y=p.y+21;
+ const p=g.player;
+ if(window.RUU_PILOTS?.hasEscort?.()){
+ const f=1-Math.exp(-dt*6),X=p.x-80*(p.face||1),Y=p.y+21;
  const incoming=window.RUU_PILOTS?.entering?.();
  if(incoming){
    // Run from off-screen right to the ordinary follow position.
@@ -150,6 +152,7 @@ function tick(dt,g,api,q='auto'){
    z.attack-=dt;if(z.attack<=0){z.attack=window.RUU_PILOTS?.shotRate?.()||1.5;fireSuit(g,api,q)}
    z.intercept-=dt;if(z.intercept<=0){z.intercept=.12;defend(g,api,q)}
  }
+ }
  if(z.t<=0)return;
  z.t=Math.max(0,z.t-dt);
  const alpha=1-Math.exp(-4*dt);
@@ -167,10 +170,13 @@ function fallback(ctx,astro){
  ctx.strokeStyle=astro?pink:gold;ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(-34,-39);ctx.lineTo(42,-39);ctx.stroke();ctx.restore();
 }
 function drawGround(ctx,cam,g){
- if(!g?.player||z.allyX===null)return;
- if(window.RUU_PILOTS?.entering?.()?.running===false)return;
- ctx.save();ctx.globalAlpha=.35;ctx.fillStyle='#070911';
- ctx.beginPath();ctx.ellipse(z.allyX-cam.x,z.allyY-cam.y,30,10,0,0,PI);ctx.fill();
+ if(!g?.player)return;
+ ctx.save();
+ if(window.RUU_PILOTS?.hasEscort?.()&&z.allyX!==null&&window.RUU_PILOTS?.entering?.()?.running!==false){
+  ctx.globalAlpha=.35;ctx.fillStyle='#070911';
+  ctx.beginPath();ctx.ellipse(z.allyX-cam.x,z.allyY-cam.y,30,10,0,0,PI);ctx.fill();
+ }
+ ctx.globalAlpha=.5;
  if(z.t>0){ctx.strokeStyle=pink;ctx.lineWidth=3;ctx.beginPath();ctx.ellipse(z.astraX+93-cam.x,z.astraY+20-cam.y,120,34,0,0,PI);ctx.stroke()}
  ctx.restore();
 }
@@ -180,8 +186,8 @@ function drawImage(ctx,img,x,y,w,h,opacity,astro){
  ctx.restore();
 }
 function drawUnits(ctx,cam,g,q='auto'){
- if(!g?.player||z.allyX===null)return;
- if(window.RUU_PILOTS?.entering?.()?.running===false)return;
+ if(!g?.player)return;
+ if(window.RUU_PILOTS?.hasEscort?.()&&z.allyX!==null&&window.RUU_PILOTS?.entering?.()?.running!==false){
  // Reduced from 86x125 to 64x94 logical pixels, about 25% smaller.
  // Source GIF faces right. Flip the drawing when escort moves left.
  const xSuit=z.allyX-cam.x,ySuit=z.allyY-cam.y+6,suitW=64,suitH=94;
@@ -197,6 +203,7 @@ function drawUnits(ctx,cam,g,q='auto'){
    ctx.drawImage(IMG.suit,-suitW/2,-suitH,suitW,suitH);
  }else fallback(ctx,false);
  ctx.restore();
+ }
  if(z.t<=0)return;
  const alpha=clamp(Math.min((12-z.t)*2.4,z.t*1.7),0,1),x=z.astraX+93-cam.x,y=z.astraY+20-cam.y;
  if(q!=='lite'){ctx.save();ctx.globalCompositeOperation='screen';const glow=ctx.createRadialGradient(x,y-115,12,x,y-115,150);glow.addColorStop(0,'rgba(255,148,228,.24)');glow.addColorStop(1,'rgba(255,148,228,0)');ctx.fillStyle=glow;ctx.beginPath();ctx.arc(x,y-115,150,0,PI);ctx.fill();ctx.restore()}
@@ -228,5 +235,5 @@ function drawScreen(ctx,W,H,g,q='auto'){
  }
  if(z.flash>0&&q!=='lite'){ctx.save();ctx.globalAlpha=z.flash*.18;ctx.strokeStyle=pink;ctx.lineWidth=8;ctx.strokeRect(7,7,W-14,H-14);ctx.restore()}
 }
-window.RUU_COMPANION={VERSION:'1.15.0',reset,canDeploy,status,onKill,deploy,tick,drawGround,drawUnits,drawFront,drawScreen,position:()=>z.allyX===null?null:{x:z.allyX,y:z.allyY}};
+window.RUU_COMPANION={VERSION:'1.15.1',reset,canDeploy,status,onKill,deploy,tick,drawGround,drawUnits,drawFront,drawScreen,position:()=>z.allyX===null?null:{x:z.allyX,y:z.allyY}};
 })();
