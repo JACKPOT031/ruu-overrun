@@ -60,9 +60,11 @@ function spawnWaveMob(g,api){
 function finishWave(g,api,won){
  if(!wave)return;const c=wave.cfg;
  if(won){
-  g.score+=c.score;g.xp+=c.xp;api?.gainDrive?.(c.drive);api?.gainFinisher?.(c.finisher);
-  api?.wave?.(g.player.x,g.player.y,240,c.color);api?.sound?.('victory');api?.toast?.('INVASION REPELLED // SCORE +'+c.score,true);
-  banner={name:'INVASION REPELLED / +'+c.score,col:'#a5ffdd',life:2.3};
+  const pilotBonus=window.RUU_PILOTS?.onInvasionRepelled?.(g,c.score)||0;
+  const total=c.score+pilotBonus;
+  g.score+=total;g.xp+=c.xp;api?.gainDrive?.(c.drive);api?.gainFinisher?.(c.finisher);
+  api?.wave?.(g.player.x,g.player.y,240,c.color);api?.sound?.('victory');api?.toast?.('INVASION REPELLED // SCORE +'+total,true);
+  banner={name:'INVASION REPELLED / +'+total,col:'#a5ffdd',life:2.3};
  }else banner={name:'INVASION BREACHED / NO BONUS',col:'#ff859c',life:1.75};
  wave=null;
 }
@@ -106,5 +108,5 @@ function drawScreen(ctx,W,H,g,q='auto'){
  const mission=currentInfo(g);
  if(g.mode==='challenge'&&mission){ctx.save();ctx.textAlign='center';ctx.font='800 11px ui-monospace,Consolas,monospace';ctx.fillStyle=mission.failed?'#ff879a':'#e6cfae';ctx.fillText('TRIAL // '+mission.name+(mission.failed?' / FAILED':''),W/2,H*.062);ctx.restore()}
 }
-window.RUU_OPERATIONS={VERSION:'1.14.0',reset,start,status,selectedTitle,selectTitle,currentInfo,allowJackpot,allowUpgrade,onDamage,complete,onKill,tick,drawScreen};
+window.RUU_OPERATIONS={VERSION:'1.15.0',reset,start,status,selectedTitle,selectTitle,currentInfo,allowJackpot,allowUpgrade,onDamage,complete,onKill,tick,drawScreen};
 })();
