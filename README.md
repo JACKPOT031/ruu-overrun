@@ -1,4 +1,41 @@
-# RUU//OVERRUN — PUBLIC BETA (v1.15.2)
+# RUU//OVERRUN — PUBLIC BETA (v1.15.3)
+
+## v1.15.3 — GUARDIAN EMERGENCY / PILOT EFFECTS SURGE
+
+### ASTRAEA: automatic emergency reinforcement, no X button
+
+The **25% mass-produced ASTRAL-SUIT support roll** determines whether there is any named allied pilot (Elio, Oz, Kai, Sera, Mina; 5% of all starts each). ASTRAEA No.3 now automatically intervenes **only if both conditions hold at the exact moment a FINAL boss is spawned**:
+
+1. **That run won the 25% mass-produced pilot roll** (a named support ASTRAL-SUIT is participating).
+2. **Ruu's current HP is 50% of maximum or lower**, and Ruu is alive.
+
+There is **no second random roll**. On qualification, ASTRAEA's pink emergency signal appears and the actual 12s deployment begins about **1.05 seconds after the final boss appears**, leaving time for the boss warning. Only one ASTRAEA appearance is possible per run. In ENDLESS, later final-boss appearances can qualify if a previous final encounter did not; once used, it cannot be used again. If Ruu drops below 50% *after* a final boss spawned, it does not retroactively trigger on that boss. Shield points do not alter the HP ratio.
+
+The **old manual X / touch button**, 75-second condition, first-boss defeat requirement, and 100% SYNCHRO requirement **are removed**. The HUD shows a compact **GUARDIAN EMERGENCY** status instead of a SYNCHRO bar. The original ASTRAEA 12-second cinematics, pink wings and volleys, GUARDIAN RESONANCE finish, and **28% max-HP per-boss damage cap** are retained. The final blow still belongs to the player.
+
+### Five dramatic but readable pilot signature effects
+
+Every named support technique now has stronger short-lived visual feedback: larger color-coded impact rings, brighter burst particles, multi-layered beam lines, geometric target and defense markers, and a **compact right-side skill banner displaying WHO acted and WHAT they did**. Each keeps their own WebAudio SFX.
+
+| Pilot | Enhanced visual | On-screen action |
+|---|---|---|
+| Elio | Triple expanding cyan hex shields and interception sparks | ELIO / SHIELD COVER — SHIELD + |
+| Oz | Strong magenta precision beam, crosshair burst and MARKED status | OZ / EXECUTION MARK — +11% DMG |
+| Kai | Triple orange muzzle burst, impact trails and CROSS-FIRE | KAI / BURST ASSIST — CROSS-FIRE |
+| Sera | Layered silver field rings, slowing links and gauge feedback | SERA / SUPPORT FIELD — DRIVE +4 / FINISHER +3 |
+| Mina | Teal multi-target scan boxes, pickup lines and invasion reward flare | MINA / TARGET SCAN — SCANNED / COLLECT |
+
+All visuals are event-timed rather than permanent screen coverage. LITE still shows the informative labels but reduces particles/glows; AUTO and HIGH are more elaborate. Enemy-danger telegraphs remain the priority. Core skill intervals, damage and shield numbers are otherwise unchanged: the upgrade makes support **more obvious**, not an automatic win.
+
+**Preserved:** normal 100-second clear and final-boss defeat, ENDLESS and CHALLENGE rules, all 16 soundtrack tracks, 1% JACKPOT MODE, the ending, original mass-produced escort probability 25%/75% absent, online NORMAL/ENDLESS ranking and separate offline challenge results. **No Cloudflare Worker/D1 migration is required.**
+
+### v1.15.3 tests to perform in-browser
+
+1. With no pilot selected, confirm no mass-produced suit and no ASTRAEA automatic dispatch.
+2. With a pilot selected and HP at **50% or lower when NULL EMPEROR appears** (around 84s), confirm automatic signal and ASTRAEA dispatch about 1s later, without X or tapping.
+3. With HP **above 50% at the boss's arrival**, confirm no dispatch even if HP later falls during that encounter. Confirm one use maximum.
+4. Observe five pilot support banners and amplified effects; ensure warning circles/aim lines stay visible in FX LITE/HIGH.
+5. Recheck NORMAL/ENDLESS scores, CHALLENGE isolation, original soundtrack, and the ending.
 
 ## v1.15.2 — FIVE CINEMATIC SUPPORT PILOT CUT-INS
 
