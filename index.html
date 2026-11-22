@@ -14,7 +14,7 @@ body{background:radial-gradient(ellipse 72% 54% at 50% 25%,#14243a 0%,#080d18 58
 .build{font-family:ui-monospace,Consolas,monospace;color:#77859c;font-size:10px;text-align:right}
 .frame{position:relative;width:100%;aspect-ratio:16/9;overflow:hidden;background:#0c1321;border:1px solid #52647d;border-radius:14px;box-shadow:0 0 0 1px #0e1d2b,0 12px 65px #0009,0 0 70px #1b79881b;isolation:isolate}
 .frame:after{pointer-events:none;position:absolute;z-index:15;inset:0;content:"";border-radius:14px;box-shadow:inset 0 0 0 1px #bdffef12,inset 0 0 80px #01050e99}
-canvas{display:block;width:100%;height:100%;touch-action:none;cursor:crosshair}
+canvas{display:block;width:100%;height:100%;touch-action:none;cursor:crosshair;image-rendering:auto}
 .hud{position:absolute;z-index:9;inset:0;pointer-events:none;display:none;font-family:ui-monospace,Consolas,monospace;text-shadow:0 1px 4px #02040c}
 .top-left{position:absolute;top:3.2%;left:3.1%;width:min(310px,28%)}.mini-label{font-size:clamp(8px,.95vw,13px);letter-spacing:.13em;font-weight:800}.bar{height:clamp(9px,1vw,13px);background:#111c2d;border:1px solid #7198ac77;overflow:hidden;border-radius:4px;margin-top:6px;box-shadow:0 0 13px #0007}.fill{height:100%;width:100%;transition:width .14s linear}.hp{background:linear-gradient(90deg,#17b5a6,#8dfec8);box-shadow:0 0 12px #72fff6aa}.xp{background:linear-gradient(90deg,#5154ff,#c36dff);box-shadow:0 0 12px #a676ff99}.substat{font-size:clamp(8px,.82vw,11px);color:#d1e8f6;display:flex;justify-content:space-between;margin:4px 0 9px}
 .top-mid{position:absolute;top:3%;left:50%;transform:translateX(-50%);text-align:center;white-space:nowrap}.clock{font-weight:1000;font-size:clamp(15px,2.15vw,29px);letter-spacing:.08em}.phase{font-size:clamp(8px,.8vw,11px);letter-spacing:.19em;color:#91adc8}.top-right{position:absolute;right:3.5%;top:3%;text-align:right;font-weight:800;font-size:clamp(10px,1.12vw,15px)}.top-right small{display:block;color:#8babc2;margin-top:7px;font-size:clamp(7px,.73vw,11px)}
@@ -316,7 +316,7 @@ body{background:radial-gradient(ellipse 80% 66% at 52% 24%,#2a2934 0%,#11131d 55
 </head>
 <body>
 <div class="shell">
- <div class="upper"><div class="brand">JACKPOT<b>Ø</b>31 <span style="color:#667f95">/ ORIGINAL GAMES</span></div><div class="build">RUU//OVERRUN <b>v1.19.0</b> · 16 TRACKS / SHORT ENDING</div></div>
+ <div class="upper"><div class="brand">JACKPOT<b>Ø</b>31 <span style="color:#667f95">/ ORIGINAL GAMES</span></div><div class="build">RUU//OVERRUN <b>v1.19.1</b> · 16 TRACKS / SHORT ENDING</div></div>
  <main class="frame" id="frame">
   <canvas id="game" width="1200" height="675" aria-label="ルーのサバイバルアクションゲーム"></canvas>
   <div class="hud" id="hud">
@@ -360,7 +360,7 @@ body{background:radial-gradient(ellipse 80% 66% at 52% 24%,#2a2934 0%,#11131d 55
 <script src="expansion-system.js"></script>
 <script src="devora-mutation.js?v=1.17.0"></script>
 <script src="devora-phase3.js?v=1.19.0"></script>
-<script src="devora-true-end.js?v=1.19.0"></script>
+<script src="devora-true-end.js?v=1.19.1"></script>
 <script src="swarm-director.js?v=1.18.0"></script>
 <script src="support-pilots.js?v=1.19.0"></script>
 <script src="astral-companion.js?v=1.19.0"></script>
@@ -494,9 +494,23 @@ const WALK_ATLAS=new Image();WALK_ATLAS.src='assets/ruu_walk_atlas.webp';
  const SAVE_KEY='RUU_OVERRUN_V022_RECORD';
  const ENDLESS_SAVE_KEY='RUU_OVERRUN_ENDLESS_RECORD_V1';
  let musicStarted=false,musicLevel=0,musicBass=0,prevBass=0,beatCooldown=0,uiTimer=0;
- // Default is AUTO: bright effects but tightly capped and rendered at a lower pixel density.
- let fxPreset='auto',fxMax=false,renderScale=.72,renderInterval=1000/30;
+ // High-density canvas: retain the 1200x675 gameplay coordinate system.
+ // AUTO quality adapts to GPU load instead of defaulting to blurry 72% pixels.
+ let fxPreset='auto',fxMax=false,renderScale=1,renderInterval=1000/30,autoQuality=1;
  let lastPaint=0,lastPaintState='',paintCount=0,paintTotalMs=0,perfTick=performance.now(),lastFxHit=0;
+ function syncCanvasResolution(){
+   const rect=c.getBoundingClientRect();
+   const cssScale=Math.max((rect.width||W)/W,(rect.height||H)/H);
+   const dpr=clamp(window.devicePixelRatio||1,1,2);
+   const displayScale=clamp(cssScale*dpr,.75,2);
+   const quality=fxPreset==='lite'?.8:fxPreset==='auto'?autoQuality:1;
+   const target=clamp(displayScale*quality,fxPreset==='lite'?.72:.95,2);
+   const bw=Math.round(W*target),bh=Math.round(H*target);
+   if(c.width!==bw||c.height!==bh){c.width=bw;c.height=bh;lastPaint=0;lastPaintState=''}
+   renderScale=c.width/W;
+   ctx.imageSmoothingEnabled=true;
+   ctx.imageSmoothingQuality='high';
+ }
  let sfxEnabled=true,sfxCooldown=Object.create(null);
  const sfxToggle=document.getElementById('sfxToggle'),perfHud=document.getElementById('perfHud');
  const TRACK_RATE=20;
@@ -2530,10 +2544,10 @@ ui.healthFill.style.width=`${100*p.hp/p.maxHp}%`;ui.healthText.textContent=`${Ma
  retryMusic.addEventListener('click',()=>{musicStarted=true;soundOn=true;ui.mute.textContent='♫ BGM ON';if(state==='ending'){playEndingSong(false)}else resumeStageMusic();try{ensureAudio()}catch(e){}});
  function setFxPreset(next){
    fxPreset=next;fxMax=next==='high';
-   renderScale=next==='high'?.91:next==='lite'?.58:.72;
+   autoQuality=1;
    renderInterval=1000/(next==='high'?40:next==='lite'?26:30);
    fxMode.textContent=next==='auto'?'✦ FX AUTO':next==='high'?'✦ FX HIGH':'✧ FX LITE';
-   c.width=Math.round(W*renderScale);c.height=Math.round(H*renderScale);lastPaint=0;
+   syncCanvasResolution();lastPaint=0;
    if(g){const c1=next==='high'?180:next==='lite'?24:65,c2=next==='high'?35:next==='lite'?8:16;g.shards.splice(0,Math.max(0,g.shards.length-c1));g.impacts.splice(0,Math.max(0,g.impacts.length-c2))}
  }
  fxMode.onclick=()=>{const next=fxPreset==='auto'?'high':fxPreset==='high'?'lite':'auto';setFxPreset(next);if(g)toast('VISUAL FX // '+next.toUpperCase())};
@@ -2649,7 +2663,7 @@ ui.healthFill.style.width=`${100*p.hp/p.maxHp}%`;ui.healthText.textContent=`${Ma
    const shouldPaint=(active&&now-lastPaint>=renderInterval)||(!active&&lastPaintState!==state);
    if(shouldPaint){
      lastPaint=now;lastPaintState=state;
-     const begin=performance.now();ctx.setTransform(renderScale,0,0,renderScale,0,0);
+     const begin=performance.now();ctx.setTransform(renderScale,0,0,renderScale,0,0);ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';
      render();drawJoy();if(state==='bossbreak')window.RUU_EXPANSION?.drawBoss(ctx,W,H,fxPreset);if(state==='dying')window.RUU_DEATH?.draw(ctx,W,H,deathScene?.elapsed||0,fxPreset);paintCount++;paintTotalMs+=performance.now()-begin;
    }
    // BGM must continue at full speed even while the level-up panel freezes simulation.
@@ -2658,12 +2672,16 @@ ui.healthFill.style.width=`${100*p.hp/p.maxHp}%`;ui.healthText.textContent=`${Ma
      const perFrame=paintTotalMs/Math.max(1,paintCount);
      perfHud.textContent=active?'FPS '+Math.round(paintCount*1000/(now-perfTick)):'FPS —';
      if(fxPreset==='auto'){
-       const crowded=!!g&&g.enemies.length>90;
        const fps=paintCount*1000/Math.max(1,now-perfTick);
-       let target=0;
-       if(renderScale>.65&&(perFrame>18||crowded||fps<21))target=.63;
-       else if(renderScale>.55&&(perFrame>27||fps<16))target=.54;
-       if(target){renderScale=target;c.width=Math.round(W*target);c.height=Math.round(H*target);lastPaint=0;perfHud.title='自動軽量化中'}
+       // Slow adaptation only under sustained load; never use the old .54 fallback.
+       let target=autoQuality;
+       if(perFrame>26||fps<19)target=Math.max(.72,autoQuality-.12);
+       else if(perFrame>19||fps<23)target=Math.max(.84,autoQuality-.07);
+       else if(perFrame<14&&fps>27)target=Math.min(1,autoQuality+.04);
+       if(Math.abs(target-autoQuality)>.005){
+         autoQuality=target;syncCanvasResolution();
+         perfHud.title=autoQuality<.99?'高精細描画 / 負荷に応じて最適化中':'高精細描画';
+       }
        renderInterval=1000/(fps<18?24:30);
      }
      perfTick=now;paintCount=0;paintTotalMs=0;
@@ -2678,7 +2696,7 @@ ui.healthFill.style.width=`${100*p.hp/p.maxHp}%`;ui.healthText.textContent=`${Ma
    level: Math.max(1, Math.floor(g?.level || 1)),
    durationSeconds: Math.max(0, Math.floor(g?.time || 0)),
    won: state === 'won',
-   version: '1.19.0',
+   version: '1.19.1',
     mode: g?.mode==='challenge'?'challenge':g?.mode==='endless'?'endless':'normal',
      challengeId:g?.challengeId||'',
      challengeName:window.RUU_OPERATIONS?.currentInfo(g)?.name||'',
@@ -2687,7 +2705,9 @@ ui.healthFill.style.width=`${100*p.hp/p.maxHp}%`;ui.healthText.textContent=`${Ma
     maxCombo: Math.max(0,g?.maxCombo||0),
      supportPilot:window.RUU_PILOTS?.status()?.name||''
  });
- showStart();requestAnimationFrame(loop);
+ window.addEventListener('resize',syncCanvasResolution,{passive:true});
+ if(typeof ResizeObserver!=='undefined')new ResizeObserver(syncCanvasResolution).observe(ui.frame);
+ showStart();syncCanvasResolution();requestAnimationFrame(loop);
 })();
 </script>
 <script src="public-features.js"></script>
