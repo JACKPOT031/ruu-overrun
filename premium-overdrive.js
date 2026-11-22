@@ -282,6 +282,8 @@ const soundPresets={
  pop:{d:.29,f:530,end:1280,tone:.53,noise:.29,sub:.28,metal:.62,gain:.16,bright:.79},
  death:{d:1.28,f:238,end:29,tone:.30,noise:.40,sub:.91,metal:.32,gain:.19,bright:.44},
  deathEcho:{d:.86,f:1450,end:72,tone:.40,noise:.36,sub:.41,metal:.50,gain:.11,bright:.67},
+ bossBreak:{d:1.27,f:340,end:39,tone:.44,noise:.56,sub:.85,metal:.3,gain:.20,bright:.53},
+ comboBig:{d:.69,f:750,end:1660,tone:.63,noise:.10,sub:.23,metal:.75,gain:.13,bright:.81},
  select:{d:.18,f:610,end:960,tone:.60,noise:.07,sub:0,metal:.46,gain:.12,bright:.82}
 };
 const soundAliases={
@@ -293,7 +295,7 @@ const soundAliases={
  meteor:'boom',rail:'laser',frost:'frost',well:'boom',missile:'slash',
  explosion:'boom',rare:'rare',start:'chorus',levelup:'level',select:'select',
  evolve:'chorus',boss:'boss',bossDown:'boom',victory:'chorus',
- defeat:'boss',jackpot:'jackpotDuo',death:'death',deathEcho:'deathEcho'
+ defeat:'boss',jackpot:'jackpotDuo',death:'death',deathEcho:'deathEcho',bossBreak:'bossBreak',comboBig:'comboBig'
 };
 const samples=new WeakMap();let soundTick=0,soundLive=0;
 function buildSample(ac,key){
@@ -333,7 +335,7 @@ function playSound(name,engine,kind,active){
  let key=soundAliases[name],k=clamp(kind|0,0,2);
  if(name==='jackpot')key=['jackpotDuo','jackpotWhite','jackpotBlack'][k];
  if(name==='bolt'&&active)key=k===0?'laser':k===1?'pop':'slash';
- const major=['jackpot','boss','bossDown','signature','mythic','levelup','victory','death','deathEcho'].includes(name);
+ const major=['jackpot','boss','bossDown','signature','mythic','levelup','victory','death','deathEcho','bossBreak','comboBig'].includes(name);
  if(soundLive>(major?20:15))return true;
  try{
   let cache=samples.get(ac);if(!cache){cache=new Map();samples.set(ac,cache);}
@@ -352,7 +354,11 @@ function playSound(name,engine,kind,active){
    src.start(now+delay);
   };
   const alter=1+Math.sin(soundTick++*11.78)*.035;
-  if(name==='death'){
+  if(name==='bossBreak'){
+    play('bossBreak',0,1.2,.9,-.1);play('boom',.06,.8,.75,.2);play('deathEcho',.28,.39,1.1,-.25);
+  }else if(name==='comboBig'){
+    play('comboBig',0,1.0,1,-.15);play('rare',.12,.58,1.17,.18);
+  }else if(name==='death'){
     play('death',0,1.14,.96,0);
     play('boom',.045,.57,.69,-.25);
     play('slash',.22,.45,.78,.3);
