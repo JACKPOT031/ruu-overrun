@@ -1,4 +1,14 @@
-# RUU//OVERRUN — PUBLIC BETA (v1.7.0)
+# RUU//OVERRUN — PUBLIC BETA (v1.8.0)
+
+## v1.8.0 — SHORT SPARKLING ENDING
+
+- Replaces the 10-scene, 3m25s ending with one full-frame collage illustration (`assets/ending_11.webp`) and gentle moving, twinkling light particles.
+- Ending music now plays for about 53.45 seconds. The artist-provided short WAV was verified to match the final 53.45 seconds of the existing master; the game seeks to that excerpt of the already-hosted `assets/ending_sasuraeba.mp3` (starting around 151.687s), avoiding duplicate audio downloads.
+- Updates ending controls to ±10 seconds. Pause and resume also pause the sparkle animations; Skip and Ending Theater remain available.
+- The entire 16-track soundtrack, original visual-combat enhancements, JACKPOT MODE (3%), global rankings, and X sharing are unchanged.
+- Game/menu/result version strings updated to **v1.8.0**.
+
+
 
 ## v1.7.0 — VISUAL OVERDRIVE
 
