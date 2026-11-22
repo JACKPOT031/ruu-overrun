@@ -1,4 +1,14 @@
-# RUU//OVERRUN — PUBLIC BETA (v1.15.1)
+# RUU//OVERRUN — PUBLIC BETA (v1.15.2)
+
+## v1.15.2 — FIVE CINEMATIC SUPPORT PILOT CUT-INS
+
+- Adopted the **five full cinematic Guardian Genome recruitment illustrations** from the creator's approved Elio, Oz, Kai, Sera and Mina posters, in this exact order.
+- New optimized **AVIF atlas**: `assets/support-pilot-cutins.avif` (**5 × 320×569**, approximately **54 KB** total). The entire tall image is drawn, including faces and bottom nameplates. There is **no face-cropping rectangle**.
+- The right-hand entry illustration sits **below the HUD**. A separate readable overlay says **「星屑の鎧 - Guardian Genome - から参戦」**. The original small WebP face atlas remains as a fallback if AVIF is unsupported.
+- Preview the five exact game-used posters in **DEVORA FILES → SUPPORT PILOT GALLERY**, with previous/next controls. The title screen is unchanged, avoiding extra start-menu clutter.
+- The 25% chance of getting **any** ASTRAL-SUIT, five uniform support pilots (5% of all runs each), signature effects, ASTRAEA No.3, normal/endless/challenge modes, 16-track soundtrack, and rankings are preserved.
+- **No Cloudflare or D1 migration**. Browser playthrough and Pages cache-refresh validation are still pending.
+
 
 ## v1.15.1 — MASS-PRODUCED SUPPORT PILOT / EFFECTS UPDATE
 
@@ -14,7 +24,7 @@ All five support actions now have a dedicated **color, short readable action lab
 | Sera | SERA / SUPPORT FIELD | Silver expanding support field, SLOW marker under enemies, DRIVE +4 / FINISHER +3 text |
 | Mina | MINA / TARGET SCAN | Teal target boxes and scan lines, XP pickup tether / COLLECT feedback, INVASION BONUS label |
 
-**Intro improvement:** The existing five-person portrait atlas is displayed larger with the complete image tile rather than a face-clipping rectangle. The entry panel explicitly says **「星屑の鎧 - Guardian Genome - から参戦」** above the selected pilot's name. The original portrait sheet is still the canonical reference, and the escort continues to run in from the right. The cinematic portrait illustrations generated for preview are not yet stored as separate game files; this update enlarges the current in-game atlas.
+**Intro improvement:** The existing five-person portrait atlas is displayed larger with the complete image tile rather than a face-clipping rectangle. The entry panel explicitly says **「星屑の鎧 - Guardian Genome - から参戦」** above the selected pilot's name. The original portrait sheet is still the canonical reference, and the escort continues to run in from the right. The complete five-poster cinematic artwork was subsequently adopted in **v1.15.2**, replacing the initial portrait tiles while retaining them as a compatibility fallback.
 
 Gameplay numbers and mode restrictions from v1.15.0 are otherwise unchanged. Only presentation and the escort-presence probability were corrected. No Cloudflare migration is needed.
 
