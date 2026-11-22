@@ -1,6 +1,6 @@
-/* v1.15.1 ASTRAL COMPANION / MASS-PRODUCED SUPPORT PILOT — game-only; no Cloudflare changes.
-   ASTRAL-SUIT: modest constant support. ASTRAEA No.3: once per run,
-   manually deployable for 12s after DEVORA boss defeat + 75s + SYNCHRO 100%.
+/* v1.15.3 ASTRAL COMPANION / MASS-PRODUCED SUPPORT PILOT — game-only; no Cloudflare changes.
+   ASTRAL-SUIT: a 25%-chance named escort. ASTRAEA No.3: once per run,
+   auto-dispatch at a FINAL boss spawn if a pilot joined and Ruu HP <= 50%.
    Sprites are stylized game interpretations of the supplied character sheets.
 */
 (()=>{
@@ -27,15 +27,35 @@ if(typeof ImageDecoder!=='undefined'&&typeof fetch==='function'){
    }finally{decoder.close()}
  }).catch(()=>{}); // Local file:// and older browsers fall back to the GIF element.
 }
-function init(){return{sync:0,bossDown:false,used:false,t:0,intro:0,allyX:null,allyY:null,astraX:0,astraY:0,attack:.5,intercept:7,volley:.2,finished:false,rays:[],sparks:[],flash:0,shots:0,blocked:0,allyMoving:false,allyFacing:1,walkClock:0,walkSpeed:0}}
+function init(){return{sync:0,bossDown:false,used:false,t:0,intro:0,pending:0,queued:false,attempts:0,autoTriggered:false,triggerHpRatio:null,allyX:null,allyY:null,astraX:0,astraY:0,attack:.5,intercept:7,volley:.2,finished:false,rays:[],sparks:[],flash:0,shots:0,blocked:0,allyMoving:false,allyFacing:1,walkClock:0,walkSpeed:0}}
 let z=init();function reset(){z=init()}
-function canDeploy(g){return!!g&&g.time>=75&&z.bossDown&&z.sync>=100&&!z.used&&!(g.jackpotTime>0)&&!(g.finisherTime>0)}
+// No manual deployment and no second random roll.
+// The pilot roll already makes emergency support rare: 25% at most.
+function emergencyEligible(g){
+ const p=g?.player;
+ return !!p && p.hp>0 && p.maxHp>0 && p.hp/p.maxHp<=.5 &&
+   window.RUU_PILOTS?.hasEscort?.()===true && !z.used && !z.queued;
+}
+function onFinalBossSpawn(g,api,q='auto'){
+ // Runs ONCE at each genuine final boss spawn, never on later damage ticks.
+ // In ENDLESS a later final encounter may qualify, but ASTRAEA remains one-use.
+ if(!g?.player||z.used||z.queued)return false;
+ z.attempts++;
+ if(!emergencyEligible(g))return false;
+ z.queued=true;z.pending=1.05;
+ z.triggerHpRatio=g.player.hp/g.player.maxHp;
+ // This halo is only a signal cue; do not interfere with boss warning text.
+ fxSparks(g.player.x,g.player.y,pink,20,140,q);
+ return true;
+}
 function status(g){
- const ready=canDeploy(g),t=g?.time||0;
- let text=z.used?(z.t>0?'ASTRAEA ACTIVE '+z.t.toFixed(1)+'s':'ASTRAEA DISPATCHED'):
- !z.bossDown?'LOCKED / DEFEAT DEVORA':t<75?'LOCKED / SURVIVE '+Math.ceil(75-t)+'s':
- z.sync<100?'LOCKED / SYNCHRO '+Math.floor(z.sync)+'%':!ready?'READY / WAIT FOR FINISHER':'ASTRAEA READY / PRESS X';
- return{synchro:Math.floor(z.sync),bossDown:z.bossDown,used:z.used,active:z.t,ready,text,shots:z.shots,blocked:z.blocked};
+ const escort=window.RUU_PILOTS?.hasEscort?.()===true;
+ let text=z.used?(z.t>0?'ASTRAEA ACTIVE / '+z.t.toFixed(1)+'s':'ASTRAEA / DEPLOYED'):
+ z.queued?'ASTRAEA / SIGNAL INBOUND':
+ !escort?'ASTRAEA / NO ALLIED SIGNAL':
+ z.attempts?'ASTRAEA / CONDITIONS NOT MET':'ASTRAEA / EMERGENCY LINK';
+ return{used:z.used,active:z.t,queued:z.queued,autoTriggered:z.autoTriggered,
+  triggerHpRatio:z.triggerHpRatio,attempts:z.attempts,ready:false,text,shots:z.shots,blocked:z.blocked};
 }
 function onKill(e,g){
  if(!e||!g)return;
@@ -59,16 +79,17 @@ function targetList(g,x,y,r,n){
  for(const e of g.enemies||[]){if(e.hp<=0)continue;const d=(e.x-x)**2+(e.y-y)**2;if(d<rr)arr.push({e,d})}
  arr.sort((a,b)=>a.d-b.d);return arr.slice(0,n).map(o=>o.e);
 }
-function deploy(g,api,q='auto'){
- if(!canDeploy(g))return false;
- z.used=true;z.t=12;z.intro=1.8;z.finished=false;z.volley=.15;z.flash=.7;
+function activateEmergency(g,api,q='auto'){
+ if(!g?.player||!z.queued||z.used)return false;
+ z.queued=false;z.pending=0;z.used=true;z.autoTriggered=true;
+ z.t=12;z.intro=1.8;z.finished=false;z.volley=.15;z.flash=.7;
  const p=g.player;z.astraX=p.x-190;z.astraY=p.y-160;
  let removed=0;
  for(let i=(g.ebullets||[]).length-1;i>=0&&removed<12;i--){
   const b=g.ebullets[i];if((b.x-p.x)**2+(b.y-p.y)**2<220*220){g.ebullets.splice(i,1);removed++}
  }
  api?.wave?.(p.x,p.y,265,pink);api?.burst?.(p.x,p.y,pink,27,200);
- api?.sound?.('signature');api?.toast?.('ASTRAEA No.3 // MEMORY INHERITANCE',true);
+ api?.sound?.('signature');api?.toast?.('ASTRAEA No.3 // EMERGENCY GUARDIAN RESONANCE',true);
  fxSparks(p.x,p.y,pink,45,240,q);g.shake=Math.max(g.shake||0,13);g.scenePulse=Math.max(g.scenePulse||0,1);
  return true;
 }
@@ -122,6 +143,7 @@ function finalAstraea(g,api,q){
 }
 function tick(dt,g,api,q='auto'){
  if(!g?.player||dt<=0)return;
+ if(z.queued){z.pending-=dt;if(z.pending<=0)activateEmergency(g,api,q)}
  z.intro=Math.max(0,z.intro-dt);z.flash=Math.max(0,z.flash-dt*1.8);
  for(let i=z.rays.length-1;i>=0;i--){z.rays[i].time-=dt;if(z.rays[i].time<=0)z.rays.splice(i,1)}
  for(let i=z.sparks.length-1;i>=0;i--){
@@ -235,5 +257,5 @@ function drawScreen(ctx,W,H,g,q='auto'){
  }
  if(z.flash>0&&q!=='lite'){ctx.save();ctx.globalAlpha=z.flash*.18;ctx.strokeStyle=pink;ctx.lineWidth=8;ctx.strokeRect(7,7,W-14,H-14);ctx.restore()}
 }
-window.RUU_COMPANION={VERSION:'1.15.1',reset,canDeploy,status,onKill,deploy,tick,drawGround,drawUnits,drawFront,drawScreen,position:()=>z.allyX===null?null:{x:z.allyX,y:z.allyY}};
+window.RUU_COMPANION={VERSION:'1.15.3',reset,status,onKill,onFinalBossSpawn,tick,drawGround,drawUnits,drawFront,drawScreen,position:()=>z.allyX===null?null:{x:z.allyX,y:z.allyY}};
 })();
