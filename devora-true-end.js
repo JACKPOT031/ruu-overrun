@@ -1,4 +1,4 @@
-/* RUU//OVERRUN v1.19.0 — TRUE END : DEVORA TRINITY / QUINTET
+/* RUU//OVERRUN v1.19.1 — TRUE END : DEVORA TRINITY / QUINTET
    Final boss defeat reveals a real, challenging second battle.
    Ordinary: three DEVORA. Rare: five (10%). All must be defeated to clear.
 */
@@ -125,7 +125,18 @@ function drawScreen(ctx,W,H,g,q='auto'){
  if(S.intro>0&&S.active){const t=S.intro,alpha=clamp(Math.min((S.introMax-t)*6,t*3),0,1),rare=S.rare;
   if(alpha<=0)return;ctx.save();ctx.globalAlpha=alpha;ctx.fillStyle=rare?'#140612ed':'#110919e8';ctx.fillRect(0,H*.15,W,H*.73);
   const image=ART[rare?'five':'three'],x=W*.065,y=H*.19,w=W*.87,h=H*.56;
-  if(image?.complete&&image.naturalWidth>0)ctx.drawImage(image,x,y,w,h);else{ctx.fillStyle='#381229';ctx.fillRect(x,y,w,h)}
+  // Native-aspect front layer keeps all three / five DEVORA figures proportional.
+  // A faint cover layer behind it fills the wide panel without stretching the main art.
+  if(image?.complete&&image.naturalWidth>0&&image.naturalHeight>0){
+   const iw=image.naturalWidth,ih=image.naturalHeight,inset=Math.min(w,h)*.015;
+   ctx.save();ctx.beginPath();ctx.rect(x,y,w,h);ctx.clip();
+   const cover=Math.max(w/iw,h/ih),cw=iw*cover,ch=ih*cover;
+   ctx.globalAlpha=alpha*.17;
+   ctx.drawImage(image,x+(w-cw)/2,y+(h-ch)/2,cw,ch);
+   const contain=Math.min((w-inset*2)/iw,(h-inset*2)/ih),dw=iw*contain,dh=ih*contain;
+   ctx.globalAlpha=alpha;ctx.drawImage(image,x+(w-dw)/2,y+(h-dh)/2,dw,dh);
+   ctx.restore();
+  }else{ctx.fillStyle='#381229';ctx.fillRect(x,y,w,h)}
   const gr=ctx.createLinearGradient(0,0,W,0);gr.addColorStop(0,'rgba(3,4,13,.90)');gr.addColorStop(.43,'rgba(8,4,15,.48)');gr.addColorStop(1,'rgba(4,4,11,.23)');
   ctx.fillStyle=gr;ctx.fillRect(x,y,w,h);ctx.fillStyle=rare?'#ff6794':'#e5a5ff';ctx.fillRect(W*.075,H*.195,7,H*.52);
   ctx.textAlign='left';ctx.fillStyle='#fff3e9';ctx.font='900 17px ui-monospace,Consolas,monospace';ctx.fillText('DEVORA // TRUE FINAL PHASE',W*.104,H*.39);
@@ -137,5 +148,5 @@ function drawScreen(ctx,W,H,g,q='auto'){
   ctx.fillStyle='#100916d9';ctx.fillRect(W*.32,H*.85,W*.36,29);ctx.textAlign='center';ctx.fillStyle=S.rare?'#ff91a8':'#f6afd9';
   ctx.font='900 12px ui-monospace,monospace';ctx.fillText('DEVORA TRUE BOSS // '+S.remaining+' / '+S.total+' REMAINING',W/2,H*.85+19);ctx.restore()}
 }
-window.RUU_TRUE_END={VERSION:'1.19.0',RARE_FIVE_CHANCE,ROLES,reset,queue,spawnQueued,onKill,status,isIntro,step,tick,drawGround,drawWorld,drawScreen};
+window.RUU_TRUE_END={VERSION:'1.19.1',RARE_FIVE_CHANCE,ROLES,reset,queue,spawnQueued,onKill,status,isIntro,step,tick,drawGround,drawWorld,drawScreen};
 })();
