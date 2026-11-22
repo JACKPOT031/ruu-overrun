@@ -1,4 +1,4 @@
-/* v1.16.1 ASTRAL COMPANION / MASS-PRODUCED SUPPORT PILOT — game-only; no Cloudflare changes.
+/* v1.16.2 ASTRAL COMPANION / MASS-PRODUCED SUPPORT PILOT — game-only; no Cloudflare changes.
    ASTRAL-SUIT: a 25%-chance named escort. ASTRAEA No.3: once per run,
    auto-dispatch at a FINAL boss spawn if a pilot joined and Ruu HP <= 50%.
    Sprites are stylized game interpretations of the supplied character sheets.
@@ -262,12 +262,7 @@ function drawUnits(ctx,cam,g,q='auto'){
  // Reduced from 86x125 to 64x94 logical pixels, about 25% smaller.
  // Source GIF faces right. Flip the drawing when escort moves left.
  const xSuit=z.allyX-cam.x,ySuit=z.allyY-cam.y+6,suitW=64,suitH=94;
- // Small size preserved; a pilot-colored halo distinguishes the rare ally.
- const allyColor=window.RUU_PILOTS?.active?.()?.color||silver;
- ctx.save();ctx.globalCompositeOperation='screen';ctx.strokeStyle=allyColor;
- ctx.globalAlpha=.5;ctx.lineWidth=q==='lite'?1.7:2.4;
- ctx.beginPath();ctx.ellipse(xSuit,ySuit-43,39,50,0,0,PI);ctx.stroke();ctx.restore();
- ctx.save();ctx.translate(xSuit,ySuit);
+ctx.save();ctx.translate(xSuit,ySuit);
  if(z.allyFacing<0)ctx.scale(-1,1);
  ctx.globalAlpha=.97;
  if(walk.frames.length){
@@ -347,5 +342,5 @@ function drawScreen(ctx,W,H,g,q='auto'){
  }
  if(z.flash>0&&q!=='lite'){ctx.save();ctx.globalAlpha=z.flash*.18;ctx.strokeStyle=pink;ctx.lineWidth=8;ctx.strokeRect(7,7,W-14,H-14);ctx.restore()}
 }
-window.RUU_COMPANION={VERSION:'1.16.1',reset,status,onKill,onFinalBossSpawn,tick,drawGround,drawUnits,drawFront,drawScreen,position:()=>z.allyX===null?null:{x:z.allyX,y:z.allyY}};
+window.RUU_COMPANION={VERSION:'1.16.2',reset,status,onKill,onFinalBossSpawn,tick,drawGround,drawUnits,drawFront,drawScreen,position:()=>z.allyX===null?null:{x:z.allyX,y:z.allyY}};
 })();
