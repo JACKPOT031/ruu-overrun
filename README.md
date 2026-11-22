@@ -1,4 +1,16 @@
-# RUU//OVERRUN — PUBLIC BETA (v1.8.0)
+# RUU//OVERRUN — PUBLIC BETA (v1.9.0)
+
+## v1.9.0 — JACKPOT ROYALE / PREMIUM SOUND
+
+- Adds three distinct JACKPOT presentation themes: **DUO SIGNAL** (violet/crimson crossfire), **WHITE POP** (pearl/gold starburst), **BLACK TRACE** (red/black glitch slash).
+- While JACKPOT is active, the screen gains custom animated corner crests, musical pulse accents, countdown jewels, ornamental edge artwork, a moving player corona and additional world-space attack effects. The central playfield remains readable and cut-in art is preserved.
+- General weapon impact, beam and ultimate effects receive complementary visual detail without affecting damage.
+- `premium-overdrive.js` provides an original, runtime-synthesized layered SFX engine, replacing simplistic single-oscillator bleeps for **40 in-game SFX events**, including separate sound signatures for all three JACKPOT modes.
+- Effects respect **FX AUTO / HIGH / LITE**; SFX ON/OFF still works. Original game music continues separately.
+- **Visual/audio-only update:** 16 tracks, short ending (53s), JACKPOT chance (3%), 13-second invulnerability, combat stats, online leaderboard and X sharing are unchanged.
+- Keep `premium-overdrive.js` at the repository root alongside `index.html` and `visual-overdrive.js`.
+
+
 
 ## v1.8.0 — SHORT SPARKLING ENDING
 
