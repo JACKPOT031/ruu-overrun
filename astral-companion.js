@@ -1,4 +1,4 @@
-/* v1.15.3 ASTRAL COMPANION / MASS-PRODUCED SUPPORT PILOT — game-only; no Cloudflare changes.
+/* v1.16.0 ASTRAL COMPANION / MASS-PRODUCED SUPPORT PILOT — game-only; no Cloudflare changes.
    ASTRAL-SUIT: a 25%-chance named escort. ASTRAEA No.3: once per run,
    auto-dispatch at a FINAL boss spawn if a pilot joined and Ruu HP <= 50%.
    Sprites are stylized game interpretations of the supplied character sheets.
@@ -7,7 +7,7 @@
 'use strict';
 const PI=Math.PI*2,clamp=(v,a,b)=>Math.max(a,Math.min(b,v)),pink='#ff85d0',white='#ffe5f7',silver='#b8d3df',gold='#ffe2b5';
 const IMG={};
-for(const [id,src] of Object.entries({suit:'assets/astral-suit-companion.svg',astraea:'assets/astraea-companion.svg'})){
+for(const [id,src] of Object.entries({suit:'assets/astral-suit-companion.svg',astraea:'assets/astraea-companion.svg',flight:'assets/astraea_flight_atlas.webp',cutin:'assets/astraea_emergency_cutin.webp'})){
  if(typeof Image==='undefined'){IMG[id]=null;continue}
  const img=new Image();img.src=src;IMG[id]=img;
 }
@@ -27,7 +27,14 @@ if(typeof ImageDecoder!=='undefined'&&typeof fetch==='function'){
    }finally{decoder.close()}
  }).catch(()=>{}); // Local file:// and older browsers fall back to the GIF element.
 }
-function init(){return{sync:0,bossDown:false,used:false,t:0,intro:0,pending:0,queued:false,attempts:0,autoTriggered:false,triggerHpRatio:null,allyX:null,allyY:null,astraX:0,astraY:0,attack:.5,intercept:7,volley:.2,finished:false,rays:[],sparks:[],flash:0,shots:0,blocked:0,allyMoving:false,allyFacing:1,walkClock:0,walkSpeed:0}}
+// Twelve distinct patrol waypoints sweep across the entire 1200x675 camera.
+const FLIGHT_PATH=[
+ {x:385,y:-204},{x:-370,y:-192},{x:-413,y:151},{x:375,y:190},
+ {x:76,y:-245},{x:-145,y:213},{x:421,y:-66},{x:-394,y:-36},
+ {x:-235,y:-207},{x:246,y:173},{x:36,y:102},{x:341,y:-191}
+];
+const ATLAS_CELL=256,ATLAS_COLS=4,FLIGHT_DURATION=12;
+function init(){return{sync:0,bossDown:false,used:false,t:0,intro:0,pending:0,queued:false,attempts:0,autoTriggered:false,triggerHpRatio:null,allyX:null,allyY:null,astraX:0,astraY:0,flightClock:0,flightStep:0,flightAnim:0,flightFace:-1,flightTrails:[],flightTrailTimer:0,laserCount:0,attack:.5,intercept:7,volley:.2,finished:false,rays:[],sparks:[],flash:0,shots:0,blocked:0,allyMoving:false,allyFacing:1,walkClock:0,walkSpeed:0}}
 let z=init();function reset(){z=init()}
 // No manual deployment and no second random roll.
 // The pilot roll already makes emergency support rare: 25% at most.
@@ -55,7 +62,8 @@ function status(g){
  !escort?'ASTRAEA / NO ALLIED SIGNAL':
  z.attempts?'ASTRAEA / CONDITIONS NOT MET':'ASTRAEA / EMERGENCY LINK';
  return{used:z.used,active:z.t,queued:z.queued,autoTriggered:z.autoTriggered,
-  triggerHpRatio:z.triggerHpRatio,attempts:z.attempts,ready:false,text,shots:z.shots,blocked:z.blocked};
+  triggerHpRatio:z.triggerHpRatio,attempts:z.attempts,ready:false,text,shots:z.shots,blocked:z.blocked,
+  flightX:z.astraX,flightY:z.astraY,flightStep:z.flightStep,laserCount:z.laserCount};
 }
 function onKill(e,g){
  if(!e||!g)return;
@@ -82,8 +90,10 @@ function targetList(g,x,y,r,n){
 function activateEmergency(g,api,q='auto'){
  if(!g?.player||!z.queued||z.used)return false;
  z.queued=false;z.pending=0;z.used=true;z.autoTriggered=true;
- z.t=12;z.intro=1.8;z.finished=false;z.volley=.15;z.flash=.7;
- const p=g.player;z.astraX=p.x-190;z.astraY=p.y-160;
+ z.t=FLIGHT_DURATION;z.intro=2.15;z.finished=false;z.volley=.24;z.flash=.75;
+ z.flightClock=0;z.flightStep=0;z.flightAnim=0;z.flightFace=-1;
+ z.flightTrails=[];z.flightTrailTimer=0;z.laserCount=0;
+ const p=g.player;z.astraX=p.x+520;z.astraY=p.y-135;
  let removed=0;
  for(let i=(g.ebullets||[]).length-1;i>=0&&removed<12;i--){
   const b=g.ebullets[i];if((b.x-p.x)**2+(b.y-p.y)**2<220*220){g.ebullets.splice(i,1);removed++}
@@ -121,13 +131,25 @@ function defend(g,api,q){
  }
 }
 function burstAstraea(g,api,q){
- const targets=targetList(g,g.player.x,g.player.y,800,q==='lite'?2:3);
- for(const e of targets){
-  hitAssist(e,e.kind==='boss'||e.kind==='final'?39:58+(g.level||1)*1.3,api);
-  fxLine(z.astraX+92,z.astraY-80,e.x,e.y,pink,q==='lite'?3:5,.34);
-  fxSparks(e.x,e.y,pink,10,175,q);
+ // Every volley emits bright visible laser beams from ASTRAEA's actual gun.
+ // FX LITE and HIGH have identical targets, damage, and timings.
+ const enemies=targetList(g,z.astraX,z.astraY,1000,2);
+ if(!enemies.length)return;
+ const primary=enemies[0];
+ z.flightFace=primary.x>=z.astraX?1:-1;
+ const gunX=z.astraX+z.flightFace*55,gunY=z.astraY+10;
+ for(const [i,e] of enemies.entries()){
+  const amount=e.kind==='boss'||e.kind==='final'?27:42+(g.level||1)*1.12;
+  hitAssist(e,amount,api);
+  fxLine(gunX,gunY,e.x,e.y,pink,i===0?9:5.2,.35);
+  fxLine(gunX,gunY,e.x,e.y,white,i===0?3.2:2.1,.16);
+  fxSparks(e.x,e.y,pink,i===0?28:17,260,q);
+  if(q!=='lite')fxSparks(gunX,gunY,white,10,170,q);
+  z.laserCount++;
  }
- if(targets.length){z.flash=.3;api?.sound?.('rail')}
+ z.flash=Math.max(z.flash,.27);
+ g.scenePulse=Math.max(g.scenePulse||0,.25);
+ api?.sound?.('rail');
 }
 function finalAstraea(g,api,q){
  z.finished=true;const p=g.player,range=365;
@@ -141,6 +163,32 @@ function finalAstraea(g,api,q){
  fxSparks(p.x,p.y,white,54,290,q);z.flash=.76;
  g.scenePulse=Math.max(g.scenePulse||0,1);g.shake=Math.max(g.shake||0,15);
 }
+function flyPatrol(dt,g,q){
+ const p=g.player;
+ z.flightClock+=dt;
+ z.flightAnim+=dt;
+ z.flightTrailTimer-=dt;
+ // Visit each waypoint once per ~0.9 sec, all directions relative to the moving camera.
+ const next=Math.min(FLIGHT_PATH.length-1,Math.floor(z.flightClock/.94));
+ z.flightStep=next;
+ const waypoint=FLIGHT_PATH[next];
+ const lead=targetList(g,p.x,p.y,580,1)[0];
+ const dx=lead?clamp((lead.x-p.x)*.14,-66,66):0;
+ const dy=lead?clamp((lead.y-p.y)*.11,-45,45):0;
+ const x=p.x+waypoint.x+dx,y=p.y+waypoint.y+dy;
+ const oldX=z.astraX,oldY=z.astraY;
+ const factor=1-Math.exp(-dt*6.4);
+ z.astraX+=(x-z.astraX)*factor;z.astraY+=(y-z.astraY)*factor;
+ const dist=Math.hypot(z.astraX-oldX,z.astraY-oldY);
+ if(dist>2&&z.flightTrailTimer<=0){
+  z.flightTrailTimer=q==='lite'?.12:.065;
+  z.flightTrails.push({x:z.astraX,y:z.astraY,life:.45,max:.45});
+  if(z.flightTrails.length>16)z.flightTrails.shift();
+ }
+ for(let i=z.flightTrails.length-1;i>=0;i--)
+  if((z.flightTrails[i].life-=dt)<=0)z.flightTrails.splice(i,1);
+}
+
 function tick(dt,g,api,q='auto'){
  if(!g?.player||dt<=0)return;
  if(z.queued){z.pending-=dt;if(z.pending<=0)activateEmergency(g,api,q)}
@@ -177,11 +225,11 @@ function tick(dt,g,api,q='auto'){
  }
  if(z.t<=0)return;
  z.t=Math.max(0,z.t-dt);
- const alpha=1-Math.exp(-4*dt);
- z.astraX+=(p.x-190-z.astraX)*alpha;z.astraY+=(p.y-160-z.astraY)*alpha;
- z.volley-=dt;if(z.volley<=0&&z.t>.7){z.volley=.72;burstAstraea(g,api,q)}
+ flyPatrol(dt,g,q);
+ z.volley-=dt;
+ if(z.volley<=0&&z.t>.7){z.volley=.42;burstAstraea(g,api,q)}
  if(z.t<=1.2&&!z.finished)finalAstraea(g,api,q);
- if(z.t===0){api?.toast?.('ASTRAEA // SIGNAL RELEASED',false);fxSparks(z.astraX,z.astraY,pink,20,160,q)}
+ if(z.t===0){api?.toast?.('ASTRAEA // SIGNAL RELEASED',false);fxSparks(z.astraX,z.astraY,pink,32,240,q)}
 }
 function isReady(im){return !!(im&&im.complete&&im.naturalWidth>0)}
 function fallback(ctx,astro){
@@ -199,7 +247,8 @@ function drawGround(ctx,cam,g){
   ctx.beginPath();ctx.ellipse(z.allyX-cam.x,z.allyY-cam.y,30,10,0,0,PI);ctx.fill();
  }
  ctx.globalAlpha=.5;
- if(z.t>0){ctx.strokeStyle=pink;ctx.lineWidth=3;ctx.beginPath();ctx.ellipse(z.astraX+93-cam.x,z.astraY+20-cam.y,120,34,0,0,PI);ctx.stroke()}
+ if(z.t>0){ctx.globalAlpha=.28;ctx.strokeStyle=pink;ctx.lineWidth=2;
+  ctx.beginPath();ctx.ellipse(z.astraX-cam.x,z.astraY+53-cam.y,58,16,0,0,PI);ctx.stroke()}
  ctx.restore();
 }
 function drawImage(ctx,img,x,y,w,h,opacity,astro){
@@ -227,9 +276,33 @@ function drawUnits(ctx,cam,g,q='auto'){
  ctx.restore();
  }
  if(z.t<=0)return;
- const alpha=clamp(Math.min((12-z.t)*2.4,z.t*1.7),0,1),x=z.astraX+93-cam.x,y=z.astraY+20-cam.y;
- if(q!=='lite'){ctx.save();ctx.globalCompositeOperation='screen';const glow=ctx.createRadialGradient(x,y-115,12,x,y-115,150);glow.addColorStop(0,'rgba(255,148,228,.24)');glow.addColorStop(1,'rgba(255,148,228,0)');ctx.fillStyle=glow;ctx.beginPath();ctx.arc(x,y-115,150,0,PI);ctx.fill();ctx.restore()}
- drawImage(ctx,IMG.astraea,x,y,235,255,.97*alpha,true);
+ const alpha=clamp(Math.min((FLIGHT_DURATION-z.t)*3,z.t*1.8),0,1),x=z.astraX-cam.x,y=z.astraY-cam.y;
+ if(q!=='lite'){
+  ctx.save();ctx.globalCompositeOperation='screen';
+  const glow=ctx.createRadialGradient(x,y,10,x,y,122);
+  glow.addColorStop(0,'rgba(255,148,226,.25)');glow.addColorStop(1,'rgba(255,148,226,0)');
+  ctx.fillStyle=glow;ctx.beginPath();ctx.arc(x,y,122,0,PI);ctx.fill();ctx.restore();
+ }
+ // Animated real eight-frame flying GIF, decoded into a deterministic sprite atlas.
+ // Fallback to the original ASTRAEA illustration if WebP decoding is unsupported.
+ const frame=Math.floor(z.flightAnim/.12)%8,col=frame%ATLAS_COLS,row=Math.floor(frame/ATLAS_COLS);
+ const moving=isReady(IMG.flight);
+ const renderMech=(xx,yy,opacity,frameNo=frame)=>{
+  ctx.save();ctx.translate(xx,yy);ctx.globalAlpha=opacity;
+  if(z.flightFace>0)ctx.scale(-1,1);
+  if(moving)ctx.drawImage(IMG.flight,(frameNo%4)*ATLAS_CELL,Math.floor(frameNo/4)*ATLAS_CELL,ATLAS_CELL,ATLAS_CELL,-96,-96,192,192);
+  else if(isReady(IMG.astraea))ctx.drawImage(IMG.astraea,-94,-102,188,192);
+  else fallback(ctx,true);
+  ctx.restore();
+ };
+ if(q!=='lite'){
+  for(const ghost of z.flightTrails.slice(-3)){
+   const a=Math.max(0,ghost.life/ghost.max);
+   renderMech(ghost.x-cam.x,ghost.y-cam.y,a*.14*alpha,frame);
+  }
+ }
+ renderMech(x,y,alpha*.97,frame);
+
 }
 function drawFront(ctx,cam,g,q='auto'){
  if(!g)return;
@@ -247,15 +320,27 @@ function drawFront(ctx,cam,g,q='auto'){
 }
 function drawScreen(ctx,W,H,g,q='auto'){
  if(!g)return;
- if(z.intro>0){const a=clamp(Math.min((1.8-z.intro)*5,z.intro*4),0,1);
-  ctx.save();ctx.globalAlpha=a;const grad=ctx.createLinearGradient(0,0,W*.7,0);grad.addColorStop(0,'rgba(11,7,24,.86)');grad.addColorStop(1,'rgba(11,7,24,0)');
-  ctx.fillStyle=grad;ctx.fillRect(0,H*.18,W*.7,H*.38);
-  ctx.textAlign='left';ctx.fillStyle=white;ctx.font='900 32px system-ui,sans-serif';ctx.fillText('ASTRAEA // DESCENT',W*.065,H*.30);
-  ctx.font='800 15px ui-monospace,monospace';ctx.fillStyle=pink;ctx.fillText('No.3 / GUARDIAN GENOME',W*.07,H*.36);
-  ctx.font='700 14px system-ui,sans-serif';ctx.fillStyle=white;ctx.fillText('記憶は、滅びない。',W*.07,H*.43);
-  ctx.strokeStyle=pink;ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(W*.07,H*.48);ctx.lineTo(W*.55,H*.48);ctx.stroke();ctx.restore();
+ if(z.intro>0){
+  const a=clamp(Math.min((2.15-z.intro)*6,z.intro*3.5),0,1);
+  const width=W*.56,height=width*941/1672;
+  const x=W-width-15+(1-a)*65,y=H*.205;
+  ctx.save();ctx.globalAlpha=a;
+  const grad=ctx.createLinearGradient(x-22,0,x+width,0);
+  grad.addColorStop(0,'rgba(13,7,23,0)');grad.addColorStop(1,'rgba(17,7,31,.74)');
+  ctx.fillStyle=grad;ctx.fillRect(x-22,y-6,width+28,height+54);
+  if(isReady(IMG.cutin))ctx.drawImage(IMG.cutin,x,y,width,height);
+  else{
+   ctx.fillStyle='#141527';ctx.fillRect(x,y,width,height);
+   ctx.fillStyle=white;ctx.font='900 35px system-ui,sans-serif';
+   ctx.fillText('ASTRAEA // EMERGENCY DESCENT',x+25,y+height/2);
+  }
+  ctx.strokeStyle=pink;ctx.lineWidth=2;ctx.strokeRect(x,y,width,height);
+  ctx.fillStyle='#090e1dd9';ctx.fillRect(x,y+height-1,width,44);
+  ctx.fillStyle=white;ctx.font='900 21px ui-monospace,Consolas,monospace';ctx.textAlign='right';
+  ctx.fillText('ASTRAEA No.3 // EMERGENCY SORTIE',x+width-15,y+height+27,width-22);
+  ctx.restore();
  }
  if(z.flash>0&&q!=='lite'){ctx.save();ctx.globalAlpha=z.flash*.18;ctx.strokeStyle=pink;ctx.lineWidth=8;ctx.strokeRect(7,7,W-14,H-14);ctx.restore()}
 }
-window.RUU_COMPANION={VERSION:'1.15.3',reset,status,onKill,onFinalBossSpawn,tick,drawGround,drawUnits,drawFront,drawScreen,position:()=>z.allyX===null?null:{x:z.allyX,y:z.allyY}};
+window.RUU_COMPANION={VERSION:'1.16.0',reset,status,onKill,onFinalBossSpawn,tick,drawGround,drawUnits,drawFront,drawScreen,position:()=>z.allyX===null?null:{x:z.allyX,y:z.allyY}};
 })();
