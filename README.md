@@ -1,12 +1,31 @@
-# RUU//OVERRUN — PUBLIC BETA (v1.15.0)
+# RUU//OVERRUN — PUBLIC BETA (v1.15.1)
+
+## v1.15.1 — MASS-PRODUCED SUPPORT PILOT / EFFECTS UPDATE
+
+**The 25% roll now controls whether the mass-produced ASTRAL-SUIT appears at all.** The other 75% of runs have no escort, no escort shots, and no escort projectile interception. On a success, exactly one named pilot is selected uniformly (5% of all runs per pilot). This corrects the former behavior where an anonymous ASTRAL-SUIT appeared on unsuccessful rolls. **ASTRAEA No.3 remains a separate special reinforcement and can still deploy without any escort.**
+
+All five support actions now have a dedicated **color, short readable action label, geometric effects, target marks, and character-distinct WebAudio sounds** (compatible with SFX OFF). FX AUTO / HIGH / LITE scales particle counts, while danger telegraphs remain visible.
+
+| Pilot | Readable skill label | Visual feedback |
+|---|---|---|
+| Elio | ELIO / SHIELD COVER | Cyan hexagonal shield around Ruu, blue interception shards and SHIELD +8 |
+| Oz | OZ / EXECUTION MARK | Magenta crosshair on the chosen elite/boss, visible MARKED target, sniper beam, +11% damage window |
+| Kai | KAI / BURST ASSIST | Orange multi-ray burst, muzzle flash and CROSS-FIRE target hits |
+| Sera | SERA / SUPPORT FIELD | Silver expanding support field, SLOW marker under enemies, DRIVE +4 / FINISHER +3 text |
+| Mina | MINA / TARGET SCAN | Teal target boxes and scan lines, XP pickup tether / COLLECT feedback, INVASION BONUS label |
+
+**Intro improvement:** The existing five-person portrait atlas is displayed larger with the complete image tile rather than a face-clipping rectangle. The entry panel explicitly says **「星屑の鎧 - Guardian Genome - から参戦」** above the selected pilot's name. The original portrait sheet is still the canonical reference, and the escort continues to run in from the right. The cinematic portrait illustrations generated for preview are not yet stored as separate game files; this update enlarges the current in-game atlas.
+
+Gameplay numbers and mode restrictions from v1.15.0 are otherwise unchanged. Only presentation and the escort-presence probability were corrected. No Cloudflare migration is needed.
+
 
 ## v1.15.0 — MASS-PRODUCED SUPPORT PILOT
 
 **A one-time 25% reinforcement roll at the start of every NORMAL, ENDLESS, or CHALLENGE run.**
 If successful, one of the five Guardian Genome / 18th-generation pilots is selected uniformly
 (**5% probability per named pilot across all runs**). This is an in-game crossover appearance
-and does not change the original story's character status. The other **75%** of runs retain
-the existing anonymous mass-produced ASTRAL-SUIT escort with no special pilot.
+and does not change the original story's character status. The other **75%** of runs have **no mass-produced ASTRAL-SUIT escort**.
+(For release history: this corrects the initial v1.15.0 anonymous-escort behavior.)
 
 **Arrival cinematic:** ~0.95s after game start, a named pilot portrait appears in the
 **right-side cut-in lane**, under the upper HUD. Their mass-produced ASTRAL-SUIT then
