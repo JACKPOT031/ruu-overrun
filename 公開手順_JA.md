@@ -1,4 +1,19 @@
-# RUU//OVERRUN — GitHub公開手順（v1.6.0 PUBLIC BETA）
+# RUU//OVERRUN — GitHub公開・更新手順（v1.12.0 PUBLIC BETA）
+
+## 既存の公開環境を更新する場合（v1.12.0）
+
+- 更新するのは **GitHub の `main` ブランチ** のゲームコード。GitHub Pages が `main/(root)` 公開設定なら、通常は変更後に自動反映されます。
+- 新しい `devora-mutation.js` は **必須ファイル**。`index.html`、`visual-overdrive.js`、`premium-overdrive.js` などと同じリポジトリ直下に置きます。
+- 敵の変異（FRENZY / OVERLOAD / FRACTURE / BULWARK）、ボス第二形態（HP55%以下）、新しい撃破演出はゲーム側の更新だけで有効です。
+- **v1.12.0のためのCloudflare D1 / Workerの追加更新は不要**です。2026-11-22にv1.11.0のランキングマイグレーションを済ませているため、既存のNORMAL/ENDLESSランキングをそのまま使います。
+- 通常モード100秒、ENDLESS、16曲、JACKPOT MODE 1%、13秒無敵、53秒EDなどは継続。
+- 変更後はブラウザで `Ctrl + Shift + R` を押して強制再読み込みし、DEVORA FILESに変異4系統の説明が現れるか確認してください。
+- 不具合時は GitHub の変更履歴から `index.html` と `devora-mutation.js` の整合する版に戻してください。
+
+---
+
+## 新規に公開する場合（初回向け手順）
+
 
 ## まずは「URLで誰でも遊べる」状態へ
 
