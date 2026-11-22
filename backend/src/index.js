@@ -76,7 +76,7 @@ export default {
       if(Array.from(title).length>24||/[<>\x00-\x1F\x7F]/.test(title))return json({error:'Invalid achievement title'},400);
       const {score,kills,level,timeSeconds,won}=data;
       if (!validInt(score,0,500000000) || !validInt(kills,0,100000) ||
-          !validInt(level,1,1000) || !validInt(timeSeconds,mode==='endless'?100:0,mode==='endless'?43200:1000) ||
+          !validInt(level,1,1000) || !validInt(timeSeconds,0,mode==='endless'?43200:1000) ||
           typeof won!=='boolean' || (mode==='normal' && won && timeSeconds<99) || (mode==='endless' && won)) {
         return json({error:'Invalid game result'},400);
       }
