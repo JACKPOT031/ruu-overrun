@@ -105,7 +105,7 @@ function activateEmergency(g,api,q='auto'){
 }
 function hitAssist(e,dmg,api){
  if(!e||e.hp<=0||!api?.hit)return;
- if(e.kind==='boss'||e.kind==='final'){
+ if(e.kind==='boss'||e.kind==='final'||e.trueDevora){
   // Per-boss cap: at most 28% of max HP from ASTRAEA, never a lethal blow.
   dmg=Math.max(0,Math.min(dmg,e.maxHp*.28-(e.astraeaAssistDamage||0),e.hp-1));
   e.astraeaAssistDamage=(e.astraeaAssistDamage||0)+dmg;
@@ -114,7 +114,7 @@ function hitAssist(e,dmg,api){
 }
 function fireSuit(g,api,q){
  const e=targetList(g,z.allyX,z.allyY,520,1)[0];if(!e)return;
- const pilot=window.RUU_PILOTS,base=clamp(8.5+(g.level||1)*.48,9,15.5)*(e.kind==='boss'||e.kind==='final'?.6:1);
+ const pilot=window.RUU_PILOTS,base=clamp(8.5+(g.level||1)*.48,9,15.5)*(e.kind==='boss'||e.kind==='final'||e.trueDevora?.6:1);
  const color=pilot?.shotColor?.()||gold,rapid=pilot?.isKai?.()===true;
  const hits=rapid?2:1,damage=rapid?base*.70:base;
  for(let n=0;n<hits;n++)api?.hit?.(e,damage,color);
@@ -139,7 +139,7 @@ function burstAstraea(g,api,q){
  z.flightFace=primary.x>=z.astraX?1:-1;
  const gunX=z.astraX+z.flightFace*55,gunY=z.astraY+10;
  for(const [i,e] of enemies.entries()){
-  const amount=e.kind==='boss'||e.kind==='final'?27:42+(g.level||1)*1.12;
+  const amount=e.kind==='boss'||e.kind==='final'||e.trueDevora?27:42+(g.level||1)*1.12;
   hitAssist(e,amount,api);
   fxLine(gunX,gunY,e.x,e.y,pink,i===0?9:5.2,.35);
   fxLine(gunX,gunY,e.x,e.y,white,i===0?3.2:2.1,.16);
@@ -155,7 +155,7 @@ function finalAstraea(g,api,q){
  z.finished=true;const p=g.player,range=365;
  for(const e of g.enemies){
   if(e.hp<=0||(e.x-p.x)**2+(e.y-p.y)**2>(range+e.r)**2)continue;
-  hitAssist(e,e.kind==='final'||e.kind==='boss'?105:100+(g.level||1)*4,api);
+  hitAssist(e,e.kind==='final'||e.kind==='boss'||e.trueDevora?105:100+(g.level||1)*4,api);
  }
  for(let i=0;i<8;i++){const a=i*PI/8;fxLine(p.x,p.y,p.x+Math.cos(a)*295,p.y+Math.sin(a)*295,white,6,.52)}
  api?.wave?.(p.x,p.y,range,pink);api?.burst?.(p.x,p.y,pink,45,300);
