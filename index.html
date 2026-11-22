@@ -1158,14 +1158,15 @@ function rollRareChoice(choices){
  }
  function chooseUpgrades(){
    let p=g.player,poss=upgrades.filter(u=>u.id==='heal'?p.hp<p.maxHp*.75:(p.mods[u.id]||0)<u.max);
-   if(p.mods.pulse>=3&&p.mods.orbit>=2&&!g.evolved)poss.push({id:'evolve',name:'Ø / 零環覚醒',desc:'ネオン・バラージ×ヘル・ハロー。追尾主砲が覚醒。',type:'EVOLUTION',max:1});
+   for(const fusion of window.RUU_EXPANSION?.eligible(p.mods,g.fusions)||[])poss.push(fusion);
+    if(p.mods.pulse>=3&&p.mods.orbit>=2&&!g.evolved)poss.push({id:'evolve',name:'Ø / 零環覚醒',desc:'ネオン・バラージ×ヘル・ハロー。追尾主砲が覚醒。',type:'EVOLUTION',max:1});
    if(p.mods.meteor>=3&&p.mods.well>=2&&!g.evoGravity)poss.push({id:'evoGravity',name:'星界崩壊',desc:'墜星雨×零界重力渦。隕石の爆発範囲と威力が拡大。',type:'EVOLUTION',max:1});
    if(p.mods.prism>=3&&p.mods.frost>=2&&!g.evoPrism)poss.push({id:'evoPrism',name:'氷光万華鏡',desc:'虹彩光槍×氷晶散華。光槍が強化され敵を氷結。',type:'EVOLUTION',max:1});
     if(p.mods.satellite>=3&&p.mods.rail>=2&&!g.evoSat)poss.push({id:'evoSat',name:'天穹崩撃',desc:'天蓋衛星砲×レールブレイカー。衛星砲の火力と本数を増幅。',type:'EVOLUTION',max:1});
     if(p.mods.rift>=3&&p.mods.prism>=2&&!g.evoRift)poss.push({id:'evoRift',name:'虚空裂華',desc:'裂界スラッシャー×虹彩光槍。斬撃が増え、光刃が拡大。',type:'EVOLUTION',max:1});
     if(p.mods.fireworks>=3&&p.mods.sonic>=2&&!g.evoBloom)poss.push({id:'evoBloom',name:'星爆大祭',desc:'超新星ファイアワークス×音圧ディストーション。爆発範囲と威力を増幅。',type:'EVOLUTION',max:1});
    let choices=[];
-   for(const special of ['evolve','evoGravity','evoPrism','evoSat','evoRift','evoBloom']){
+   for(const special of [...(window.RUU_EXPANSION?.fusions.map(f=>f.id)||[]),'evolve','evoGravity','evoPrism','evoSat','evoRift','evoBloom']){
      const u=poss.find(x=>x.id===special);if(u&&choices.length<2){choices.push(u);poss=poss.filter(x=>x!==u)}
    }
    while(choices.length<3&&poss.length){
@@ -1187,8 +1188,8 @@ function rollRareChoice(choices){
    const cards=g.levelChoices.map((u,i)=>{
      const lvl=g.player.mods[u.id]||0,boost=Math.max(1,u.bonus||1),newLvl=Math.min(u.max||99,lvl+boost);
      const label=u.type==='JACKPOT_MODE'?'★ 3.0% JACKPOT MODE':u.rarity==='mythic'?'✹ MYTHIC +4':u.rarity==='legendary'?'✦ JACKPOT +3':u.rarity==='rare'?'✧ RARE +2':'';
-     const foot=u.type==='JACKPOT_MODE'?'13s INVINCIBLE / EXCLUSIVE TRACK':u.type==='EVOLUTION'?'ULTIMATE EVOLUTION':u.id==='heal'?'INSTANT RESTORE':`LV ${lvl} → ${newLvl} ${boost>1?' / MULTI LEVEL':''}`;
-     return `<button class="upgrade-card ${u.type==='EVOLUTION'?'special':''} ${u.type==='JACKPOT_MODE'?'jackpot-special':''} ${u.rarity==='rare'?'rare':u.rarity==='legendary'?'legendary':u.rarity==='mythic'?'mythic':''}" data-i="${i}" aria-label="${u.name}${boost>1?' '+boost+'段階強化':''} を選ぶ"><span class="card-num">[${i+1}]</span>${label?`<span class="rarity-label">${label}</span>`:''}<div class="card-ico" style="color:${u.type==='JACKPOT_MODE'?'#ffe5aa':u.rarity==='mythic'?'#ffb2ff':u.rarity==='legendary'?'#ffe2a4':u.rarity==='rare'?'#9cdfff':u.type==='EVOLUTION'?'#ffeaa6':'#8effee'}">${u.type==='JACKPOT_MODE'?'★':icon[u.id]}</div><div class="card-type">${u.type}</div><div class="card-name">${u.name}</div><div class="card-text">${u.desc}</div><div class="card-foot">${foot}</div></button>`;
+     const foot=u.type==='JACKPOT_MODE'?'13s INVINCIBLE / EXCLUSIVE TRACK':u.type==='EVOLUTION'?'ULTIMATE EVOLUTION':u.type==='FUSION'?'COMPOSITE FINISHER':u.id==='heal'?'INSTANT RESTORE':`LV ${lvl} → ${newLvl} ${boost>1?' / MULTI LEVEL':''}`;
+     return `<button class="upgrade-card ${u.type==='EVOLUTION'||u.type==='FUSION'?'special':''} ${u.type==='JACKPOT_MODE'?'jackpot-special':''} ${u.rarity==='rare'?'rare':u.rarity==='legendary'?'legendary':u.rarity==='mythic'?'mythic':''}" data-i="${i}" aria-label="${u.name}${boost>1?' '+boost+'段階強化':''} を選ぶ"><span class="card-num">[${i+1}]</span>${label?`<span class="rarity-label">${label}</span>`:''}<div class="card-ico" style="color:${u.type==='JACKPOT_MODE'?'#ffe5aa':u.rarity==='mythic'?'#ffb2ff':u.rarity==='legendary'?'#ffe2a4':u.rarity==='rare'?'#9cdfff':u.type==='EVOLUTION'||u.type==='FUSION'?'#ffeaa6':'#8effee'}">${u.type==='JACKPOT_MODE'?'★':u.type==='FUSION'?'✥':icon[u.id]}</div><div class="card-type">${u.type}</div><div class="card-name">${u.name}</div><div class="card-text">${u.desc}</div><div class="card-foot">${foot}</div></button>`;
    }).join('');
    const anyRare=g.levelChoices.some(u=>u.bonus>1||u.type==='JACKPOT_MODE');
    setOverlay(`<div class="lv-panel"><div class="lv-eyebrow">${anyRare?'RARE SIGNAL DETECTED // BONUS UPGRADE':'RESONANCE FOUND // SELECT YOUR PATH'}</div><h2 class="lv-title">LEVEL UP! <span style="color:#a7f7ff;font-size:.56em">LV.${String(g.level).padStart(2,'0')}</span></h2><p class="lv-desc">3択から選択 / キー1・2・3　<span class="rarity-guide">RARE +2 15% / JACKPOT +3 3% / MYTHIC +4 1% / JACKPOT MODE 3.0%</span></p><div class="cards">${cards}</div><div class="reroll-row"><button id="rerollBtn" class="reroll-btn" ${g.rerolls<=0?'disabled':''}>⟳ REROLL / 残り ${g.rerolls}</button><span class="reroll-note">選択肢を引き直す・Rキー / BGMは継続</span></div></div>`);
@@ -1203,6 +1204,10 @@ function rollRareChoice(choices){
    const u=g.levelChoices[index];if(!u)return;
    const p=g.player,bonus=Math.max(1,u.bonus||1),jackpotChoice=u.type==='JACKPOT_MODE'?u.jackpotType:-1;
    if(u.type==='JACKPOT_MODE'){g.jackpotCount++}
+   else if(u.type==='FUSION'){
+     const f=window.RUU_EXPANSION?.activate(g,u.id);
+     if(f){awardAchievement('fusion');g.shake=18;g.flash=.50;shockwave(p.x,p.y,300,f.color);toast('FUSION AWAKENED // '+f.name,true)}
+   }
    else if(u.id==='heal')p.hp=Math.min(p.maxHp,p.hp+40);
    else if(u.type==='EVOLUTION'){
      if(u.id==='evolve')g.evolved=true;
@@ -1231,7 +1236,7 @@ function rollRareChoice(choices){
        toast(`${steps>=4?'MYTHIC':steps>=3?'JACKPOT':'RARE'} UPGRADE // ${u.name} +${steps}`,true);
      }
    }
-   sfx(u.type==='JACKPOT_MODE'?'jackpot':u.type==='EVOLUTION'?'evolve':bonus>=4?'mythic':bonus>=3?'jackpot':bonus>=2?'rare':'select');
+   sfx(u.type==='JACKPOT_MODE'?'jackpot':u.type==='EVOLUTION'||u.type==='FUSION'?'evolve':bonus>=4?'mythic':bonus>=3?'jackpot':bonus>=2?'rare':'select');
    state='playing';hideOverlay();
    if(jackpotChoice>=0)activateJackpot(jackpotChoice);
    if(musicStarted&&soundOn&&!activeMusic().paused)musicOnScreen();
@@ -1837,7 +1842,9 @@ function rollRareChoice(choices){
  if(g.time>32&&g.phase===1){g.phase=2;g.stageBlend=2.2;g.stageReveal=2.4;g.sceneShift=2.45;g.scenePulse=.9;toast('PHASE 02 // CHROMA MAUSOLEUM',true)}if(g.time>56&&!g.hexAnnounced){g.hexAnnounced=true;toast('DEVORA SIGNAL // HEX CHOIR',true)}if(g.time>75&&g.phase===2){g.phase=3;g.stageBlend=2.2;g.stageReveal=2.4;g.sceneShift=2.45;g.scenePulse=.9;toast('PHASE 03 // NULL CATHEDRAL',true)}
  updateAutoMix();updateV06Rewards(dt);advanceFx(dt);g.shotT-=dt;if(g.shotT<=0){g.shotT+=clamp(.49/p.haste, .16,.75);attackPulse()}
  g.lightT-=dt;if(g.lightT<=0&&p.mods.lightning){g.lightT=clamp(2.3/p.haste, .45,2.5);strikeLightning()}
- updateNewWeapons(dt);applyNova(dt);updateFinisher(dt);updateJackpot(dt);for(let e of g.enemies){e.t+=dt;e.attack=Math.max(0,e.attack-dt);e.shoot-=dt;e.orbCd=Math.max(0,e.orbCd-dt);e.slow=Math.max(0,e.slow-dt);e.flash=Math.max(0,e.flash-dt);if(e.hp<=0)continue;let dx=p.x-e.x,dy=p.y-e.y,n=norm(dx,dy),d=Math.hypot(dx,dy);let step=e.speed*(e.slow>0?.56:1),mvX=n.x,mvY=n.y;
+ updateNewWeapons(dt);applyNova(dt);updateFinisher(dt);updateJackpot(dt);
+  window.RUU_EXPANSION?.fusionStep(dt,g,{hit:(e,d,c)=>applyDamage(e,d,0,0,c),wave:(x,y,r,c)=>shockwave(x,y,r,c),sound:name=>sfx(name)},fxPreset);
+  for(let e of g.enemies){e.t+=dt;e.attack=Math.max(0,e.attack-dt);e.shoot-=dt;e.orbCd=Math.max(0,e.orbCd-dt);e.slow=Math.max(0,e.slow-dt);e.flash=Math.max(0,e.flash-dt);if(e.hp<=0)continue;let dx=p.x-e.x,dy=p.y-e.y,n=norm(dx,dy),d=Math.hypot(dx,dy);let step=e.speed*(e.slow>0?.56:1),mvX=n.x,mvY=n.y;
  if(e.kind==='runner'&&d<205)step*=1.12;
  if((e.kind==='caster'||e.kind==='hex')&&!e.elite){
    if(d<195){mvX=-n.x*.56;mvY=-n.y*.56}
