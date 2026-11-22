@@ -1,4 +1,44 @@
-# RUU//OVERRUN — PUBLIC BETA (v1.18.0)
+# RUU//OVERRUN — PUBLIC BETA (v1.19.0)
+
+## v1.19.0 — TRUE END / DEVORA COLLECTIVE APOCALYPSE
+
+### New mission and launch copy
+
+- Removed the specific **100-second** promise from the start screen. The new English tagline is **SURVIVE THE SWARM. BREAK THE THREAT.**
+- Japanese launch text now reads: **「移動で自動攻撃。敵を倒して、武器を強化。押し寄せる侵食を生き抜き、最後の脅威を撃ち砕け。」**
+- The description explicitly mentions occasional guest support from **『星屑の鎧 -Guardian Genome-』** characters. Their original support lottery remains 25%.
+
+### More colossal PHASE III
+
+- DEVORA and NULL EMPEROR PHASE III artworks are **another 20% larger** than in v1.18.0: phase-three display multiplier is 1.536× the pre-transformation sprite size. Collision radius is approximately 10% larger than the v1.18 PHASE III radius (1.17×1.10 relative to pre-transformation). Existing telegraphed attacks and on-transition grace remain.
+
+### FALSE ENDING → TRUE FINAL BOSS
+
+- When the **final NULL EMPEROR is defeated**, the boss-break cinematic runs as before, **but a victory is not granted yet**. Instead, 3 individually hostile **DEVORA TRUE FORM** bosses materialize. One 10% random draw upgrades the encounter to **5 simultaneously active bosses**.
+- Both counts receive distinct and optimized in-game cut-in illustrations: `assets/devora_true_end_three.webp` and `assets/devora_true_end_five.webp`. The 5-boss cut-in has a separate **EXTINCTION PROTOCOL** visual treatment, more intense magenta-red vignetting, screen-edge corruption and extra glitch scan lines. The whole cinematic lasts about **2.65 seconds**, with temporary player protection and a clear attack warning.
+- Every true DEVORA is a **real enemy with its own hit points and AI**, visually about **twice Ruu's sprite height** (288 logical px vs Ruu's 144 px), not an ornamental summon. The three base roles are **HUNTER** (aggressive pursuit), **ORACLE** (targeted precision fan), and **SIEGE** (radial blockade with gaps). In rare five-boss encounters, **FRACTURE** (multi-angle spread) and **REAPER** (fast aimed fan) join. Each uses visible charging telegraphs rather than unavoidable instant hits.
+- Individual core HP scales with game level (base **555 + 23×level**, with a small role multiplier). All true DEVORA additionally take **26% less incoming damage**. Attack timers are independent, so several bosses may coordinate naturally without a forced synchronized unavoidable wave. Global hostile projectile caps remain in force.
+- A dedicated **DEVORA TRUE FORM ×3 / ×5 health meter** displays the collective remaining HP plus **cores remaining**; each true boss also has its own nameplate and personal HP bar. Defeated cores stay defeated.
+- The final victory and original ending require **defeating every true boss**, in addition to having already defeated NULL EMPEROR and satisfying the existing minimum survival time. Challenge runs also inherit this final-clear requirement. ENDLESS remains endless.
+- ASTRAEA's original **28%-per-boss max-HP cap and nonlethal limit** now apply to true DEVORA too. Support pilot Oz prioritizes them as bosses. No automatic ally buff, additional heal or rescue is introduced.
+- If a final boss is defeated while TRUE END is already in progress in ENDLESS, the TRUE END wave does not stack. Each new run resets the random draw and the encounter state.
+
+### Visuals and technical files
+
+- New `devora-true-end.js` provides the true-boss encounter, random count, projectile attacks, world telegraphs, portrait rendering, cinematic effects and completion gating.
+- New `assets/devora_true_end_three.webp` and `assets/devora_true_end_five.webp` provide distinct 3- and 5-boss imagery. Existing devora-mutation/PHASE III/swarm scripts remain.
+- `index.html` now updates result routing, HUD health bar and launch text; its true-boss world model uses the existing DEVORA official enemy illustration, with a new two-times-player scale.
+- Updated `devora-phase3.js` provides the extra +20% visual size; updated `astral-companion.js` and `support-pilots.js` preserve TRUE END boss interactions.
+
+**Preserved:** 16 BGM tracks, JACKPOT MODE 1%, 25% named mass-produced suit chance, existing ASTRAEA emergency conditions, NORMAL / ENDLESS Cloudflare leaderboard routes, CHALLENGE local-only results, all previous cinematics and the full 'さすらえば' ending. **No Cloudflare Worker/D1 migration.**
+
+### Browser testing
+
+1. Hard-refresh GitHub Pages (Ctrl+Shift+R) and confirm v1.19.0 and the new title-screen wording.
+2. Complete NULL EMPEROR and confirm the boss-break sequence transitions into a distinct DEVORA TRUE END cut-in and spawns three (or rarely five) full-size bosses. No premature victory.
+3. Verify all hostile cores have their own HP bars and independent attacks. Check the large boss HUD decreases to 0 only when the last core is defeated.
+4. Check FX LITE and HIGH and ensure attack warnings are readable during heavy-screen-corruption scenes.
+5. Re-test NORMAL victory and full ending, CHALLENGE isolation, ENDLESS, soundtrack and companion/ASTRAEA damage caps.
 
 ## v1.18.0 — SWARM OVERRUN / COLOSSUS TRANSFORMATION
 
