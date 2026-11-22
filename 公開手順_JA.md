@@ -1,4 +1,15 @@
-# RUU//OVERRUN — GitHub公開・更新手順（v1.15.2 PUBLIC BETA）
+# RUU//OVERRUN — GitHub公開・更新手順（v1.15.3 PUBLIC BETA）
+
+## v1.15.3 — GUARDIAN EMERGENCY / SUPPORT PILOT強化
+
+- 量産型ASTRAL-SUITの出現確率は引き続き25％。当たったときだけ5人のパイロットから均等抽選。**量産機なしの75％ではASTRAEAも自動発動しない**。
+- **最終ボス（NULL EMPEROR）出現時のルーのHPが最大HPの50％以下**、かつ量産機のパイロットが参戦している場合、ASTRAEA No.3の緊急出撃を予約。約1.05秒後に自動発動する。別の乱数抽選は行わない。
+- 最終ボス出現時にHPが51％以上なら、同じボス戦の途中でHPが減っても後追い発動はしない。ENDLESSの次の最終ボス出現時には改めて判定可能。ただしASTRAEA発動は1プレイ最大1回。
+- SYNCHRO 100％・75秒生存・最初のDEVORAボス撃破・Xキー／専用ボタンによる手動出撃は廃止。HUDには「GUARDIAN EMERGENCY」の状態だけ表示する。
+- ASTRAEAの12秒の支援・専用演出・一体のボスへの最大28％ダメージ上限（止めを刺さない仕様）は維持する。
+- 量産機の5人のスキル発動時は、色付きの大きな衝撃波・弾道・装甲破片・照準／解析マーク・短い右側のスキル名表示を追加。専用SEも継続。
+- 変更対象：`index.html`、`astral-companion.js`、`support-pilots.js`。READMEと本書のバージョンも合わせて更新。
+- GitHub Pages公開後に`Ctrl + Shift + R`で再読み込みし、最終ボスの出現時刻とHP判定を確認する。Cloudflare Worker / D1の再設定は不要。
 
 ## v1.15.2 — 5人の映画風カットインを正式採用
 
