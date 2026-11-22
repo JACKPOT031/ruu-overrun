@@ -115,10 +115,11 @@ body{background:radial-gradient(ellipse 80% 66% at 52% 24%,#2a2934 0%,#11131d 55
 /* v0.4 — fast rendering, separate SFX toggle and subtle performance readout */
 .control-btn#sfxToggle{border-color:#9ba99277;color:#d9f4d7}
 .control-btn#fxMode{border-color:#c6ad8b88;color:#f4deba}
-#perfHud{font:800 10px ui-monospace,Consolas,monospace;color:#a9a6a2;min-width:44px;text-align:center;font-variant-numeric:tabular-nums}
+#perfHud{font:800 10px ui-monospace,Consolas,monospace;color:#b7e8df;min-width:153px;text-align:center;font-variant-numeric:tabular-nums;white-space:nowrap}
+#perfHud.fps-low{color:#ff91a3}
 .overlay{backdrop-filter:none;-webkit-backdrop-filter:none}
 .upgrade-card,.control-btn{touch-action:manipulation}
-@media(max-width:750px){#perfHud{font-size:9px}.controls{flex-wrap:wrap}.control-group{gap:5px}}
+@media(max-width:750px){#perfHud{font-size:9px;min-width:130px}.controls{flex-wrap:wrap}.control-group{gap:5px}}
 
 
 /* v0.5 rarity and bounded effects UI */
@@ -316,7 +317,7 @@ body{background:radial-gradient(ellipse 80% 66% at 52% 24%,#2a2934 0%,#11131d 55
 </head>
 <body>
 <div class="shell">
- <div class="upper"><div class="brand">JACKPOT<b>Ø</b>31 <span style="color:#667f95">/ ORIGINAL GAMES</span></div><div class="build">RUU//OVERRUN <b>v1.19.2</b> · 16 TRACKS / SHORT ENDING</div></div>
+ <div class="upper"><div class="brand">JACKPOT<b>Ø</b>31 <span style="color:#667f95">/ ORIGINAL GAMES</span></div><div class="build">RUU//OVERRUN <b>v1.19.3</b> · 16 TRACKS / SHORT ENDING</div></div>
  <main class="frame" id="frame">
   <canvas id="game" width="1200" height="675" aria-label="ルーのサバイバルアクションゲーム"></canvas>
   <div class="hud" id="hud">
@@ -351,7 +352,7 @@ body{background:radial-gradient(ellipse 80% 66% at 52% 24%,#2a2934 0%,#11131d 55
   </section>
  </main>
  <audio id="bossTrack" preload="none" playsinline></audio>
- <footer class="controls"><div><b>MOVE</b> WASD / ↑↓←→ ・ <b>DASH</b> SPACE ・ <b>PAUSE</b> ESC ・ <b>SELECT</b> 1–3 <span style="color:#4c6979">・ <b>BGM</b> M ・ <b>TRACK</b> B ・ <b>SFX</b> N ・ <b>REROLL</b> R ・ <b>FINISHER</b> F ・ <b>ANIM</b> V ・ <b>SCENE</b> G <span style="color:#98887b">（スマホは左側ドラッグで移動）</span></span></div><div class="control-group"><button class="control-btn" id="mute" type="button">♫ BGM ON</button><button class="control-btn" id="sfxToggle" type="button">🔊 SFX ON</button><label class="soundtrack-picker">♫ SELECT <select id="trackSelect" aria-label="サウンドトラックを選択"><option value="mix">AUTO MIX / 12 BATTLE TRACKS</option><option value="0">スーパーハイパーウルトラポップ</option><option value="1">阿怒隷鳴凜</option><option value="2">シュバダンス</option><option value="3">蟲の声</option><option value="4">TattooSmokeGirl</option><option value="5">HARD NOODLE</option><option value="6">Singularity // Nishiki</option><option value="7">MEANING__INTRUDER</option><option value="8">ちゃえ</option><option value="9">Moonphase Refrain - Lyrics by 立春</option><option value="10">GENE COACH KNOW</option><option value="11">Ms. Glitch</option><option disabled>◆ JACKPOT限定：Ruu Ruu Ruu x Watching You</option><option disabled>◆ JACKPOT限定：Ruu Ruu Ruu</option><option disabled>◆ JACKPOT限定：Ruu Ruu Ruu - Watching You</option><option disabled>★ ENDING：さすらえば</option></select></label><label class="finisher-picker">✦ ULTIMATE <select id="finisherSelect" aria-label="必殺技の発動タイプを選択"><option value="cycle">AUTO / 9 SKILLS</option><option value="0">NEON CITY OVERRUN</option><option value="1">GOLDEN VERDICT</option><option value="2">NEON PANDEMONIUM</option><option value="3">INK REQUIEM</option><option value="4">SPIRAL PARADOX</option><option value="5">BLOOD VEIL REQUIEM</option><option value="6">PATTERN BREAKER</option><option value="7">NO SYNC OVERDRIVE</option><option value="8">LUNAR CLAW DIVE</option></select></label><button class="control-btn" id="retryMusic" type="button" hidden>▶ BGM 再生</button><button class="control-btn" id="animToggle" type="button" title="ルーの歩行アニメを切り替える">♟ ANIM ON</button><button class="control-btn" id="sceneToggle" type="button" title="背景の演出を切り替える">◈ SCENE DYNAMIC</button><button class="control-btn" id="fxMode" type="button">✦ FX AUTO</button><span id="perfHud" title="実際の描画フレーム数">FPS —</span><button class="control-btn" id="pauseButton" type="button" disabled>Ⅱ PAUSE</button></div></footer>
+ <footer class="controls"><div><b>MOVE</b> WASD / ↑↓←→ ・ <b>DASH</b> SPACE ・ <b>PAUSE</b> ESC ・ <b>SELECT</b> 1–3 <span style="color:#4c6979">・ <b>BGM</b> M ・ <b>TRACK</b> B ・ <b>SFX</b> N ・ <b>REROLL</b> R ・ <b>FINISHER</b> F ・ <b>ANIM</b> V ・ <b>SCENE</b> G <span style="color:#98887b">（スマホは左側ドラッグで移動）</span></span></div><div class="control-group"><button class="control-btn" id="mute" type="button">♫ BGM ON</button><button class="control-btn" id="sfxToggle" type="button">🔊 SFX ON</button><label class="soundtrack-picker">♫ SELECT <select id="trackSelect" aria-label="サウンドトラックを選択"><option value="mix">AUTO MIX / 12 BATTLE TRACKS</option><option value="0">スーパーハイパーウルトラポップ</option><option value="1">阿怒隷鳴凜</option><option value="2">シュバダンス</option><option value="3">蟲の声</option><option value="4">TattooSmokeGirl</option><option value="5">HARD NOODLE</option><option value="6">Singularity // Nishiki</option><option value="7">MEANING__INTRUDER</option><option value="8">ちゃえ</option><option value="9">Moonphase Refrain - Lyrics by 立春</option><option value="10">GENE COACH KNOW</option><option value="11">Ms. Glitch</option><option disabled>◆ JACKPOT限定：Ruu Ruu Ruu x Watching You</option><option disabled>◆ JACKPOT限定：Ruu Ruu Ruu</option><option disabled>◆ JACKPOT限定：Ruu Ruu Ruu - Watching You</option><option disabled>★ ENDING：さすらえば</option></select></label><label class="finisher-picker">✦ ULTIMATE <select id="finisherSelect" aria-label="必殺技の発動タイプを選択"><option value="cycle">AUTO / 9 SKILLS</option><option value="0">NEON CITY OVERRUN</option><option value="1">GOLDEN VERDICT</option><option value="2">NEON PANDEMONIUM</option><option value="3">INK REQUIEM</option><option value="4">SPIRAL PARADOX</option><option value="5">BLOOD VEIL REQUIEM</option><option value="6">PATTERN BREAKER</option><option value="7">NO SYNC OVERDRIVE</option><option value="8">LUNAR CLAW DIVE</option></select></label><button class="control-btn" id="retryMusic" type="button" hidden>▶ BGM 再生</button><button class="control-btn" id="animToggle" type="button" title="ルーの歩行アニメを切り替える">♟ ANIM ON</button><button class="control-btn" id="sceneToggle" type="button" title="背景の演出を切り替える">◈ SCENE DYNAMIC</button><button class="control-btn" id="fxMode" type="button">✦ FX AUTO</button><span id="perfHud" title="実測描画FPS（直近約1.5秒平均）とCPU描画時間">FPS —</span><button class="control-btn" id="pauseButton" type="button" disabled>Ⅱ PAUSE</button></div></footer>
 </div>
 <script src="leaderboard-config.js"></script>
 <script src="visual-overdrive.js"></script>
@@ -498,6 +499,30 @@ const WALK_ATLAS=new Image();WALK_ATLAS.src='assets/ruu_walk_atlas.webp';
  // AUTO quality adapts to GPU load instead of defaulting to blurry 72% pixels.
  let fxPreset='auto',fxMax=false,renderScale=1,renderInterval=1000/30,autoQuality=1;
  let lastPaint=0,lastPaintState='',paintCount=0,paintTotalMs=0,perfTick=performance.now(),lastFxHit=0;
+ // v1.19.3: Count completed canvas draws against actual rAF timestamps,
+ // not an assumed display refresh rate or the selected FPS cap.
+ const fpsSamples=[];
+ let lastFpsFrame=0,lastFpsUpdate=0,lastFpsState='';
+ function resetFpsMeter(){
+   fpsSamples.length=0;lastFpsFrame=0;lastFpsUpdate=0;
+   perfHud.textContent='FPS —';perfHud.classList.remove('fps-low');
+ }
+ function recordFpsSample(timestamp,drawMs){
+   // Foreground resumes and long browser stalls start a fresh observation window.
+   if(lastFpsFrame&&timestamp-lastFpsFrame>650)fpsSamples.length=0;
+   lastFpsFrame=timestamp;
+   fpsSamples.push({t:timestamp,ms:drawMs});
+   while(fpsSamples.length>2&&fpsSamples[0].t<timestamp-1500)fpsSamples.shift();
+   if(timestamp-lastFpsUpdate<350)return;
+   lastFpsUpdate=timestamp;
+   const sampleMs=fpsSamples.length>1?timestamp-fpsSamples[0].t:0;
+   const actualFps=sampleMs>=450?(fpsSamples.length-1)*1000/sampleMs:0;
+   if(actualFps<=0){perfHud.textContent='FPS 計測中…';perfHud.classList.remove('fps-low');return}
+   const avgDraw=fpsSamples.reduce((sum,v)=>sum+v.ms,0)/fpsSamples.length;
+   perfHud.textContent='FPS '+actualFps.toFixed(1)+' | DRAW '+avgDraw.toFixed(1)+'ms';
+   perfHud.classList.toggle('fps-low',actualFps<22);
+   perfHud.title='実測Canvas描画FPS（直近約1.5秒の描画間隔）/ DRAW: 1フレームの平均CPU描画時間。FX '+fxPreset.toUpperCase()+' / '+c.width+'×'+c.height+'px';
+ }
  function syncCanvasResolution(){
    const rect=c.getBoundingClientRect();
    const cssScale=Math.max((rect.width||W)/W,(rect.height||H)/H);
@@ -727,7 +752,7 @@ const WALK_ATLAS=new Image();WALK_ATLAS.src='assets/ruu_walk_atlas.webp';
  endingDom.progress.addEventListener('keydown',ev=>{if(ev.key==='ArrowRight'){ev.preventDefault();seekEnding(endingClock()+5)}else if(ev.key==='ArrowLeft'){ev.preventDefault();seekEnding(endingClock()-5)}});
  musicEls[ENDING_TRACK_INDEX].addEventListener('ended',()=>{if(state==='ending')finishEndingCinema()});
 
- function showStart(){state='start';ui.hud.style.display='none';ui.pause.disabled=true;musicIndicator.classList.remove('visible');musicMeter.classList.remove('visible');showMusicRetry(false);bossAlert.classList.remove('active');const best=getBest();const endlessBest=getBest('endless');setOverlay(`<div class="menu-grid"><div class="menu-copy"><div class="menu-tick">JACKPOT<strong>Ø</strong>31 / ORIGINAL GAME <span style="color:#dcc2a2">— v1.19.0 PUBLIC BETA</span></div><h1 class="menu-logo"><span class="ruu">RUU</span><span class="slashes">//</span>OVERRUN</h1><div class="menu-nameplate">SURVIVE THE SWARM. BREAK THE THREAT.</div><div class="menu-separator"></div><p class="menu-intro">移動で自動攻撃。敵を倒して、武器を強化。<br><strong>押し寄せる侵食を生き抜き、最後の脅威を撃ち砕け。</strong><br><span style="color:#ddb2cc;font-size:.79em">一定確率で『星屑の鎧 -Guardian Genome-』のキャラクターが参戦。</span></p><div class="start-row"><button class="primary" id="startBtn" type="button">▶ START // DEPLOY  ·  ENTER</button><button class="enemy-archive-btn" id="enemyArchive" type="button">☷ DEVORA FILES</button><button class="enemy-archive-btn" id="achievementsBtn" type="button">✧ ACHIEVEMENTS</button>${endingUnlocked()?`<button class="enemy-archive-btn" id="challengeBtn" type="button">✦ CHALLENGE MISSIONS</button><button class="enemy-archive-btn" id="endlessBtn" type="button" title="クリア後解放 / 自己ベスト ${endlessBest?.score||0}">∞ ENDLESS MODE</button>`:``}${endingUnlocked()?`<button class="enemy-archive-btn" id="endingTheater" type="button">♫ ENDING THEATER</button>`:``}<div class="run-record">PERSONAL BEST<strong>${best?best.score.toLocaleString('ja-JP'):'— — —'}</strong></div></div><div class="menu-controls"><span class="key">WASD / ↑↓←→</span> MOVE　<span class="key">SPACE</span> DASH　<span class="key">1–3</span> UPGRADE　<span class="key">ESC</span> PAUSE</div></div><div class="hero-figure" id="heroArt"><div class="hero-hint">RUU / CHARACTER DATA</div></div></div>`);setupTitleGallery();const unlockBtn=document.getElementById('endingTheater');if(unlockBtn)unlockBtn.onclick=()=>startEndingCinema(true);document.getElementById('startBtn').addEventListener('click',()=>{try{startGame()}catch(e){console.error(e);const btn=document.getElementById('startBtn');if(btn){btn.textContent='START エラー — ENTER / 再読込';btn.title=String(e)}}});document.getElementById('enemyArchive').addEventListener('click',showDevoraFiles);document.getElementById('achievementsBtn').onclick=showAchievementArchive;const challengeBtn=document.getElementById('challengeBtn');if(challengeBtn)challengeBtn.onclick=showChallengeArchive;const endlessBtn=document.getElementById('endlessBtn');if(endlessBtn)endlessBtn.onclick=()=>startGame('endless')}
+ function showStart(){state='start';ui.hud.style.display='none';ui.pause.disabled=true;musicIndicator.classList.remove('visible');musicMeter.classList.remove('visible');showMusicRetry(false);bossAlert.classList.remove('active');const best=getBest();const endlessBest=getBest('endless');setOverlay(`<div class="menu-grid"><div class="menu-copy"><div class="menu-tick">JACKPOT<strong>Ø</strong>31 / ORIGINAL GAME <span style="color:#dcc2a2">— v1.19.3 PUBLIC BETA</span></div><h1 class="menu-logo"><span class="ruu">RUU</span><span class="slashes">//</span>OVERRUN</h1><div class="menu-nameplate">SURVIVE THE SWARM. BREAK THE THREAT.</div><div class="menu-separator"></div><p class="menu-intro">移動で自動攻撃。敵を倒して、武器を強化。<br><strong>押し寄せる侵食を生き抜き、最後の脅威を撃ち砕け。</strong><br><span style="color:#ddb2cc;font-size:.79em">一定確率で『星屑の鎧 -Guardian Genome-』のキャラクターが参戦。</span></p><div class="start-row"><button class="primary" id="startBtn" type="button">▶ START // DEPLOY  ·  ENTER</button><button class="enemy-archive-btn" id="enemyArchive" type="button">☷ DEVORA FILES</button><button class="enemy-archive-btn" id="achievementsBtn" type="button">✧ ACHIEVEMENTS</button>${endingUnlocked()?`<button class="enemy-archive-btn" id="challengeBtn" type="button">✦ CHALLENGE MISSIONS</button><button class="enemy-archive-btn" id="endlessBtn" type="button" title="クリア後解放 / 自己ベスト ${endlessBest?.score||0}">∞ ENDLESS MODE</button>`:``}${endingUnlocked()?`<button class="enemy-archive-btn" id="endingTheater" type="button">♫ ENDING THEATER</button>`:``}<div class="run-record">PERSONAL BEST<strong>${best?best.score.toLocaleString('ja-JP'):'— — —'}</strong></div></div><div class="menu-controls"><span class="key">WASD / ↑↓←→</span> MOVE　<span class="key">SPACE</span> DASH　<span class="key">1–3</span> UPGRADE　<span class="key">ESC</span> PAUSE</div></div><div class="hero-figure" id="heroArt"><div class="hero-hint">RUU / CHARACTER DATA</div></div></div>`);setupTitleGallery();const unlockBtn=document.getElementById('endingTheater');if(unlockBtn)unlockBtn.onclick=()=>startEndingCinema(true);document.getElementById('startBtn').addEventListener('click',()=>{try{startGame()}catch(e){console.error(e);const btn=document.getElementById('startBtn');if(btn){btn.textContent='START エラー — ENTER / 再読込';btn.title=String(e)}}});document.getElementById('enemyArchive').addEventListener('click',showDevoraFiles);document.getElementById('achievementsBtn').onclick=showAchievementArchive;const challengeBtn=document.getElementById('challengeBtn');if(challengeBtn)challengeBtn.onclick=showChallengeArchive;const endlessBtn=document.getElementById('endlessBtn');if(endlessBtn)endlessBtn.onclick=()=>startGame('endless')}
  function resetGame(){g={time:0,kills:0,level:1,rareFinds:0,combo:0,comboTimer:0,comboMilestones:0,stageBlend:0,stageReveal:0,scenePulse:0,sceneUlt:0,sceneBoss:0,sceneShift:0,crates:0,rerolls:2,mythicFinds:0,driveGauge:0,driveTime:0,finisherGauge:0,finisherTime:0,finisherPulse:0,finisherCooldown:0,finisherType:0,finisherCursor:0,finisherCount:0,finisherHits:0,finisherChain:0,signatureFx:[],jackpotTime:0,jackpotIntro:0,jackpotPulse:0,jackpotType:-1,jackpotCount:0,jackpotFx:[],jackpotResumeIndex:0,cutin:0,elites:0,elite1:false,elite2:false,xp:0,need:26,spawnT:0,shotT:.1,novaT:0,lightT:0,meteorT:1.4,railT:1.7,frostT:1.1,wellT:2.4,missileT:1.3,sonicT:1.6,prismT:2.3,shardT:1.3,satelliteT:2.0,riftT:2.2,fireworksT:1.7,crossT:2.6,beat:0,flash:0,shake:0,boss1:false,boss2:false,evolved:false,finalBossDead:false,trueEndPending:false,trueEndCleared:false,trueEndCount:0,trueEndRemaining:0,phase:1,score:0,levelChoices:[],enemies:[],bullets:[],ebullets:[],gems:[],particles:[],texts:[],waves:[],lightningFx:[],shards:[],impacts:[],ghosts:[],muzzle:[],meteors:[],wells:[],missiles:[],weaponFx:[],chests:[],crystals:[],evoGravity:false,evoPrism:false,evoSat:false,evoRift:false,evoBloom:false,hexAnnounced:false,fxPulse:0,fxBeat:0,ghostClock:0,player:{x:0,y:0,px:0,py:0,r:20,hp:115,maxHp:115,shield:0,maxShield:0,inv:0,speed:208,damage:13,haste:1,magnet:110,crit:0,dash:0,dashRemain:0,dashX:0,dashY:0,face:1,dir:'down',isMoving:false,hexSlow:0,animPhase:0,wasMoving:false,mods:{pulse:1,orbit:0,nova:0,lightning:0,meteor:0,rail:0,frost:0,well:0,missile:0,sonic:0,prism:0,shard:0,satellite:0,rift:0,fireworks:0,cross:0,echo:0,crit:0,damage:0,haste:0,speed:0,magnet:0,vital:0,shield:0}}};window.RUU_SPECTACLE?.reset();window.RUU_PREMIUM?.reset();window.RUU_MUTATION?.reset();window.RUU_PHASE3?.reset();window.RUU_SWARM?.reset();window.RUU_TRUE_END?.reset();window.RUU_COMPANION?.reset();keys.clear();joy.active=false}
  function startGame(mode='normal',challengeId=''){
    if(endingState){endingState=null;endingDom.pane.hidden=true;}
@@ -2546,7 +2571,7 @@ ui.healthFill.style.width=`${100*p.hp/p.maxHp}%`;ui.healthText.textContent=`${Ma
  retryMusic.addEventListener('click',()=>{musicStarted=true;soundOn=true;ui.mute.textContent='♫ BGM ON';if(state==='ending'){playEndingSong(false)}else resumeStageMusic();try{ensureAudio()}catch(e){}});
  function setFxPreset(next){
    fxPreset=next;fxMax=next==='high';
-   autoQuality=1;
+   autoQuality=1;resetFpsMeter();
    renderInterval=1000/(next==='high'?40:next==='lite'?26:30);
    fxMode.textContent=next==='auto'?'✦ FX AUTO':next==='high'?'✦ FX HIGH':'✧ FX LITE';
    syncCanvasResolution();lastPaint=0;
@@ -2661,18 +2686,22 @@ ui.healthFill.style.width=`${100*p.hp/p.maxHp}%`;ui.healthText.textContent=`${Ma
  function loop(now){
    const dt=Math.min(Math.max(0,(now-last)/1000),.048);last=now;
    if(state==='playing'){if(g?.impactFreeze>0)g.impactFreeze=Math.max(0,g.impactFreeze-dt);else update(dt);}if(state==='bossbreak')updateBossBreak(dt);if(state==='dying')updateDeathSequence(dt);if(state==='ending')updateEndingCinema(now);if(musicFade&&state!=='paused')updateMusicFade(dt);
+   if(state!==lastFpsState){lastFpsState=state;resetFpsMeter();perfTick=now;paintCount=0;paintTotalMs=0;}
    const active=state==='playing'||state==='start'||state==='dying'||state==='bossbreak';
    const shouldPaint=(active&&now-lastPaint>=renderInterval)||(!active&&lastPaintState!==state);
    if(shouldPaint){
      lastPaint=now;lastPaintState=state;
      const begin=performance.now();ctx.setTransform(renderScale,0,0,renderScale,0,0);ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';
-     render();drawJoy();if(state==='bossbreak')window.RUU_EXPANSION?.drawBoss(ctx,W,H,fxPreset);if(state==='dying')window.RUU_DEATH?.draw(ctx,W,H,deathScene?.elapsed||0,fxPreset);paintCount++;paintTotalMs+=performance.now()-begin;
+     render();drawJoy();if(state==='bossbreak')window.RUU_EXPANSION?.drawBoss(ctx,W,H,fxPreset);if(state==='dying')window.RUU_DEATH?.draw(ctx,W,H,deathScene?.elapsed||0,fxPreset);
+     const drawMs=performance.now()-begin;paintCount++;paintTotalMs+=drawMs;
+     if(active)recordFpsSample(now,drawMs);
    }
    // BGM must continue at full speed even while the level-up panel freezes simulation.
    if(state==='levelup'&&Math.floor(now/200)!==Math.floor((now-17)/200))updateMusicUI();
    if(now-perfTick>1200){
      const perFrame=paintTotalMs/Math.max(1,paintCount);
-     perfHud.textContent=active?'FPS '+Math.round(paintCount*1000/(now-perfTick)):'FPS —';
+     // The HUD is updated from a rolling window of actual drawn frames.
+     // Keep these batch statistics exclusively for adaptive quality decisions.
      if(fxPreset==='auto'){
        const fps=paintCount*1000/Math.max(1,now-perfTick);
        // Slow adaptation only under sustained load; never use the old .54 fallback.
@@ -2698,7 +2727,7 @@ ui.healthFill.style.width=`${100*p.hp/p.maxHp}%`;ui.healthText.textContent=`${Ma
    level: Math.max(1, Math.floor(g?.level || 1)),
    durationSeconds: Math.max(0, Math.floor(g?.time || 0)),
    won: state === 'won',
-   version: '1.19.2',
+   version: '1.19.3',
     mode: g?.mode==='challenge'?'challenge':g?.mode==='endless'?'endless':'normal',
      challengeId:g?.challengeId||'',
      challengeName:window.RUU_OPERATIONS?.currentInfo(g)?.name||'',
