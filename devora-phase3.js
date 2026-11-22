@@ -137,10 +137,7 @@ function drawEnemies(ctx,cam,g,q='auto'){
    const angle=clock*.65+i*Math.PI/2,r=e.r+19;
    ctx.beginPath();ctx.arc(x,y,r,angle,angle+.54);ctx.stroke();
   }
-  ctx.textAlign='center';ctx.textBaseline='middle';ctx.font='900 11px ui-monospace,Consolas,monospace';
-  ctx.fillStyle='#11131cdd';ctx.fillRect(x-47,y-e.r-59,94,20);
-  ctx.strokeStyle=COLOR;ctx.strokeRect(x-47,y-e.r-59,94,20);
-  ctx.globalAlpha=1;ctx.fillStyle=COLOR;ctx.fillText('PHASE III',x,y-e.r-49);
+  // The boss nameplate is already rendered by devora-mutation.js.
   ctx.restore();
  }
 }
