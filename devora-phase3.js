@@ -1,4 +1,4 @@
-/* RUU//OVERRUN v1.18.0 — DEVORA PHASE III / GIANT TRANSFORMATION
+/* RUU//OVERRUN v1.19.0 — DEVORA PHASE III / GIANT TRANSFORMATION
    Both bosses enter a third form when remaining HP <= 30%.
    All new lethal attacks are projectile-based and preceded by visible warnings.
    No invincibility, free healing or unavoidable instant damage.
@@ -18,7 +18,9 @@ function start(e,g,api,q){
  const b=e.bossMutation;
  b.phase=3;b.wind=0;b.cd=1000;
  // The third form is visually 1.28x; its physical collision radius grows 1.17x.
- e.basePhase3Radius=e.r;e.r=Math.round(e.r*1.17);e.phase3VisualScale=1.28;
+ e.basePhase3Radius=e.r;
+ // v1.19: +20% visual over the prior 1.28x, and +10% collision over 1.17x.
+ e.r=Math.round(e.r*1.17*1.10);e.phase3VisualScale=1.28*1.20;
  e.speed*=1.10;e.dmg=Math.ceil(e.dmg*1.1);
  // Do not let the boss fire or contact-hit Ruu during the transformation cut-in.
  e.shoot=Math.max(e.shoot,1.52);e.attack=Math.max(e.attack||0,1.43);
@@ -236,5 +238,5 @@ function drawScreen(ctx,W,H,g,q='auto',arts=null){
 }
 
 function tick(dt){clock+=Math.max(0,dt)}
-window.RUU_PHASE3={VERSION:'1.18.0',reset,tick,start,step,drawGround,drawEnemies,drawScreen};
+window.RUU_PHASE3={VERSION:'1.19.0',reset,tick,start,step,drawGround,drawEnemies,drawScreen};
 })();
