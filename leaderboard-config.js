@@ -1,6 +1,5 @@
-// Set apiUrl only after deploying the included Cloudflare Worker + D1 backend.
-// No API token, secret, or private key belongs in this public file.
+// RUU//OVERRUN public ranking endpoint. Do not place secrets in this file.
 window.RUU_PUBLIC_CONFIG = {
-  apiUrl: "",
-  siteUrl: ""
+  apiUrl: "https://ruu-overrun-leaderboard.iverson06200.workers.dev",
+  siteUrl: "https://jackpot031.github.io/ruu-overrun/"
 };
