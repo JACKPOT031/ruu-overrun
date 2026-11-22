@@ -1,4 +1,14 @@
-# RUU//OVERRUN — GitHub公開・更新手順（v1.15.1 PUBLIC BETA)
+# RUU//OVERRUN — GitHub公開・更新手順（v1.15.2 PUBLIC BETA）
+
+## v1.15.2 — 5人の映画風カットインを正式採用
+
+- エリオ／オズ／カイ／セラ／ミナの映画風ポスターを、ゲーム内の実際のカットイン画像として採用。
+- 追加ファイル `assets/support-pilot-cutins.avif` は5枚をまとめた軽量画像（320×569px×5、約54KB）。顔・髪・名前の下部まで画像を**切らずに表示**する。
+- カットインは従来どおり画面右側、上部HUDより下。別の読みやすい文字として「星屑の鎧 - Guardian Genome - から参戦」を併記。
+- **DEVORA FILES → SUPPORT PILOT GALLERY** から5人全員の実際のカットインをいつでも鑑賞できる。スタート画面には新しいボタンを増やさない。
+- 旧WebP顔アトラスはAVIF非対応環境の予備表示用に残す。
+- 量産機の出現率25%／75%は量産機なし、5人均等、各キャラの固有エフェクト、ASTRAEA No.3の独立出撃は変更しない。
+- GitHubの `main` へ反映。Cloudflare側の追加設定は不要。ブラウザで `Ctrl + Shift + R` して最新化を確認。
 
 ## v1.15.1 — MASS-PRODUCED SUPPORT PILOT 演出強化
 
