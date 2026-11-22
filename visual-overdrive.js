@@ -217,7 +217,7 @@
         var a=clock*1.3+k*TAU/(lv===0?4:8);
         var d=105+8*Math.sin(clock*5+k);
         ctx.globalAlpha=.75;ctx.fillStyle=cols[k%3];
-        star(ctx,4,9,2,a);ctx.save();ctx.translate(Math.cos(a)*d,Math.sin(a)*d);ctx.fill();ctx.restore();
+        ctx.save();ctx.translate(Math.cos(a)*d,Math.sin(a)*d);star(ctx,4,9,2,a);ctx.fill();ctx.restore();
       }
     }
     ctx.restore();
