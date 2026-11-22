@@ -1,4 +1,37 @@
-# RUU//OVERRUN — PUBLIC BETA (v1.15.3)
+# RUU//OVERRUN — PUBLIC BETA (v1.16.0)
+
+## v1.16.0 — ASTRAEA EMERGENCY FLIGHT CINEMA
+
+ASTRAEA No.3 is now an **animated flying reinforcement** rather than a static mecha tethered to the player.
+
+### New cinematic assets
+
+- **`assets/astraea_emergency_cutin.webp`** — a 1440×810 Ruu Scrivner + ASTRAEA emergency cut-in, preserving the original Guardian Genome / No.3 aesthetic. The art slides into the right half of the battlefield below the top HUD for about 2.15 seconds.
+- **`assets/astraea_flight.gif`** — actual transparent eight-frame flight/laser GIF (120ms per frame), separately viewable as a game character animation.
+- **`assets/astraea_flight_atlas.webp`** — a 4-column × 2-row WebP frame atlas from that GIF. The Canvas game advances its frames in game-time, including pauses. If the atlas cannot decode, the prior ASTRAEA SVG remains as fallback.
+
+### Flying combat
+
+- The 12-second emergency reinforcement now **visits 12 distinct positions** across the visible 1200×675 combat view. It smoothly accelerates between the left, right, top and bottom of the screen instead of staying beside Ruu, while maintaining a small enemy-facing offset.
+- **Laser rifle volleys about every 0.42 seconds** target up to two nearby living enemies, with magenta-and-white muzzle beams, bright impacts, moving trails and afterimages. Graphics quality changes **visual particles only**, never damage, targeting or attack interval.
+- The last ~1.2 seconds retain the original large-area **GUARDIAN RESONANCE** finish.
+- **Boss safety remains:** ASTRAEA's cumulative damage against each boss is capped at 28% of that boss's max HP, and it cannot land the final hit.
+- The mass-produced escort, when selected by the 25% pilot lottery, continues fighting alongside the flying ASTRAEA.
+
+### Unchanged automatic emergency conditions
+
+- The 25% named-pilot escort draw must have succeeded, and Ruu's HP must be at or below **50% at the exact time a final NULL EMPEROR spawns**.
+- One ASTRAEA appearance at most per run, about 1.05s after the qualifying boss spawn. No X-key/manual deployment or additional random draw. Later ENDLESS final bosses can retry qualification if the ability is still unused.
+
+**Preserved:** NORMAL 100-second survival and final-boss defeat, ENDLESS, CHALLENGE local record isolation, original 16 music tracks, JACKPOT MODE 1%, existing five pilot abilities, ending and Cloudflare rankings. **No Cloudflare Worker or D1 update required.**
+
+### Browser smoke tests
+
+1. In a named-pilot run, reach the final boss with HP ≤50% to watch the right-hand emergency cut-in.
+2. Verify the small ASTRAEA sprite crosses the camera repeatedly, changes pose and shoots visible lasers from its rifle for ~12 seconds.
+3. Confirm the same encounter does not trigger when no pilot is present or HP exceeds 50%; repeated deployment must remain blocked.
+4. Check FX LITE and HIGH, boss damage cap, ending, music and leaderboard behavior.
+5. Force refresh GitHub Pages with Ctrl + Shift + R after deployment if images are cached.
 
 ## v1.15.3 — GUARDIAN EMERGENCY / PILOT EFFECTS SURGE
 
