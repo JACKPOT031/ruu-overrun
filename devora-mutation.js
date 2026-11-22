@@ -1,4 +1,4 @@
-/* RUU//OVERRUN v1.12.0 — DEVORA MUTATION / IMPACT SURGE
+/* RUU//OVERRUN v1.17.0 — DEVORA MUTATION / PHASE III INTEGRATION
    Enemy variants, readable danger telegraphs, boss phase II, bounded hit FX.
    No new assets. All gameplay effects are independent of visual quality.
 */
@@ -231,12 +231,12 @@ function drawEnemies(ctx,cam,g,q){
     if(e.hp<=0||!visible(e.x,e.y,cam,1200,675,100))continue;
     const m=e.mutation,b=e.bossMutation;if(!m&&!b)continue;
     if(++drawn>(q==='lite'?12:28))break;
-    const color=m?COLOR[m.type]:COLOR.boss,x=e.x-cam.x,y=e.y-cam.y,t=pulseClock;
+    const color=m?COLOR[m.type]:b?.phase===3?'#ffc375':COLOR.boss,x=e.x-cam.x,y=e.y-cam.y,t=pulseClock;
     const r=e.r+(m?.type==='bulwark'&&m.guard>0?13:8);
     ctx.save();ctx.globalAlpha=.75;ctx.strokeStyle=color;
     ctx.lineWidth=q==='lite'?1.5:2.5;
     ctx.beginPath();ctx.arc(x,y,r,Math.sin(t*2)*.3,Math.sin(t*2)*.3+Math.PI*1.55);ctx.stroke();
-    const label=b?(b.phase===2?'PHASE II':'DEVORA'):LABEL[m.type];
+    const label=b?(b.phase===3?'PHASE III':b.phase===2?'PHASE II':'DEVORA'):LABEL[m.type];
     ctx.font='800 10px ui-monospace,Consolas,monospace';ctx.textAlign='center';ctx.textBaseline='middle';
     const yy=y-e.r-(b?37:29);
     const w=ctx.measureText(label).width+15;
@@ -286,5 +286,5 @@ function drawScreen(ctx,W,H,q){
   ctx.restore();
 }
 window.RUU_MUTATION={reset,tick,decorate,bossSpawn,modifyDamage,onEnemyKilled,onPlayerHit,step,drawGround,drawEnemies,drawWorld,drawScreen,
-  VERSION:'1.12.0'};
+  VERSION:'1.17.0'};
 })();
