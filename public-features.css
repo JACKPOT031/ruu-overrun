@@ -1,0 +1,23 @@
+/* RUU//OVERRUN public beta: compact ranking / share controls */
+.ruu-public-start{margin:12px 0 4px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;color:#e6d7c4;font:700 12px ui-monospace,Consolas,monospace}
+.ruu-public-start label{font-size:10px;letter-spacing:.09em;color:#d9c2a4}
+.ruu-nickname{max-width:180px;min-width:120px;width:180px;padding:9px 10px;background:#161923;border:1px solid #a89177;border-radius:5px;color:#fff0da;font:700 13px system-ui,sans-serif;outline-offset:2px}
+.ruu-nickname:focus{outline:1px solid #eed5a4}
+.ruu-mini-btn{padding:9px 13px;border:1px solid #ba9f7b;border-radius:6px;background:#29222b;color:#f5dfb9;cursor:pointer;font:800 11px system-ui,sans-serif;letter-spacing:.03em}
+.ruu-mini-btn:hover,.ruu-mini-btn:focus-visible{border-color:#f5d4a4;background:#39303c}
+.ruu-score-box{margin:16px auto 2px;max-width:660px;display:flex;justify-content:center;align-items:center;flex-wrap:wrap;gap:9px;padding:12px;border:1px solid #987c6990;border-radius:9px;background:#161824c4}
+.ruu-score-box .ruu-nickname{width:150px}
+.ruu-public-hint{flex-basis:100%;font:600 10px system-ui,sans-serif;line-height:1.45;color:#bbad9d;text-align:center}
+.ruu-public-status{flex-basis:100%;min-height:17px;text-align:center;font:700 12px system-ui,sans-serif;color:#e1d0b5}
+.ruu-public-modal[hidden]{display:none!important}
+.ruu-public-modal{position:absolute;z-index:90;inset:0;background:#050711e9;display:flex;align-items:center;justify-content:center;overflow:auto;padding:20px}
+.ruu-public-panel{width:min(760px,100%);max-height:100%;overflow:auto;background:linear-gradient(135deg,#292131,#0e1824 75%);border:1px solid #bba37b;border-radius:14px;padding:22px;color:#f7ebd7;box-shadow:0 10px 45px #000b}
+.ruu-public-top{display:flex;gap:8px;justify-content:space-between;align-items:flex-start}
+.ruu-public-top h2{font:italic 900 clamp(22px,3vw,36px) Impact,system-ui,sans-serif;letter-spacing:.04em;margin:3px 0 10px}
+.ruu-public-caption{font:700 11px system-ui,sans-serif;color:#c6af97}
+.ruu-public-table{width:100%;border-collapse:collapse;font:700 12px system-ui,sans-serif;margin-top:15px}
+.ruu-public-table th,.ruu-public-table td{border-bottom:1px solid #baa18635;padding:10px 6px;text-align:left;font-variant-numeric:tabular-nums}
+.ruu-public-table th{color:#d7b889;font-size:11px}
+.ruu-public-table tr:nth-child(-n+3) td:first-child{color:#ffdc90;font-weight:900}
+.ruu-public-note{font:600 11px/1.5 system-ui,sans-serif;color:#a6a7b3;margin:12px 0 0}
+@media(max-width:720px){.ruu-public-panel{padding:12px}.ruu-public-table{font-size:10px}.ruu-public-table th,.ruu-public-table td{padding:8px 3px}.ruu-public-start{gap:5px}.ruu-nickname{width:130px;min-width:105px}.ruu-mini-btn{padding:8px}.ruu-score-box{padding:7px;gap:6px}}

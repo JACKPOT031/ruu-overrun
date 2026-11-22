@@ -1,0 +1,13 @@
+name = "ruu-overrun-leaderboard"
+main = "src/index.js"
+compatibility_date = "2026-11-20"
+workers_dev = true
+
+[vars]
+# Match your live GitHub Pages host (origin only, not /ruu-overrun/).
+ALLOWED_ORIGINS = "https://JACKPOT031.github.io,http://localhost:8000,http://127.0.0.1:8000"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "ruu-overrun-ranking"
+database_id = "REPLACE_WITH_DATABASE_ID_FROM_WRANGLER_D1_CREATE"
