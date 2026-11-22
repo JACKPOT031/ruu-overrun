@@ -1,4 +1,13 @@
-# RUU//OVERRUN — PUBLIC BETA (v1.6.0)
+# RUU//OVERRUN — PUBLIC BETA (v1.7.0)
+
+## v1.7.0 — VISUAL OVERDRIVE
+
+- Adds brighter projectile trails, impact flares, colored fragmentation and reinforced weapon beams.
+- Nine ultimate finishers receive additional ceremonial light sigils; all three JACKPOT modes receive distinctive energy auras and special strike overlays.
+- Effects respect the existing FX AUTO / HIGH / LITE settings and use bounded effect budgets.
+- **Visuals only:** weapon damage, enemy HP, game timing, JACKPOT appearance rate (3%), music (16 tracks), ending, shared leaderboard and X posting are unchanged.
+- `visual-overdrive.js` must remain in the repository root alongside `index.html`.
+
 
 JACKPOTØ31 original browser survival game. Includes all 16 approved soundtracks, 3 JACKPOT modes, ending cinema, 9 ultimate signatures, an X share button and a nickname-based ranking interface.
 
