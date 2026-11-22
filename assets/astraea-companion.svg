@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="300" height="310" viewBox="0 0 300 310" role="img" aria-label="ASTRAEA No.3 / Guardian Genome">
+<defs>
+<linearGradient id="plating" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#faf8ff"/><stop offset=".5" stop-color="#afbac5"/><stop offset="1" stop-color="#5f6475"/></linearGradient>
+<linearGradient id="shadow" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#3b3447"/><stop offset="1" stop-color="#100d19"/></linearGradient>
+<linearGradient id="blade" x1="0" y1=".5" x2="1" y2=".5"><stop stop-color="#fbdeee"/><stop offset=".42" stop-color="#ff77c2"/><stop offset="1" stop-color="#b01e8a"/></linearGradient>
+<radialGradient id="core"><stop stop-color="#fff2ff"/><stop offset=".3" stop-color="#ffb1eb"/><stop offset=".7" stop-color="#f65bcc"/><stop offset="1" stop-color="#71376d"/></radialGradient>
+</defs>
+<!-- wing matrix, black segmented vanes with pink reverse-phase geometry -->
+<g stroke="#2b233b" stroke-width="4" stroke-linejoin="round">
+<path d="M130 80 61 11 8 7 42 79 87 124 14 93 42 155 95 156 38 182 82 197 134 142" fill="#242531"/>
+<path d="M170 80 239 11 292 7 258 79 213 124 286 93 258 155 205 156 262 182 218 197 166 142" fill="#242531"/>
+</g>
+<g fill="none" stroke="#fa79c3" stroke-width="4" stroke-linecap="round">
+<path d="M135 88 66 24 24 20 M124 110 44 91 M123 135 49 150 M113 158 57 184"/>
+<path d="M165 88 234 24 276 20 M176 110 256 91 M177 135 251 150 M187 158 243 184"/>
+</g>
+<g stroke="#ffc3e8" stroke-width="1.8" opacity=".9" fill="none">
+<path d="M52 38 110 110 33 101 M70 157 136 126 M248 38 190 110 267 101 M230 157 164 126"/>
+</g>
+<g fill="#ff73c4"><circle cx="44" cy="30" r="4"/><circle cx="78" cy="79" r="3"/><circle cx="38" cy="145" r="3"/><circle cx="256" cy="30" r="4"/><circle cx="222" cy="79" r="3"/><circle cx="262" cy="145" r="3"/></g>
+<!-- slender high-agility legs -->
+<path d="M130 180 143 181 144 238 136 289 117 297 113 287 122 238 117 212 Z M170 180 157 181 156 238 164 289 183 297 187 287 178 238 183 212 Z" fill="url(#shadow)" stroke="#aaa2bd" stroke-width="3"/>
+<path d="M127 192 144 189 143 224 136 241 121 235 118 213 Z M173 192 156 189 157 224 164 241 179 235 182 213 Z" fill="url(#plating)" stroke="#282635" stroke-width="3"/>
+<path d="M123 243 139 248 133 286 113 286 Z M177 243 161 248 167 286 187 286 Z" fill="url(#plating)" stroke="#282635" stroke-width="3"/>
+<path d="M113 285 134 285 132 303 104 304 99 297 Z M187 285 166 285 168 303 196 304 201 297 Z" fill="#393442" stroke="#c5c1d1" stroke-width="2"/>
+<!-- arms, including long ranged weapon on left and compact blade on right -->
+<path d="M118 103 98 109 88 153 81 197 91 208 109 200 118 160 134 132 Z M182 103 202 109 212 153 219 197 209 208 191 200 182 160 166 132 Z" fill="url(#shadow)" stroke="#b3aabb" stroke-width="4"/>
+<path d="M103 108 91 119 84 159 100 169 114 135 Z M197 108 209 119 216 159 200 169 186 135 Z" fill="url(#plating)" stroke="#423749" stroke-width="3"/>
+<path d="M119 153 89 166 83 197 95 206 113 190 Z M181 153 211 166 217 197 205 206 187 190 Z" fill="#29242e" stroke="#e8bcda" stroke-width="2"/>
+<!-- torso and reactor -->
+<path d="M130 84 170 84 194 108 184 160 175 189 126 189 116 160 106 108 Z" fill="url(#shadow)" stroke="#e0cadc" stroke-width="4"/>
+<path d="M119 106 144 93 150 106 156 93 182 106 175 136 164 151 136 151 125 136 Z" fill="url(#plating)" stroke="#3f3547" stroke-width="3"/>
+<path d="M130 159 145 145 155 145 170 159 169 185 131 185 Z" fill="url(#plating)" stroke="#342d3e" stroke-width="3"/>
+<circle cx="150" cy="127" r="18" fill="url(#core)" stroke="#fac8ec" stroke-width="3"/>
+<path d="M150 108 157 127 150 146 143 127Z" fill="none" stroke="#ffffff" stroke-width="2"/>
+<path d="M150 148 150 180" stroke="#ff8ed8" stroke-width="3"/>
+<!-- shoulders -->
+<path d="M112 93 89 87 74 111 94 133 116 120 132 105 Z M188 93 211 87 226 111 206 133 184 120 168 105 Z" fill="url(#plating)" stroke="#3f3547" stroke-width="4"/>
+<path d="M80 107 101 115 114 107 M220 107 199 115 186 107" stroke="#ff87d6" stroke-width="2" fill="none"/>
+<!-- smooth featureless head as reference -->
+<path d="M132 50 140 35 160 35 168 50 165 81 155 93 145 93 135 81 Z" fill="url(#plating)" stroke="#3b3345" stroke-width="4"/>
+<path d="M139 54 150 48 161 54 158 69 142 69 Z" fill="#3d3b4c" stroke="#5c566a" stroke-width="2"/>
+<path d="M139 70 150 75 161 70 156 83 144 83 Z" fill="#e7dde9"/>
+<path d="M134 49 123 60 129 78 M166 49 177 60 171 78" stroke="#d4c6d7" stroke-width="4" fill="none"/>
+<!-- long precision rifle -->
+<path d="M45 173 112 173 118 181 130 181 130 190 117 193 33 193 18 202 7 197 24 180 29 178Z" fill="#24232e" stroke="#bbb2bd" stroke-width="3"/>
+<path d="M22 182 82 182 M41 190 77 190" stroke="#ff8acb" stroke-width="2"/>
+<path d="M82 167 104 167 111 176 77 176Z" fill="#f4d0e9" stroke="#483b4e" stroke-width="2"/>
+<path d="M94 192 107 192 101 211 88 211Z" fill="#34323f"/>
+<!-- right blade; long white/pink energy edge -->
+<path d="M213 180 227 184 278 119 290 93 265 113 207 174Z" fill="url(#blade)" stroke="#f6d6eb" stroke-width="3"/>
+<path d="M207 179 236 195" stroke="#302438" stroke-width="7"/>
+<path d="M237 196 248 203" stroke="#e4ced9" stroke-width="4"/>
+<!-- particle halo -->
+<g fill="#ff7acc"><circle cx="49" cy="220" r="3"/><circle cx="257" cy="210" r="3"/><circle cx="95" cy="45" r="2"/><circle cx="212" cy="32" r="3"/></g>
+</svg>
