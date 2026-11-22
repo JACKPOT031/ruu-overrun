@@ -336,7 +336,7 @@ function playSound(name,engine,kind,active){
  try{
   let cache=samples.get(ac);if(!cache){cache=new Map();samples.set(ac,cache);}
   if(!cache.has(key))cache.set(key,buildSample(ac,key));
-  const now=ac.currentTime,volume=soundPresets[key].gain;
+  const now=ac.currentTime,volume=soundPresets[key].gain*(major?2.2:3.3);
   const play=(preset,delay=0,mult=1,rate=1,pan=0)=>{
    if(soundLive>23)return;
    if(!cache.has(preset))cache.set(preset,buildSample(ac,preset));
