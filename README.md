@@ -1,4 +1,40 @@
-# RUU//OVERRUN — PUBLIC BETA (v1.17.0)
+# RUU//OVERRUN — PUBLIC BETA (v1.18.0)
+
+## v1.18.0 — SWARM OVERRUN / COLOSSUS TRANSFORMATION
+
+### Enlarged Ruu's normal SIGNATURE FINISHER cut-ins
+
+- All nine signature cut-ins remain on the **right** and now use a **52%-wide × 82%-high** area (previously 46% × 76%), beginning 16% below the canvas top so the top-left gauges stay clear.
+- The original Ruu artwork, nine skills, timing and effects are preserved. No additional start-screen clutter.
+
+### Massive PHASE III bosses and unique boss cinematics
+
+- When DEVORA or NULL EMPEROR reaches **30% HP**, it still enters PHASE III after the original 55%-HP PHASE II. Its **visual artwork is 1.28× larger** and its **physical collision radius is 1.17× larger** than its preceding form.
+- New **~1.38-second third-form cut-in** uses the game's original DEVORA/NULL EMPEROR portrait assets, recomposed into a dark-gold corruption/limit-break panel with separate Japanese and English forms. No new boss illustration is falsely implied; the cinematic uses the established enemy character artwork.
+- The boss attack and contact timers provide approximately **1.4 seconds of grace** during the transformation, avoiding surprise collisions or projectiles beneath the cinematic.
+- The golden PHASE III HUD, aimed fan with warning line, and radial SIEGE NOVA with two green SAFE gaps are preserved. Phase III also grants a brief speed/contact-damage boost, **up to two first-wave guards** on the map perimeter, and recurring **3–4 enemy guard groups** about every 8.4–10.2 seconds while that boss remains alive. Reinforcements have a 0.63-second warning and appear at least 565 game units away from the player.
+- The new protection logic caps reinforcements in busy arenas. Boss HP does not refill and bosses gain no invincibility.
+
+### More enemies, more visible formations
+
+- The base enemy spawn interval is shortened by a factor of **0.86** (about **16.3% more spawn events per second**); after 75s it is shortened by a further 10%. Ordinary enemy count caps are increased by roughly **14%**. Late enemy selection also contains a higher proportion of runner / brute / caster / hex varieties.
+- `swarm-director.js` independently coordinates **three new, clearly announced perimeter groups**: 35s **SCOUT PACK** (5), 66s **IRON FLOOD** (8), and 82s **NULL TIDE** (12). Each group enters in a short staggered burst after a 0.62s warning rather than instantly appearing near the player.
+- These are *additional* to the existing DEVORA INVASION kill-quota events (30 / 60 / 90 seconds). They do not change or grant any new score rewards by themselves.
+- Swarm spawns originate approximately **565–669 world units** from Ruu; caps prevent unbounded enemy growth and FX quality does not change enemy numbers or difficulty.
+
+### Technical / compatibility notes
+
+- New required root module: `swarm-director.js`; updated `devora-phase3.js` handles cinematic composition and periodic guards. `index.html` passes original `DEVORA_ART` portraits to the new third-form cinematic.
+- Existing NORMAL 100s + final-boss clear, ENDLESS, CHALLENGE local-only results, all 16 BGM tracks, 25% support-pilot lottery, ASTRAEA auto emergency, JACKPOT MODE 1%, original ending, and Cloudflare NORMAL / ENDLESS ranking submission remain connected.
+- No Cloudflare Worker or D1 migration is required. GitHub Pages should reflect the new version after the usual deployment and a hard refresh.
+
+### Browser QA checklist
+
+1. Activate one of Ruu's nine SIGNATURE skills: confirm the right-side art is visibly larger without covering the top-left HP/drive/finisher UI.
+2. Push either boss through 55% and 30% HP; verify the larger third-form sprite, portrait cut-in and brief attack grace, then defeat the final boss.
+3. Check PHASE III's golden target-line and SAFE-sector telegraphs, perimeter guards and staggered reinforcement packs; verify no enemies appear on top of Ruu.
+4. Play through 35 / 66 / 82 seconds and confirm SCOUT PACK, IRON FLOOD, NULL TIDE announcements, sizes and performance.
+5. Compare FX LITE/HIGH, and recheck NORMAL/ENDLESS rankings, CHALLENGE, companion/ASTRAEA, BGM and original ending.
 
 ## v1.17.0 — PHASE III REBELLION / LARGER SIGNATURE CUT-INS
 
