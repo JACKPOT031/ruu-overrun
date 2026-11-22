@@ -1,4 +1,15 @@
-# RUU//OVERRUN — GitHub公開・更新手順（v1.16.0 PUBLIC BETA）
+# RUU//OVERRUN — GitHub公開・更新手順（v1.16.1 PUBLIC BETA）
+
+## v1.16.1 — 量産機の抽選結果・表示状態を可視化
+
+- 量産機の出現率は従来どおり **各プレイ25％**。75％のプレイでは量産機が登場しないのが仕様で、出現率は変更していない。
+- プレイ中の画面上部・中央に **SUPPORT // NO SIGNAL (25% CHANCE)**（抽選外れ）、**SUPPORT // パイロット名 / INBOUND**（登場中）、**ACTIVE**（合流後）を表示。
+- JavaScriptを読み込めなかった場合は **SUPPORT // LOAD ERROR** と表示するため、抽選外れと不具合を区別できる。
+- 当選したゲームでは、開始時の通知にもパイロット名と「INBOUND」を表示。量産機はゲーム開始約1秒後に右側から走り、約2.5秒でルーに合流。
+- 量産機のサイズは従来の64×94のまま。薄い色付きの発光枠で見えやすくした。
+- `index.html` から読み込む `support-pilots.js` と `astral-companion.js` にバージョン指定を付け、古いキャッシュが残りにくいようにした。
+- GitHub Pagesに反映後、**Ctrl + Shift + R** で再読み込み。タイトルに **v1.16.1** と表示されたか確認。
+- 25％の抽選、5人の固有能力、ASTRAEAの緊急自動参戦、JACKPOT 1％、16曲、ランキング、EDは変更なし。Cloudflare更新も不要。
 
 ## v1.16.0 — ASTRAEA 飛行GIFとレーザー戦闘
 
