@@ -1,4 +1,14 @@
-# RUU//OVERRUN — GitHub公開・更新手順（v1.15.0 PUBLIC BETA）
+# RUU//OVERRUN — GitHub公開・更新手順（v1.15.1 PUBLIC BETA)
+
+## v1.15.1 — MASS-PRODUCED SUPPORT PILOT 演出強化
+
+- **量産型ASTRAL-SUITの出現自体が25％**。75％のプレイでは量産機も通常射撃・敵弾迎撃も発生しない。
+- 出現時は5人均等抽選。エリオ／オズ／カイ／セラ／ミナ各5％（全プレイに対する割合）。
+- 右側カットインの肖像を拡大し、顔画像の全体と「星屑の鎧 - Guardian Genome - から参戦」を表示。
+- 5人それぞれに色・専用SE・スキル名・エフェクト・対象マーカーを追加。FX LITEでも危険予兆を隠さない。
+- **ASTRAEA No.3は量産機の抽選と独立**。従来の条件で出撃可能。
+- 変更ファイルは `support-pilots.js`、`astral-companion.js`、`index.html`。他にREADME・本手順を更新。
+- GitHub Pagesで公開後 `Ctrl + Shift + R` で再読み込み。Cloudflareの更新は不要。
 
 ## v1.15.0 MASS-PRODUCED SUPPORT PILOT の更新
 
