@@ -1,4 +1,4 @@
-/* RUU//OVERRUN v1.18.0 — DEVORA SWARM DIRECTOR
+/* RUU//OVERRUN v1.19.2 — DEVORA SWARM DIRECTOR
    Reinforcement clusters arrive from the arena perimeter.
    Spawn caps and warnings keep dense encounters readable and bounded.
 */
@@ -6,18 +6,19 @@
 'use strict';
 const TAU=Math.PI*2,clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
 const WAVES=[
- {at:35,count:5,interval:.33,name:'SCOUT PACK',jp:'小規模集団',color:'#eea377',
-  kinds:['wisp','runner','runner','wisp','brute'],spread:.58},
- {at:66,count:8,interval:.27,name:'IRON FLOOD',jp:'侵攻集団',color:'#eeb1a4',
-  kinds:['runner','brute','wisp','runner','caster','brute','runner','caster'],spread:.84},
- {at:82,count:12,interval:.22,name:'NULL TIDE',jp:'大規模集団',color:'#ff859b',
-  kinds:['runner','hex','brute','runner','caster','hex','runner','brute','caster','runner','hex','brute'],spread:1.08}
+ {at:35,count:4,interval:.33,name:'SCOUT PACK',jp:'小規模集団',color:'#eea377',
+  kinds:['wisp','runner','brute','runner'],spread:.58},
+ {at:66,count:7,interval:.27,name:'IRON FLOOD',jp:'侵攻集団',color:'#eeb1a4',
+  kinds:['runner','brute','wisp','runner','caster','brute','caster'],spread:.84},
+ {at:82,count:10,interval:.22,name:'NULL TIDE',jp:'大規模集団',color:'#ff859b',
+  kinds:['runner','hex','brute','runner','caster','hex','runner','brute','caster','hex'],spread:1.08}
 ];
 let next=0,active=null,banner=null,completed=0;
 function reset(){next=0;active=null;banner=null;completed=0}
 function enemyCap(g){
  const baseline=55+Math.floor(Math.max(0,g.time)*1.4);
- return clamp(Math.ceil(baseline*1.14),62,g.mode==='endless'?242:205);
+ // About 15% fewer ordinary enemies at once; named bosses remain exempt.
+ return clamp(Math.ceil(baseline*.97),53,g.mode==='endless'?205:175);
 }
 function begin(g,index,api){
  const w=WAVES[index],dir=(index*2.11+.37)%TAU;
@@ -67,5 +68,5 @@ function drawScreen(ctx,W,H,g,q='auto'){
  ctx.restore();
 }
 function status(){return{next,completed,active:active?.def.name||null,remaining:active?active.def.count-active.spawned:0}}
-window.RUU_SWARM={VERSION:'1.18.0',WAVES,reset,enemyCap,tick,drawScreen,status};
+window.RUU_SWARM={VERSION:'1.19.2',WAVES,reset,enemyCap,tick,drawScreen,status};
 })();
