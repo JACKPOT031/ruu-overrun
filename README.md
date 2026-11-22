@@ -1,4 +1,16 @@
-# RUU//OVERRUN — PUBLIC BETA (v1.9.0)
+# RUU//OVERRUN — PUBLIC BETA (v1.10.0)
+
+## v1.10.0 — SIGNAL LOST / DEFEAT CINEMATIC
+
+- A lethal hit now freezes the world and plays a **3.05-second defeat sequence** before displaying GAME OVER.
+- Light fractures, drifting shards, expanding broken shock rings, interference scanlines, a darkening frame and an in-world **SIGNAL LOST** title replace the abrupt transition.
+- Music fades out over ~1.75 seconds, accompanied by two new layered WebAudio cues: impact and fading signal. Respects SFX ON/OFF.
+- Press **Enter/Escape** or tap/click the game screen after the initial impact to skip to the results.
+- Gameplay time and score stop progressing during the cinematic. Personal best is saved at the lethal hit; global leaderboard and X result sharing remain compatible.
+- No change to weapon damage, 16 soundtracks, JACKPOT (3% chance / 13s invulnerability), short ending, or attack FX.
+- Keep `death-cinema.js` alongside `index.html`, `premium-overdrive.js`, and `visual-overdrive.js`.
+
+
 
 ## v1.9.0 — JACKPOT ROYALE / PREMIUM SOUND
 
