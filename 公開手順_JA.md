@@ -1,4 +1,14 @@
-# RUU//OVERRUN — GitHub公開・更新手順（v1.15.3 PUBLIC BETA）
+# RUU//OVERRUN — GitHub公開・更新手順（v1.16.0 PUBLIC BETA）
+
+## v1.16.0 — ASTRAEA 飛行GIFとレーザー戦闘
+
+- ASTRAEAの緊急参戦カットインに、ルー・スクリヴナーとASTRAEA No.3の新しい16:9イラストを採用。右側・上部HUDより下で表示。
+- 追加素材は `assets/astraea_emergency_cutin.webp`（カットイン）、`assets/astraea_flight.gif`（8コマ・透過飛行GIF）、`assets/astraea_flight_atlas.webp`（ゲーム描画用8コマアトラス）。
+- 12秒の支援中は画面の上下左右を巡回する飛行パターンを実装。銃口からの桃色レーザーが約0.42秒ごとに敵を追尾し、着弾光・飛行残像も描く。
+- 量産機サポート当選（25％）＋最終ボス出現時にルーのHPが50％以下、という自動出撃条件は維持。出撃は1プレイ最大1回。
+- ASTRAEA単独ではボスに止めを刺さず、ボスの最大HP28％までの累積支援ダメージ上限も継続。FINISHER等の既存機能、16曲、JACKPOT 1％、ランキングは維持。
+- `astral-companion.js`、`index.html`、READMEと本案内をGitHubに更新。画像素材3ファイルもルートの `assets/` に追加。
+- ブラウザで `Ctrl + Shift + R` を押してキャッシュを更新し、飛行経路とレーザー発射、12秒後の消失を確認する。Cloudflareの設定変更は不要。
 
 ## v1.15.3 — GUARDIAN EMERGENCY / SUPPORT PILOT強化
 
