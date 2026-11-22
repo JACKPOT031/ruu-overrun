@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="270" viewBox="0 0 200 270" role="img" aria-label="量産型ASTRAL-SUIT / frontline support">
+<defs>
+<linearGradient id="armor" x1=".12" y1="0" x2=".92" y2="1"><stop stop-color="#f1f2f3"/><stop offset=".42" stop-color="#bbc5d0"/><stop offset="1" stop-color="#5b6a7b"/></linearGradient>
+<linearGradient id="metal" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#4b5562"/><stop offset="1" stop-color="#111824"/></linearGradient>
+<linearGradient id="gun" x1="0" x2="1"><stop stop-color="#647078"/><stop offset="1" stop-color="#101622"/></linearGradient>
+<filter id="drop"><feGaussianBlur stdDeviation="1.3"/></filter>
+</defs>
+<!-- silhouette: standard issued armored suit, twin rear thrusters, mass-production number 18 -->
+<path d="M62 42 L44 35 35 52 31 110 48 126 65 112 Z M138 42 L156 35 165 52 169 110 152 126 135 112 Z" fill="#242d38" stroke="#8b97a7" stroke-width="3"/>
+<path d="M62 53 L52 120 67 144 86 112 L91 51 Z M138 53 L148 120 133 144 114 112 109 51 Z" fill="url(#metal)" stroke="#526070" stroke-width="2"/>
+<path d="M71 139 55 151 51 203 40 234 49 257 77 255 84 234 90 186 93 148 Z M129 139 145 151 149 203 160 234 151 257 123 255 116 234 110 186 107 148 Z" fill="url(#metal)" stroke="#222b35" stroke-width="3"/>
+<path d="M63 147 82 150 85 183 70 211 51 202 52 169 Z M137 147 118 150 115 183 130 211 149 202 148 169 Z" fill="url(#armor)" stroke="#293743" stroke-width="3"/>
+<path d="M55 203 75 213 71 240 48 242 Z M145 203 125 213 129 240 152 242 Z" fill="#788491" stroke="#242c37" stroke-width="2"/>
+<path d="M50 238 75 238 78 254 73 265 39 265 36 255 Z M150 238 125 238 122 254 127 265 161 265 164 255 Z" fill="#45515d" stroke="#161b27" stroke-width="3"/>
+<path d="M59 93 50 100 53 141 75 148 82 128 Z M141 93 150 100 147 141 125 148 118 128 Z" fill="url(#metal)" stroke="#48515b" stroke-width="2"/>
+<path d="M48 110 39 116 38 151 48 167 62 161 63 132 Z M152 110 161 116 162 151 152 167 138 161 137 132 Z" fill="url(#armor)" stroke="#293642" stroke-width="3"/>
+<path d="M49 167 42 174 42 186 61 188 66 176 59 163 Z M151 167 158 174 158 186 139 188 134 176 141 163 Z" fill="#313b47"/>
+<path d="M77 132 88 145 112 145 123 132 117 103 83 103 Z" fill="#687584" stroke="#252f3b" stroke-width="3"/>
+<path d="M65 56 78 44 122 44 135 56 137 104 121 125 80 125 63 104 Z" fill="url(#armor)" stroke="#273341" stroke-width="4"/>
+<path d="M71 66 94 69 100 83 106 69 128 66 124 102 112 115 88 115 76 102 Z" fill="#5f6c79" stroke="#273440" stroke-width="2"/>
+<path d="M91 89 100 82 109 89 108 104 92 104 Z" fill="#1f2b3b" stroke="#a3adb9" stroke-width="2"/>
+<path d="M100 90 105 96 100 102 95 96 Z" fill="#e7c6a3"/>
+<path d="M62 45 45 46 29 63 36 96 62 104 79 70 Z M138 45 155 46 171 63 164 96 138 104 121 70 Z" fill="url(#armor)" stroke="#26313c" stroke-width="4"/>
+<path d="M41 66 56 53 74 69 61 90 42 87 Z M159 66 144 53 126 69 139 90 158 87 Z" fill="#8996a4" stroke="#384452" stroke-width="2"/>
+<text x="145" y="78" text-anchor="middle" font-size="14" fill="#343e49" font-family="monospace" font-weight="900">18</text>
+<!-- sensor head, military solid visor -->
+<path d="M79 20 89 11 111 11 121 20 124 49 112 61 88 61 76 49 Z" fill="url(#armor)" stroke="#202a35" stroke-width="4"/>
+<path d="M83 32 96 29 113 31 118 37 111 46 88 46 81 41 Z" fill="#1a2430" stroke="#6b7b8b" stroke-width="2"/>
+<path d="M85 37 113 37" stroke="#ebdfce" stroke-width="2" opacity=".85"/>
+<path d="M78 25 65 10 63 2 M122 25 131 13 138 6" stroke="#778b9a" stroke-width="4" fill="none"/>
+<path d="M77 51 85 68 115 68 123 51" stroke="#354252" stroke-width="4" fill="none"/>
+<!-- straight service rifle carried right side -->
+<g transform="rotate(-16 88 141)">
+<path d="M23 119 159 119 178 125 190 125 190 132 174 133 163 139 32 139 20 149 10 145 16 132 Z" fill="url(#gun)" stroke="#141a22" stroke-width="3"/>
+<path d="M74 114 99 114 102 120 70 120 Z" fill="#9cabb8"/>
+<path d="M87 137 102 137 97 169 81 169 Z" fill="#252d37" stroke="#626e7b" stroke-width="2"/>
+<path d="M118 125 148 125 M35 128 68 128" stroke="#a7b3bf" stroke-width="2"/>
+</g>
+<path d="M50 131 71 138 69 151 48 153 Z M150 131 129 138 131 151 152 153 Z" fill="#758391" stroke="#232c36" stroke-width="2"/>
+<g fill="#d1d8df" stroke="#35404d" stroke-width="1.2"><circle cx="68" cy="187" r="3"/><circle cx="130" cy="187" r="3"/><circle cx="59" cy="235" r="3"/><circle cx="141" cy="235" r="3"/></g>
+</svg>
