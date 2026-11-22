@@ -1,4 +1,4 @@
-/* RUU//OVERRUN v1.15.2 MASS-PRODUCED SUPPORT PILOT / VISUAL SIGNALS
+/* RUU//OVERRUN v1.15.3 MASS-PRODUCED SUPPORT PILOT / VISUAL SIGNALS
    Roll once per run (25%); five Guardian Genome pilots equally likely. */
 (()=>{
 'use strict';
@@ -17,7 +17,7 @@ const CUTIN_TILE_W=320,CUTIN_TILE_H=569;
 const poster=typeof Image==='undefined'?null:new Image();
 if(poster)poster.src='assets/support-pilot-cutins.avif';
 const blank=()=>({pilot:null,index:-1,t:0,arrived:false,cd:0,bonus:0,shields:0,marks:0,shots:0,slows:0,
- rays:[],rings:[],sparks:[],labels:[],flash:0,collectCd:0,bonusPending:0,fxQuality:'auto'});
+ rays:[],rings:[],sparks:[],labels:[],flash:0,collectCd:0,bonusPending:0,fxQuality:'auto',feature:null});
 let S=blank();
 const rnd=rng=>{const v=Number(rng());return Number.isFinite(v)?clamp(v,0,1-Number.EPSILON):1-Number.EPSILON};
 function start(g,rng=Math.random){
@@ -70,6 +70,9 @@ function notice(g,heading,details,x,y){
  const at=allyPosition(g);
  label(x??at.x,y??at.y-110,heading,p.color,.86);
  if(details)label((x??at.x),(y??at.y-110)+19,details,'#fff8ea',.86);
+ // A dedicated right-side support-action banner. Always states WHO and WHAT.
+ S.feature={title:heading,detail:details||p.desc,color:p.color,id:p.id,time:1.10,max:1.10};
+ S.flash=Math.max(S.flash,.4);
 }
 function shieldShape(ctx,x,y,r,color,hex){
  ctx.beginPath();
@@ -85,6 +88,7 @@ function pulse(g,color,x,y,power=1,q='auto'){
 }
 function tickFx(dt){
  S.flash=Math.max(0,S.flash-dt*.75);S.collectCd=Math.max(0,S.collectCd-dt);
+ if(S.feature){S.feature.time-=dt;if(S.feature.time<=0)S.feature=null}
  for(let i=S.rays.length-1;i>=0;i--)if((S.rays[i].time-=dt)<=0)S.rays.splice(i,1);
  for(let i=S.rings.length-1;i>=0;i--)if((S.rings[i].time-=dt)<=0)S.rings.splice(i,1);
  for(let i=S.labels.length-1;i>=0;i--)if((S.labels[i].time-=dt)<=0)S.labels.splice(i,1);
@@ -122,8 +126,10 @@ function skill(g,api){
   S.cd=10.3;p.maxShield=Math.max(p.maxShield||0,18);
   const old=p.shield||0;p.shield=Math.min(p.maxShield,old+8);
   if(p.shield>old){
-   S.shields+=p.shield-old;ring(p.x,p.y,88,col,'hex',.78);ring(p.x,p.y,59,col,'hex',.54);
-   sparks(p.x,p.y,col,27,184,q);notice(g,'ELIO / SHIELD COVER','SHIELD +'+Math.ceil(p.shield-old),p.x,p.y-108);
+   S.shields+=p.shield-old;
+   ring(p.x,p.y,152,col,'hex',.9);ring(p.x,p.y,98,col,'hex',.8);ring(p.x,p.y,59,col,'hex',.65);
+   sparks(p.x,p.y,col,47,255,q);pulse(g,col,p.x,p.y,1.5,q);
+   notice(g,'ELIO / SHIELD COVER','SHIELD +'+Math.ceil(p.shield-old),p.x,p.y-108);
    api?.wave?.(p.x,p.y,92,col);api?.sound?.('pilotElio');
   }
  }else if(id==='oz'){
@@ -133,8 +139,9 @@ function skill(g,api){
    e.pilotMarkUntil=g.time+4.5;S.marks++;
    const damage=e.kind==='boss'||e.kind==='final'?23:31;
    api?.hit?.(e,damage,col);
-   ray(at.x,at.y-56,e.x,e.y,col,4.5,.5);
-   ring(e.x,e.y,e.r+21,col,'target',.68);sparks(e.x,e.y,col,29,260,q);
+   ray(at.x,at.y-56,e.x,e.y,col,9,.62);
+   ring(e.x,e.y,e.r+72,col,'target',.86);ring(e.x,e.y,e.r+28,col,'target',.72);
+   sparks(e.x,e.y,col,54,320,q);pulse(g,col,e.x,e.y,1.65,q);
    notice(g,'OZ / EXECUTION MARK','MARKED / +11% DMG',e.x,e.y-e.r-57);
    api?.sound?.('pilotOz');
   }
@@ -143,10 +150,14 @@ function skill(g,api){
   if(enemies.length){
    for(const [i,e] of enemies.entries()){
     api?.hit?.(e,9.5+(g.level||1)*.4,col);S.shots++;
-    ray(at.x+23,at.y-52,e.x,e.y,col,i===0?4:2.4,.3);
-    sparks(e.x,e.y,col,13,160,q);
+    ray(at.x+23,at.y-52,e.x,e.y,col,i===0?6:3.4,.44);
+    const dir=Math.atan2(e.y-at.y+52,e.x-at.x-23);
+    for(const off of [-.11,.11])ray(at.x+23,at.y-52,e.x+Math.cos(dir+off)*14,e.y+Math.sin(dir+off)*14,col,1.7,.3);
+    sparks(e.x,e.y,col,31,255,q);
    }
-   ring(at.x,at.y-54,42,col,'muzzle',.32);
+   ring(at.x,at.y-54,98,col,'muzzle',.57);
+   ring(at.x,at.y-54,52,col,'muzzle',.39);
+   sparks(at.x+22,at.y-53,col,43,280,q);pulse(g,col,at.x,at.y-54,1.2,q);
    notice(g,'KAI / BURST ASSIST','CROSS-FIRE ×'+enemies.length,at.x,at.y-122);
    api?.sound?.('pilotKai');
   }
@@ -154,9 +165,11 @@ function skill(g,api){
   S.cd=8.3;enemies=nearby(g,p.x,p.y,280,null,9);
   for(const e of enemies){e.slow=Math.max(e.slow||0,1.6);e.pilotSlowUntil=g.time+1.6;S.slows++}
   api?.gainDrive?.(4);api?.gainFinisher?.(3);
-  ring(p.x,p.y,250,col,'field',.84);
-  ring(p.x,p.y,122,col,'circle',.65);
-  sparks(p.x,p.y,col,23,170,q);
+  ring(p.x,p.y,310,col,'field',1.05);
+  ring(p.x,p.y,248,col,'field',.94);
+  ring(p.x,p.y,135,col,'circle',.76);
+  for(const e of enemies.slice(0,5))ray(p.x,p.y-25,e.x,e.y,col,2.5,.39);
+  sparks(p.x,p.y,col,47,220,q);pulse(g,col,p.x,p.y,1.05,q);
   notice(g,'SERA / SUPPORT FIELD','SLOW / DRIVE +4 / FINISHER +3',p.x,p.y-116);
   api?.sound?.('pilotSera');
  }else if(id==='mina'){
@@ -165,8 +178,10 @@ function skill(g,api){
   for(const e of enemies){
    e.pilotScanUntil=g.time+2.4;
    e.slow=Math.max(e.slow||0,.5);
-   ring(e.x,e.y,e.r+21,col,'scan',.72);
-   ray(at.x,at.y-52,e.x,e.y,col,1.7,.35);
+   ring(e.x,e.y,e.r+47,col,'scan',.84);
+   ring(e.x,e.y,e.r+22,col,'scan',.65);
+   ray(at.x,at.y-52,e.x,e.y,col,2.7,.52);
+   sparks(e.x,e.y,col,17,160,q);
   }
   let pulled=0;
   for(const gem of g.gems||[]){
@@ -174,7 +189,9 @@ function skill(g,api){
    if((gem.x-p.x)**2+(gem.y-p.y)**2>=240*240)continue;
    gem.x+=(p.x-gem.x)*.24;gem.y+=(p.y-gem.y)*.24;pulled++;
   }
-  ring(p.x,p.y,126,col,'scan',.65);
+  ring(p.x,p.y,260,col,'scan',.93);
+  ring(p.x,p.y,150,col,'scan',.72);
+  sparks(p.x,p.y,col,35,200,q);pulse(g,col,p.x,p.y,1.07,q);
   notice(g,'MINA / TARGET SCAN','SCANNED '+enemies.length+' / COLLECT '+pulled,p.x,p.y-110);
   api?.sound?.('pilotMina');
  }
@@ -193,8 +210,9 @@ function tick(dt,g,api,q='auto'){
  if(S.bonusPending>0){
   const amount=S.bonusPending;S.bonusPending=0;
   notice(g,'MINA / INVASION BONUS','SCORE +'+amount,g.player.x,g.player.y-107);
-  ring(g.player.x,g.player.y,165,S.pilot.color,'scan',.65);
-  sparks(g.player.x,g.player.y,S.pilot.color,35,205,q);
+  ring(g.player.x,g.player.y,290,S.pilot.color,'scan',1);
+  ring(g.player.x,g.player.y,155,S.pilot.color,'scan',.8);
+  sparks(g.player.x,g.player.y,S.pilot.color,50,250,q);
   api?.sound?.('pilotMina');
  }
  if(S.arrived){S.cd-=dt;if(S.cd<=0)skill(g,api)}
@@ -333,6 +351,41 @@ function drawScreen(ctx,W,H,g,q='auto'){
    ctx.restore();
   }
  }
+
+ // Timed support-technique identifier. Stay on the right and below the top HUD.
+ // All five types have recognizable silhouettes; LITE keeps the label but trims glow.
+ if(S.feature&&S.feature.time>0){
+  const f=S.feature,t=clamp(f.time/f.max,0,1),ease=Math.min(1,(1-t)*6,t*5);
+  if(ease>0){
+   const boxW=W*.32,boxH=H*.115;
+   const x=W-boxW-18+(1-ease)*32,y=H*.69;
+   ctx.save();ctx.globalAlpha=ease;
+   const bg=ctx.createLinearGradient(x,y,x+boxW,y+boxH);
+   bg.addColorStop(0,'rgba(7,10,25,.92)');bg.addColorStop(1,'rgba(15,21,34,.72)');
+   ctx.fillStyle=bg;ctx.fillRect(x,y,boxW,boxH);
+   ctx.strokeStyle=f.color;ctx.lineWidth=q==='lite'?2:3;ctx.strokeRect(x,y,boxW,boxH);
+   ctx.fillStyle=f.color;ctx.fillRect(x+8,y+8,4,boxH-16);
+   // Distinct glyph geometry for each pilot, legible even in FX LITE.
+   const gx=x+35,gy=y+boxH*.5;
+   ctx.save();ctx.translate(gx,gy);ctx.strokeStyle=f.color;ctx.lineWidth=2.5;
+   ctx.beginPath();
+   if(f.id==='elio'){for(let k=0;k<7;k++){const a=k*TAU/6;const xx=Math.cos(a)*15,yy=Math.sin(a)*15;k?ctx.lineTo(xx,yy):ctx.moveTo(xx,yy)}}
+   else if(f.id==='oz'){ctx.arc(0,0,15,0,TAU);ctx.moveTo(-25,0);ctx.lineTo(25,0);ctx.moveTo(0,-25);ctx.lineTo(0,25)}
+   else if(f.id==='kai'){for(const n of [-10,0,10]){ctx.moveTo(-18,n);ctx.lineTo(17,n-7)}}
+   else if(f.id==='sera'){ctx.arc(0,0,15,0,TAU);ctx.moveTo(-10,0);ctx.lineTo(10,0);ctx.moveTo(0,-10);ctx.lineTo(0,10)}
+   else{ctx.rect(-15,-15,30,30);ctx.moveTo(-21,0);ctx.lineTo(21,0)}
+   ctx.stroke();ctx.restore();
+   ctx.textAlign='left';ctx.textBaseline='alphabetic';
+   ctx.fillStyle=f.color;ctx.font='900 15px ui-monospace,Consolas,monospace';
+   ctx.fillText(f.title,x+64,y+boxH*.42,boxW-74);
+   ctx.fillStyle='#f4e9dc';ctx.font='800 11px ui-monospace,Consolas,monospace';
+   ctx.fillText(f.detail,x+64,y+boxH*.7,boxW-74);
+   if(q!=='lite'){
+    ctx.globalAlpha=ease*.18;ctx.fillStyle=f.color;ctx.fillRect(x-3,y-3,boxW+6,boxH+6);
+   }
+   ctx.restore();
+  }
+ }
 }
 
 function drawWorld(ctx,cam,g){
@@ -347,5 +400,5 @@ function drawWorld(ctx,cam,g){
  ctx.restore();
 }
 
-window.RUU_PILOTS={VERSION:'1.15.2',PILOTS,PROBABILITY,DELAY,RUN_TIME,start,active,hasEscort,status,entering,ready,shotRate,interceptRate,shotColor,isKai,xpMultiplier,markedMultiplier,onInvasionRepelled,onEscortShot,onIntercept,onGemPickup,tick,drawScreen,drawWorld,drawGround,drawFront};
+window.RUU_PILOTS={VERSION:'1.15.3',PILOTS,PROBABILITY,DELAY,RUN_TIME,start,active,hasEscort,status,entering,ready,shotRate,interceptRate,shotColor,isKai,xpMultiplier,markedMultiplier,onInvasionRepelled,onEscortShot,onIntercept,onGemPickup,tick,drawScreen,drawWorld,drawGround,drawFront};
 })();
