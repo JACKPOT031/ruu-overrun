@@ -19,7 +19,10 @@ function start(e,g,api,q){
  b.phase=3;b.wind=0;b.cd=1000;
  // The third form is visually 1.28x; its physical collision radius grows 1.17x.
  e.basePhase3Radius=e.r;e.r=Math.round(e.r*1.17);e.phase3VisualScale=1.28;
- e.speed*=1.10;e.dmg=Math.ceil(e.dmg*1.1);e.shoot=Math.max(e.shoot,1);
+ e.speed*=1.10;e.dmg=Math.ceil(e.dmg*1.1);
+ // Do not let the boss fire or contact-hit Ruu during the transformation cut-in.
+ e.shoot=Math.max(e.shoot,1.52);e.attack=Math.max(e.attack||0,1.43);
+ e.col='#ffc375';
  const s=e.phase3={cd:1.45,wind:0,windMax:1.16,pattern:'nova',safeAngle:0,aimX:0,aimY:0,intro:1.38,shots:0,
   nextWaveAt:g.time+7.1,wave:null,waves:0};
  // Spawn first guards on the periphery, never on top of the player.
