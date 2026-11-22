@@ -1,4 +1,30 @@
-# RUU//OVERRUN — PUBLIC BETA (v1.16.2)
+# RUU//OVERRUN — PUBLIC BETA (v1.17.0)
+
+## v1.17.0 — PHASE III REBELLION / LARGER SIGNATURE CUT-INS
+
+### Enlarged the nine normal signature finisher illustrations
+
+- All **nine Ruu SIGNATURE FINISHER** cut-ins remain on the **right-hand side**, safely below the top HUD, but now use a **46% of canvas width × 76% height** image area (up from 37% × 69%). The right-side edge glow is enlarged to match. Tall cut-ins are approximately 10% taller; other image ratios can take advantage of the extra width.
+- The nine approved artwork files, skill damage, invocation conditions, and cut-in durations are unchanged. JACKPOT MODE and support-pilot cut-in positions are unchanged.
+
+### Third form for both major DEVORA bosses
+
+- At **55% HP or below**, both the mid-boss **DEVORA** and final boss **NULL EMPEROR** still shift into **PHASE II** with the existing aimed projectile fan.
+- At **30% remaining HP**, both now enter **PHASE III**, with gold-tinted shockwaves, distinct boss-nameplate colors, stronger movement/contact damage, and **up to two reinforcements** (runner-type for DEVORA, hex-caster type for NULL EMPEROR). No surprise healing or full invulnerability.
+- **TELEGRAPHED TARGET FAN:** after roughly a **1.02-second visible directional warning**, a tightly aimed 7-shot DEVORA or 9-shot NULL EMPEROR fan is fired. The warning line identifies the attack direction.
+- **SIEGE NOVA:** after a **1.17-second warning**, a 16-shot DEVORA or 20-shot NULL EMPEROR radial barrage fires, **leaving two visibly highlighted safe corridors**. The green SAFE arcs mark the gaps before the projectiles are released.
+- The special attacks alternate at approximately 3.05s for DEVORA and 2.55s for NULL EMPEROR. The ordinary radial volley remains, with a short warning and safe gaps in PHASE III. Enemy bullets have a fixed cap to avoid uncontrolled frame drops.
+- FX LITE, AUTO and HIGH preserve the same attack timings and danger warnings. Only optional decorative particles and glows are reduced on lower settings. Boss HUD and DEVORA FILES now document PHASE III.
+- Implemented as `devora-phase3.js`, connected to the original `devora-mutation.js` and game `index.html` via versioned scripts, with the phase transition state isolated per boss for easier balancing.
+
+**Unchanged:** 100-second survival + defeat final boss, ENDLESS and CHALLENGE rules, 25% mass-produced support-pilot lottery, ASTRAEA emergency auto-deployment, original 16 music tracks, JACKPOT 1%, online NORMAL/ENDLESS ranking, local challenge record isolation and the ending. **No Cloudflare Worker/D1 migration** is necessary.
+
+### Recommended smoke tests
+
+1. Trigger a signature finisher and check Ruu's cut-in is visibly larger on the right but does not obscure the top-left gauges.
+2. Lower either boss beneath 55%, then 30% HP; confirm SECOND FORM then THIRD FORM and corresponding warning labels.
+3. In PHASE III, watch for the golden aimed line and siege ring with two green SAFE arcs; try moving into a safe corridor. Confirm summoned bodyguards and alternating volleys.
+4. Check FX LITE and HIGH, NORMAL ending and ranking scores, and whether the harder last boss remains fair.
 
 ## v1.16.2 — CLEAN ESCORT SPRITE / HIT BREAKS COMBO
 
