@@ -1,4 +1,21 @@
-# RUU//OVERRUN — PUBLIC BETA (v1.16.0)
+# RUU//OVERRUN — PUBLIC BETA (v1.16.1)
+
+## v1.16.1 — SUPPORT PILOT SIGNAL VISIBILITY / CACHE PATCH
+
+- **The mass-produced ASTRAL-SUIT is intentionally absent in 75% of runs.** The per-run support roll remains exactly 25% and is not changed by this patch.
+- A small **SUPPORT SIGNAL** status beneath the top-middle timer now distinguishes three cases: `NO SIGNAL (25% CHANCE)` when no ally was drawn; `ELIO/OZ/KAI/SERA/MINA INBOUND` while a chosen pilot is running into the arena; and `ACTIVE` once the pilot has joined. `LOAD ERROR` identifies an unloaded support script. This is gameplay HUD only; the start screen remains minimal.
+- When a pilot wins the lottery, the START toast announces **ALLIED REINFORCEMENT / PILOT NAME INBOUND**. The same character arrives from the right using the mass-produced suit walking GIF, then begins supporting the player.
+- The ASTRAL-SUIT retains its **64×94 logical pixel size** but has a subtle pilot-colored halo, making it easier to see against the dark arena.
+- The HTML now references `support-pilots.js?v=1.16.1` and `astral-companion.js?v=1.16.1` to reduce the chance of browser-cached stale gameplay scripts after an update.
+- **Unchanged:** 25% mass-produced suit draw, five uniform named pilots, ASTRAEA's low-HP final-boss emergency trigger, 12-second flight, all 16 music tracks, JACKPOT 1%, offline challenges, cloud rankings and ending.
+
+### How to diagnose nonappearance
+
+1. Refresh GitHub Pages with **Ctrl + Shift + R** and confirm version **v1.16.1** on the title screen.
+2. Start a run. If the top-center HUD says **SUPPORT // NO SIGNAL (25% CHANCE)**, the random draw lost: there should be no ASTRAL-SUIT.
+3. If the HUD says **SUPPORT // PILOT NAME / INBOUND**, look to the right after approximately one second; the suit should join Ruu within approximately 2.5 seconds.
+4. When it reads **ACTIVE**, the colored suit and its pilot name should remain visible beside Ruu. If it says ACTIVE but no suit is visible, that points to a rendering/resource problem rather than the random draw.
+5. If **LOAD ERROR** is shown, one of the support JavaScript files has not loaded correctly. Recheck the installed GitHub Pages files.
 
 ## v1.16.0 — ASTRAEA EMERGENCY FLIGHT CINEMA
 
