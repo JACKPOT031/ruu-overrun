@@ -120,7 +120,7 @@
   function shareToX(){
     const r=result();if(!r)return;
     const label=nickname?safeName(nickname):'ANONYMOUS';
-    const text=`RUU//OVERRUN 🎮\n${r.mode==='endless'?'∞ ENDLESS MODE':r.won?'MISSION COMPLETE!':'SURVIVAL RESULT'}\nPLAYER: ${label}${r.title?' / '+r.title:''}\nSCORE: ${Number(r.score).toLocaleString('ja-JP')} / KILLS: ${r.kills} / LV: ${r.level}\n#RUUOVERRUN #JACKPOTØ31`;
+    const text=`RUU//OVERRUN 🎮\n${r.mode==='challenge'?'✦ CHALLENGE / '+(r.challengeName||r.challengeId)+' / '+(r.challengeSuccess?'CLEARED':'FAILED'):r.mode==='endless'?'∞ ENDLESS MODE':r.won?'MISSION COMPLETE!':'SURVIVAL RESULT'}\nPLAYER: ${label}${r.title?' / '+r.title:''}\nSCORE: ${Number(r.score).toLocaleString('ja-JP')} / KILLS: ${r.kills} / LV: ${r.level}\n#RUUOVERRUN #JACKPOTØ31`;
     const qs=new URLSearchParams({text});
     const u=shareUrl();if(u)qs.set('url',u);
     window.open('https://twitter.com/intent/tweet?'+qs.toString(),'_blank','noopener,noreferrer');
@@ -140,7 +140,7 @@
     c.strokeStyle='#ddbe8f';c.lineWidth=3;c.strokeRect(26,26,W-52,H-52);
     c.fillStyle='#c4ae92';c.font='800 21px ui-monospace,monospace';c.fillText('JACKPOTØ31 / ORIGINAL GAME',64,87);
     c.fillStyle='#fce7bd';c.font='italic 900 76px system-ui,sans-serif';c.fillText('RUU//OVERRUN',59,174);
-    c.fillStyle=r.won?'#98fbd7':'#ffb1c6';c.font='900 31px system-ui,sans-serif';c.fillText(r.mode==='endless'?'∞ ENDLESS MODE':r.won?'MISSION COMPLETE':'SURVIVAL RESULT',65,238);
+    c.fillStyle=r.won?'#98fbd7':'#ffb1c6';c.font='900 31px system-ui,sans-serif';c.fillText(r.mode==='challenge'?'✦ CHALLENGE '+(r.challengeSuccess?'CLEARED':'FAILED'):r.mode==='endless'?'∞ ENDLESS MODE':r.won?'MISSION COMPLETE':'SURVIVAL RESULT',65,238);
     c.fillStyle='#fff3dc';c.font='900 116px ui-monospace,Consolas,monospace';c.fillText(Number(r.score).toLocaleString('ja-JP'),59,385);
     c.fillStyle='#d2bca2';c.font='800 23px system-ui,sans-serif';c.fillText('SCORE',65,281);
     c.fillStyle='#efdfc6';c.font='900 29px ui-monospace,monospace';c.fillText(`KILLS  ${r.kills}      LV  ${r.level}      TIME  ${String(Math.floor(r.durationSeconds/60)).padStart(2,'0')}:${String(r.durationSeconds%60).padStart(2,'0')}`,65,460);
@@ -154,7 +154,7 @@
     nickname=safeName(scoreInput.value);scoreInput.value=nickname;storage.set(STORE_NAME,nickname);
     if(!nickname){status.textContent='まずプレイヤー名を入力してね。';scoreInput.focus();return}
     if(!api){status.textContent=API_MESSAGE;return}
-    const r=result();if(!r){status.textContent='プレイ終了後の記録だけ登録できるよ。';return}
+    const r=result();if(!r){status.textContent='プレイ終了後の記録だけ登録できるよ。';return}if(r.mode==='challenge'){status.textContent='チャレンジ記録はローカル専用。通常ランキングに送信しないよ。';return;}
     if(r.mode==='endless'&&!(await supportedModes()).includes('endless')){status.textContent='ENDLESS自己ベストは保存済み。オンライン登録はCloudflare更新後に使えるよ。';return;}
     busy=true;status.textContent='送信中…';
     try{
@@ -177,12 +177,12 @@
     if(menu.querySelector('#ruu-public-result'))return;
     const stats=menu.querySelector('.result-stats');if(!stats)return;
     const p=document.createElement('div');p.id='ruu-public-result';p.className='ruu-score-box';
-    const input=inputElement();const status=document.createElement('div');status.className='ruu-public-status';
-    p.append(input,createButton('🏆 ランキング登録',()=>submit(input,status)),createButton('🌐 みんなの順位',()=>showBoard(result()?.mode==='endless'?'endless':'normal')),createButton('𝕏 結果をポスト',shareToX),createButton('🖼 結果カード保存',saveResultCard));
-    const hint=document.createElement('div');hint.className='ruu-public-hint';hint.textContent='名前とスコアは公開ランキングに表示されるよ。匿名のニックネームを使ってね。Xへの投稿は確認画面が開くだけ。画像カードは保存後、Xで手動添付してね。';
+    const input=inputElement();const status=document.createElement('div');status.className='ruu-public-status';const challengeMode=result()?.mode==='challenge';
+    if(challengeMode)p.append(createButton('𝕏 チャレンジ結果をポスト',shareToX),createButton('🖼 結果カード保存',saveResultCard));else p.append(input,createButton('🏆 ランキング登録',()=>submit(input,status)),createButton('🌐 みんなの順位',()=>showBoard(result()?.mode==='endless'?'endless':'normal')),createButton('𝕏 結果をポスト',shareToX),createButton('🖼 結果カード保存',saveResultCard));
+    const hint=document.createElement('div');hint.className='ruu-public-hint';hint.textContent=challengeMode?'CHALLENGEはローカル記録専用。通常・ENDLESSの世界ランキングへ送信されません。Xと結果カードは共有できるよ。':'名前とスコアは公開ランキングに表示されるよ。匿名のニックネームを使ってね。Xへの投稿は確認画面が開くだけ。画像カードは保存後、Xで手動添付してね。';
     p.append(hint,status);
     const help=menu.querySelector('.help');if(help)menu.insertBefore(p,help);else menu.append(p);
-    if(!api)status.textContent='共通ランキングの接続待ち。X共有は今すぐ利用可能。';
+    if(!api&&!challengeMode)status.textContent='共通ランキングの接続待ち。X共有は今すぐ利用可能。';
   }
   function refresh(){if(menu.querySelector('#startBtn'))addTitleControls();else if(menu.querySelector('.result-stats'))addResultControls();}
   new MutationObserver(refresh).observe(menu,{childList:true});
