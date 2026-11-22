@@ -342,5 +342,5 @@ function drawScreen(ctx,W,H,g,q='auto'){
  }
  if(z.flash>0&&q!=='lite'){ctx.save();ctx.globalAlpha=z.flash*.18;ctx.strokeStyle=pink;ctx.lineWidth=8;ctx.strokeRect(7,7,W-14,H-14);ctx.restore()}
 }
-window.RUU_COMPANION={VERSION:'1.16.2',reset,status,onKill,onFinalBossSpawn,tick,drawGround,drawUnits,drawFront,drawScreen,position:()=>z.allyX===null?null:{x:z.allyX,y:z.allyY}};
+window.RUU_COMPANION={VERSION:'1.19.0',reset,status,onKill,onFinalBossSpawn,tick,drawGround,drawUnits,drawFront,drawScreen,position:()=>z.allyX===null?null:{x:z.allyX,y:z.allyY}};
 })();
