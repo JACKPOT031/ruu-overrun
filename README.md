@@ -1,4 +1,13 @@
-# RUU//OVERRUN — PUBLIC BETA (v1.14.0)
+# RUU//OVERRUN — PUBLIC BETA (v1.14.1)
+
+## v1.14.1 — RIGHT-SIDE CUT-INS / CLEAN START SCREEN
+
+- All **nine SIGNATURE FINISHER** illustrations now enter from the **right**. Their image lane starts at approximately 19% down from the top, keeping the top-left HP / FINISHER / SYNCHRO gauges free of cut-in art.
+- All **three JACKPOT MODE** introduction illustrations also use the same right-side layout. Right-side score HUD remains above the image lane.
+- Cinematic overlays still use the original artwork, music, damage, timings and controls; **only presentation geometry was changed**.
+- The title screen removes the long feature catalog and outdated ZIP startup advice. It now shows one short description (automatic attacks, 100-second survival and final boss), key controls, existing menu buttons and personal best.
+- DEVORA FILES, ACHIEVEMENTS, CHALLENGE MISSIONS, ENDLESS MODE and ENDING THEATER stay available through their existing title buttons.
+- No Cloudflare / D1 update required. The game and result version displays are now **v1.14.1**.
 
 ## v1.14.0 — SURVIVAL TRIALS (DEVORA INVASION / LAST STAND / CHALLENGE MISSIONS)
 
