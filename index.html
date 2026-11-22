@@ -395,7 +395,7 @@ function showAchievementArchive(){
   {key:'black',title:'Ruu Ruu Ruu - Watching You',label:'DARK TRACE / 黒影追葬',asset:'assets/jackpot_black.webp',song:14,color:'#ff5270',accent:'#c4b1ff',duration:13}
  ];
  const JACKPOT_ARTS=JACKPOTS.map(j=>{const im=new Image();im.src=j.asset;return im});
- const JACKPOT_CHANCE=.03; // 3.0% chance per level-up menu, rerolls independently roll
+ const JACKPOT_CHANCE=.01; // 1.0% chance per level-up menu, rerolls independently roll
  const ENDING_TITLE='さすらえば';
  const ARENAS=[
   {jp:'紅蓮の遺構',name:'CRIMSON ARCHIVE',color:'#ec8e91',asset:'assets/stage_0.webp'},
@@ -1188,12 +1188,12 @@ function rollRareChoice(choices){
    ui.pause.textContent='Ⅱ PAUSE';
    const cards=g.levelChoices.map((u,i)=>{
      const lvl=g.player.mods[u.id]||0,boost=Math.max(1,u.bonus||1),newLvl=Math.min(u.max||99,lvl+boost);
-     const label=u.type==='JACKPOT_MODE'?'★ 3.0% JACKPOT MODE':u.rarity==='mythic'?'✹ MYTHIC +4':u.rarity==='legendary'?'✦ JACKPOT +3':u.rarity==='rare'?'✧ RARE +2':'';
+     const label=u.type==='JACKPOT_MODE'?'★ 1.0% JACKPOT MODE':u.rarity==='mythic'?'✹ MYTHIC +4':u.rarity==='legendary'?'✦ JACKPOT +3':u.rarity==='rare'?'✧ RARE +2':'';
      const foot=u.type==='JACKPOT_MODE'?'13s INVINCIBLE / EXCLUSIVE TRACK':u.type==='EVOLUTION'?'ULTIMATE EVOLUTION':u.type==='FUSION'?'FUSION ATTACK':u.id==='heal'?'INSTANT RESTORE':`LV ${lvl} → ${newLvl} ${boost>1?' / MULTI LEVEL':''}`;
      return `<button class="upgrade-card ${u.type==='EVOLUTION'||u.type==='FUSION'?'special':''} ${u.type==='JACKPOT_MODE'?'jackpot-special':''} ${u.rarity==='rare'?'rare':u.rarity==='legendary'?'legendary':u.rarity==='mythic'?'mythic':''}" data-i="${i}" aria-label="${u.name}${boost>1?' '+boost+'段階強化':''} を選ぶ"><span class="card-num">[${i+1}]</span>${label?`<span class="rarity-label">${label}</span>`:''}<div class="card-ico" style="color:${u.type==='JACKPOT_MODE'?'#ffe5aa':u.rarity==='mythic'?'#ffb2ff':u.rarity==='legendary'?'#ffe2a4':u.rarity==='rare'?'#9cdfff':u.type==='EVOLUTION'||u.type==='FUSION'?'#ffeaa6':'#8effee'}">${u.type==='JACKPOT_MODE'?'★':u.type==='FUSION'?'✥':icon[u.id]}</div><div class="card-type">${u.type}</div><div class="card-name">${u.name}</div><div class="card-text">${u.desc}</div><div class="card-foot">${foot}</div></button>`;
    }).join('');
    const anyRare=g.levelChoices.some(u=>u.bonus>1||u.type==='JACKPOT_MODE');
-   setOverlay(`<div class="lv-panel"><div class="lv-eyebrow">${anyRare?'RARE SIGNAL DETECTED // BONUS UPGRADE':'RESONANCE FOUND // SELECT YOUR PATH'}</div><h2 class="lv-title">LEVEL UP! <span style="color:#a7f7ff;font-size:.56em">LV.${String(g.level).padStart(2,'0')}</span></h2><p class="lv-desc">3択から選択 / キー1・2・3　<span class="rarity-guide">RARE +2 15% / JACKPOT +3 3% / MYTHIC +4 1% / JACKPOT MODE 3.0%</span></p><div class="cards">${cards}</div><div class="reroll-row"><button id="rerollBtn" class="reroll-btn" ${g.rerolls<=0?'disabled':''}>⟳ REROLL / 残り ${g.rerolls}</button><span class="reroll-note">選択肢を引き直す・Rキー / BGMは継続</span></div></div>`);
+   setOverlay(`<div class="lv-panel"><div class="lv-eyebrow">${anyRare?'RARE SIGNAL DETECTED // BONUS UPGRADE':'RESONANCE FOUND // SELECT YOUR PATH'}</div><h2 class="lv-title">LEVEL UP! <span style="color:#a7f7ff;font-size:.56em">LV.${String(g.level).padStart(2,'0')}</span></h2><p class="lv-desc">3択から選択 / キー1・2・3　<span class="rarity-guide">RARE +2 15% / JACKPOT +3 3% / MYTHIC +4 1% / JACKPOT MODE 1.0%</span></p><div class="cards">${cards}</div><div class="reroll-row"><button id="rerollBtn" class="reroll-btn" ${g.rerolls<=0?'disabled':''}>⟳ REROLL / 残り ${g.rerolls}</button><span class="reroll-note">選択肢を引き直す・Rキー / BGMは継続</span></div></div>`);
    document.querySelectorAll('.upgrade-card').forEach(btn=>{btn.onclick=()=>selectUpgrade(Number(btn.dataset.i))});document.getElementById('rerollBtn').onclick=rerollUpgrades;
  }
  function rerollUpgrades(){
