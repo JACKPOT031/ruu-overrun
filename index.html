@@ -316,7 +316,7 @@ body{background:radial-gradient(ellipse 80% 66% at 52% 24%,#2a2934 0%,#11131d 55
 </head>
 <body>
 <div class="shell">
- <div class="upper"><div class="brand">JACKPOT<b>Ø</b>31 <span style="color:#667f95">/ ORIGINAL GAMES</span></div><div class="build">RUU//OVERRUN <b>v1.19.1</b> · 16 TRACKS / SHORT ENDING</div></div>
+ <div class="upper"><div class="brand">JACKPOT<b>Ø</b>31 <span style="color:#667f95">/ ORIGINAL GAMES</span></div><div class="build">RUU//OVERRUN <b>v1.19.2</b> · 16 TRACKS / SHORT ENDING</div></div>
  <main class="frame" id="frame">
   <canvas id="game" width="1200" height="675" aria-label="ルーのサバイバルアクションゲーム"></canvas>
   <div class="hud" id="hud">
@@ -361,7 +361,7 @@ body{background:radial-gradient(ellipse 80% 66% at 52% 24%,#2a2934 0%,#11131d 55
 <script src="devora-mutation.js?v=1.17.0"></script>
 <script src="devora-phase3.js?v=1.19.0"></script>
 <script src="devora-true-end.js?v=1.19.1"></script>
-<script src="swarm-director.js?v=1.18.0"></script>
+<script src="swarm-director.js?v=1.19.2"></script>
 <script src="support-pilots.js?v=1.19.0"></script>
 <script src="astral-companion.js?v=1.19.0"></script>
 <script src="survival-trials.js"></script>
@@ -1931,9 +1931,11 @@ function rollRareChoice(choices){
  p.wasMoving=stepping;
  window.RUU_OPERATIONS?.tick(dt,g,{spawn:makeEnemy,toast,sound:sfx,wave:shockwave,gainDrive,gainFinisher});
  window.RUU_SWARM?.tick(dt,g,{spawn:makeEnemy,decorate:(e,game)=>window.RUU_MUTATION?.decorate(e,game),toast,sfx},fxPreset);
- let rate=clamp((.91-g.time*.0055)*.86*(g.time>=75?.90:1),.19,.82);
+ // About 15% fewer routine spawns without touching boss / true-end patterns.
+ let rate=clamp((.91-g.time*.0055)*1.02*(g.time>=75?.90:1),.225,.96);
  g.spawnT-=dt;
- const maxEn=clamp(Math.ceil((55+Math.floor(g.time*1.4))*1.14),62,g.mode==='endless'?242:205);
+ // Share a common cap with timed swarm waves; boss and scripted spawns are not gated here.
+ const maxEn=window.RUU_SWARM?.enemyCap?.(g)??clamp(Math.ceil((55+Math.floor(g.time*1.4))*.97),53,g.mode==='endless'?205:175);
  if(g.spawnT<=0){
   g.spawnT=rate;
   const num=g.mode==='endless'&&g.time>240?5:g.mode==='endless'&&g.time>170?4:g.time>75?3:g.time>32?2:1;
@@ -2696,7 +2698,7 @@ ui.healthFill.style.width=`${100*p.hp/p.maxHp}%`;ui.healthText.textContent=`${Ma
    level: Math.max(1, Math.floor(g?.level || 1)),
    durationSeconds: Math.max(0, Math.floor(g?.time || 0)),
    won: state === 'won',
-   version: '1.19.1',
+   version: '1.19.2',
     mode: g?.mode==='challenge'?'challenge':g?.mode==='endless'?'endless':'normal',
      challengeId:g?.challengeId||'',
      challengeName:window.RUU_OPERATIONS?.currentInfo(g)?.name||'',
