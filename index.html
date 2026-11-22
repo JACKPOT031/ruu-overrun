@@ -273,6 +273,15 @@ body{background:radial-gradient(ellipse 80% 66% at 52% 24%,#2a2934 0%,#11131d 55
 @media(max-width:700px){.ach-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:5px}.ach-item{min-height:65px;padding:7px}.ach-item span{font-size:8px}.ach-item i{font-size:7px}}
 
 .equipped-title{display:inline-block;border:1px solid #c8b28c90;border-radius:6px;padding:7px 15px;background:#231d29b8;font:800 12px system-ui,sans-serif;color:#ffe5b6;letter-spacing:.02em;margin-top:7px}
+.trial-panel{width:min(900px,100%);max-height:95%;overflow:auto;text-align:center;padding:10px 4px}
+.trial-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:11px;text-align:left;margin:18px 0}
+.trial-card{display:flex;flex-direction:column;gap:8px;padding:14px;border:1px solid #a58a7288;border-radius:8px;background:linear-gradient(145deg,#25232d,#111523);min-height:218px}
+.trial-name{color:#f9e9cb;font-size:16px;font-weight:900}.trial-desc{flex:1;color:#c6b9b1;font-size:11px;line-height:1.7}
+.trial-record{font:800 10px ui-monospace,monospace;color:#9de6b5}
+.trial-card button{border:1px solid #e5c496;background:#42342f;color:#fff4d9;border-radius:6px;padding:9px;font:900 12px system-ui,sans-serif;cursor:pointer}
+.trial-card button:hover{background:#68513c}.trial-title-select{max-width:90%;padding:8px;background:#171b28;border:1px solid #a58a72;border-radius:6px;color:#f4e1c2}
+.challenge-result-stamp{color:#f5d7ab;font:800 13px ui-monospace,monospace;margin:10px}
+@media(max-width:700px){.trial-grid{grid-template-columns:1fr;gap:7px}.trial-card{min-height:100px;padding:10px}.trial-desc{font-size:10px}}
 .astral-label{font:800 clamp(8px,.83vw,11px) ui-monospace,Consolas,monospace;letter-spacing:.07em;color:#ffb6e8;margin-top:8px;display:flex;justify-content:space-between;gap:8px}
 .astral-meter{height:6px;margin-top:4px;overflow:hidden;border-radius:5px;border:1px solid #ab658f;background:#211421}
 .astral-meter>div{height:100%;width:0%;background:linear-gradient(90deg,#ac61d7,#ff9ed9,#fff1fa);transition:width .12s}
@@ -332,6 +341,7 @@ body{background:radial-gradient(ellipse 80% 66% at 52% 24%,#2a2934 0%,#11131d 55
 <script src="expansion-system.js"></script>
 <script src="devora-mutation.js"></script>
 <script src="astral-companion.js"></script>
+<script src="survival-trials.js"></script>
 <script>
 (()=>{
  'use strict';
@@ -361,6 +371,7 @@ body{background:radial-gradient(ellipse 80% 66% at 52% 24%,#2a2934 0%,#11131d 55
    document.getElementById('codexBack').addEventListener('click',()=>showStart());
  }
 
+function equippedTitle(){return window.RUU_OPERATIONS?.selectedTitle()||window.RUU_EXPANSION?.selectedTitle()||''}
 function showAchievementArchive(){
   const sys=window.RUU_EXPANSION;
   const badges=sys?.status()||[];
@@ -368,10 +379,20 @@ function showAchievementArchive(){
   const options='<option value="">称号なし</option>'+badges.filter(a=>a.unlocked).map(a=>'<option value="'+a.id+'">'+a.title+'</option>').join('');
   setOverlay('<section class="ach-panel"><div class="eyebrow">RUU / MISSION ARCHIVE</div><h2 class="codex-title">ACHIEVEMENTS</h2><p class="codex-deck">'+badges.filter(a=>a.unlocked).length+' / '+badges.length+' UNLOCKED · 獲得した称号を選べる</p><div class="ach-grid">'+items+'</div><div class="ach-select-label">EQUIPPED TITLE <select id="achTitle" aria-label="獲得称号を選択">'+options+'</select></div><button class="primary codex-back" id="achBack" type="button">← BACK TO TITLE</button></section>');
   document.getElementById('achTitle').value=badges.find(a=>a.unlocked&&a.title===sys.selectedTitle())?.id||'';
-  document.getElementById('achTitle').onchange=e=>{sys.changeTitle(e.target.value);sfx('select');};
+  document.getElementById('achTitle').onchange=e=>{sys.changeTitle(e.target.value);window.RUU_OPERATIONS?.selectTitle('');sfx('select');};
   document.getElementById('achBack').onclick=showStart;
  }
- const WALK_ATLAS=new Image();WALK_ATLAS.src='assets/ruu_walk_atlas.webp';
+ function showChallengeArchive(){
+ const sys=window.RUU_OPERATIONS,all=sys?.status()||[];
+ const cards=all.map(m=>'<article class="trial-card"><div class="trial-name">'+m.icon+' '+m.name+' / '+m.jp+'</div><div class="trial-desc">'+m.desc+'</div><div class="trial-record">'+(m.cleared?'CLEAR '+m.clears+' / BEST '+m.best.toLocaleString('ja-JP'):'NOT CLEARED')+'</div><button type="button" data-trial="'+m.id+'">▶ この試練に挑戦</button></article>').join('');
+ const options='<option value="">チャレンジ称号なし</option>'+all.filter(m=>m.cleared).map(m=>'<option value="'+m.id+'">'+m.title+'</option>').join('');
+ setOverlay('<section class="trial-panel"><div class="eyebrow">CLASSIFIED // SURVIVAL TRIALS</div><h2 class="codex-title">CHALLENGE MISSIONS</h2><p class="codex-deck">100秒＋最終ボス撃破 / ローカル専用・世界ランキングとは別</p><div class="trial-grid">'+cards+'</div><label class="ach-select-label">EQUIPPED TRIAL TITLE <select class="trial-title-select" id="trialTitle">'+options+'</select></label><button class="primary codex-back" id="trialBack" type="button">← BACK TO TITLE</button></section>');
+ document.querySelectorAll('[data-trial]').forEach(el=>{el.onclick=()=>startGame('challenge',el.dataset.trial)});
+ const select=document.getElementById('trialTitle');select.value=all.find(m=>m.equipped)?.id||'';
+ select.onchange=()=>{if(sys.selectTitle(select.value)&&select.value)window.RUU_EXPANSION?.changeTitle('');sfx('select')};
+ document.getElementById('trialBack').onclick=showStart;
+}
+const WALK_ATLAS=new Image();WALK_ATLAS.src='assets/ruu_walk_atlas.webp';
  const ANIM_CELL=256,ANIM_COLS=6;
  const animToggle=document.getElementById('animToggle');
  let animEnabled=true;
@@ -491,7 +512,7 @@ function showAchievementArchive(){
  function showMusicRetry(show){retryMusic.hidden=!show;}
  function musicRunning(){return musicStarted && soundOn && !activeMusic().paused && activeMusic().readyState>=2;}
  function getBest(mode='normal'){try{return JSON.parse(localStorage.getItem(mode==='endless'?ENDLESS_SAVE_KEY:SAVE_KEY)||'null')}catch(e){return null}}
- function saveBest(){if(!g)return;const mode=g.mode||'normal',prior=getBest(mode);if(!prior||g.score>prior.score){try{localStorage.setItem(mode==='endless'?ENDLESS_SAVE_KEY:SAVE_KEY,JSON.stringify({score:Math.floor(g.score),kills:g.kills,level:g.level,time:Math.floor(g.time),mode}))}catch(e){}}}
+ function saveBest(){if(!g||g.mode==='challenge')return;const mode=g.mode||'normal',prior=getBest(mode);if(!prior||g.score>prior.score){try{localStorage.setItem(mode==='endless'?ENDLESS_SAVE_KEY:SAVE_KEY,JSON.stringify({score:Math.floor(g.score),kills:g.kills,level:g.level,time:Math.floor(g.time),mode}))}catch(e){}}}
  function showBossAlert(final){bossAlert.innerHTML=`<img class="boss-portrait" src="${ENEMY_URLS[final?'final':'boss']}" alt=""><div class="alert-tag">${final?'FINAL THREAT IDENTIFIED':'WARNING // BOSS DETECTED'}</div><div class="alert-title">${final?'NULL EMPEROR':'DEVORA // FIRST CONTACT'}</div><div class="alert-sub">${final?'NO MORE ESCAPE':'STAGE BOSS PROTOCOL // STILL PLAYING'}</div>`;bossAlert.classList.remove('active');void bossAlert.offsetWidth;bossAlert.classList.add('active');}
  
  const rand=(a,b)=>a+Math.random()*(b-a),ri=(a,b)=>Math.floor(rand(a,b+1)),clamp=(x,a,b)=>Math.max(a,Math.min(b,x)),lerp=(a,b,t)=>a+(b-a)*t;
@@ -659,9 +680,9 @@ function showAchievementArchive(){
  endingDom.progress.addEventListener('keydown',ev=>{if(ev.key==='ArrowRight'){ev.preventDefault();seekEnding(endingClock()+5)}else if(ev.key==='ArrowLeft'){ev.preventDefault();seekEnding(endingClock()-5)}});
  musicEls[ENDING_TRACK_INDEX].addEventListener('ended',()=>{if(state==='ending')finishEndingCinema()});
 
- function showStart(){state='start';ui.hud.style.display='none';ui.pause.disabled=true;musicIndicator.classList.remove('visible');musicMeter.classList.remove('visible');showMusicRetry(false);bossAlert.classList.remove('active');const best=getBest();const endlessBest=getBest('endless');setOverlay(`<div class="menu-grid"><div class="menu-copy"><div class="menu-tick">JACKPOT<strong>Ø</strong>31 / ORIGINAL GAME <span style="color:#dcc2a2">— v1.13.1 PUBLIC BETA</span></div><h1 class="menu-logo"><span class="ruu">RUU</span><span class="slashes">//</span>OVERRUN</h1><div class="menu-nameplate">SURVIVE THE SWARM. BREAK THE LIMIT.</div><div class="menu-separator"></div><p class="menu-intro">群れを生き抜け。限界を突破しろ。<br><strong>移動するだけで自動攻撃。</strong> 経験値を集めてスキルを進化させよう。<br><span class="minor">AUTO MIXはボス戦の節目で切替。侵食体DEVORA敵8種＋変異個体4系統・ボス第二形態・ASTRAL-SUIT援護・条件付きASTRAEA出撃・9種類の自動必殺技・平面2Dワールド追従アリーナ3種・視認性調整を実装。通常戦闘12曲＋特別3曲＋ED『さすらえば』の全16曲・100秒の生存戦。約53秒のキラキラEDを追加。背景演出はSCENEボタンで切替可能。</span></p><div class="start-row"><button class="primary" id="startBtn" type="button">▶ START // DEPLOY  ·  ENTER</button><button class="enemy-archive-btn" id="enemyArchive" type="button">☷ DEVORA FILES</button><button class="enemy-archive-btn" id="achievementsBtn" type="button">✧ ACHIEVEMENTS</button>${endingUnlocked()?`<button class="enemy-archive-btn" id="endlessBtn" type="button" title="クリア後解放 / 自己ベスト ${endlessBest?.score||0}">∞ ENDLESS MODE</button>`:``}${endingUnlocked()?`<button class="enemy-archive-btn" id="endingTheater" type="button">♫ ENDING THEATER</button>`:``}<div class="run-record">PERSONAL BEST<strong>${best?best.score.toLocaleString('ja-JP'):'— — —'}</strong></div></div><div class="menu-controls"><span class="key">WASD</span> MOVE　<span class="key">SPACE</span> DASH　<span class="key">X</span> ASTRAEA　<span class="key">1–3</span> UPGRADE　<span class="key">ESC</span> PAUSE<br><span style="color:#bd9e79">♪ MUSIC CONTINUES DURING LEVEL UP // 9 ULTIMATE CUT-INS / 16 TRACKS / JACKPOT MODE</span><br><span style="color:#e0bfa1">起動できない場合はZIPを展開してChrome／Edgeで開いてください。</span></div></div><div class="hero-figure" id="heroArt"><div class="hero-hint">RUU / CHARACTER DATA</div></div></div>`);setupTitleGallery();const unlockBtn=document.getElementById('endingTheater');if(unlockBtn)unlockBtn.onclick=()=>startEndingCinema(true);document.getElementById('startBtn').addEventListener('click',()=>{try{startGame()}catch(e){console.error(e);const btn=document.getElementById('startBtn');if(btn){btn.textContent='START エラー — ENTER / 再読込';btn.title=String(e)}}});document.getElementById('enemyArchive').addEventListener('click',showDevoraFiles);document.getElementById('achievementsBtn').onclick=showAchievementArchive;const endlessBtn=document.getElementById('endlessBtn');if(endlessBtn)endlessBtn.onclick=()=>startGame('endless')}
+ function showStart(){state='start';ui.hud.style.display='none';ui.pause.disabled=true;musicIndicator.classList.remove('visible');musicMeter.classList.remove('visible');showMusicRetry(false);bossAlert.classList.remove('active');const best=getBest();const endlessBest=getBest('endless');setOverlay(`<div class="menu-grid"><div class="menu-copy"><div class="menu-tick">JACKPOT<strong>Ø</strong>31 / ORIGINAL GAME <span style="color:#dcc2a2">— v1.13.1 PUBLIC BETA</span></div><h1 class="menu-logo"><span class="ruu">RUU</span><span class="slashes">//</span>OVERRUN</h1><div class="menu-nameplate">SURVIVE THE SWARM. BREAK THE LIMIT.</div><div class="menu-separator"></div><p class="menu-intro">群れを生き抜け。限界を突破しろ。<br><strong>移動するだけで自動攻撃。</strong> 経験値を集めてスキルを進化させよう。<br><span class="minor">AUTO MIXはボス戦の節目で切替。侵食体DEVORA敵8種＋変異個体4系統・ボス第二形態・ASTRAL-SUIT援護・条件付きASTRAEA出撃・9種類の自動必殺技・平面2Dワールド追従アリーナ3種・視認性調整を実装。通常戦闘12曲＋特別3曲＋ED『さすらえば』の全16曲・100秒の生存戦。約53秒のキラキラEDを追加。背景演出はSCENEボタンで切替可能。</span></p><div class="start-row"><button class="primary" id="startBtn" type="button">▶ START // DEPLOY  ·  ENTER</button><button class="enemy-archive-btn" id="enemyArchive" type="button">☷ DEVORA FILES</button><button class="enemy-archive-btn" id="achievementsBtn" type="button">✧ ACHIEVEMENTS</button>${endingUnlocked()?`<button class="enemy-archive-btn" id="challengeBtn" type="button">✦ CHALLENGE MISSIONS</button><button class="enemy-archive-btn" id="endlessBtn" type="button" title="クリア後解放 / 自己ベスト ${endlessBest?.score||0}">∞ ENDLESS MODE</button>`:``}${endingUnlocked()?`<button class="enemy-archive-btn" id="endingTheater" type="button">♫ ENDING THEATER</button>`:``}<div class="run-record">PERSONAL BEST<strong>${best?best.score.toLocaleString('ja-JP'):'— — —'}</strong></div></div><div class="menu-controls"><span class="key">WASD</span> MOVE　<span class="key">SPACE</span> DASH　<span class="key">X</span> ASTRAEA　<span class="key">1–3</span> UPGRADE　<span class="key">ESC</span> PAUSE<br><span style="color:#bd9e79">♪ MUSIC CONTINUES DURING LEVEL UP // 9 ULTIMATE CUT-INS / 16 TRACKS / JACKPOT MODE</span><br><span style="color:#e0bfa1">起動できない場合はZIPを展開してChrome／Edgeで開いてください。</span></div></div><div class="hero-figure" id="heroArt"><div class="hero-hint">RUU / CHARACTER DATA</div></div></div>`);setupTitleGallery();const unlockBtn=document.getElementById('endingTheater');if(unlockBtn)unlockBtn.onclick=()=>startEndingCinema(true);document.getElementById('startBtn').addEventListener('click',()=>{try{startGame()}catch(e){console.error(e);const btn=document.getElementById('startBtn');if(btn){btn.textContent='START エラー — ENTER / 再読込';btn.title=String(e)}}});document.getElementById('enemyArchive').addEventListener('click',showDevoraFiles);document.getElementById('achievementsBtn').onclick=showAchievementArchive;const challengeBtn=document.getElementById('challengeBtn');if(challengeBtn)challengeBtn.onclick=showChallengeArchive;const endlessBtn=document.getElementById('endlessBtn');if(endlessBtn)endlessBtn.onclick=()=>startGame('endless')}
  function resetGame(){g={time:0,kills:0,level:1,rareFinds:0,combo:0,comboTimer:0,comboMilestones:0,stageBlend:0,stageReveal:0,scenePulse:0,sceneUlt:0,sceneBoss:0,sceneShift:0,crates:0,rerolls:2,mythicFinds:0,driveGauge:0,driveTime:0,finisherGauge:0,finisherTime:0,finisherPulse:0,finisherCooldown:0,finisherType:0,finisherCursor:0,finisherCount:0,finisherHits:0,finisherChain:0,signatureFx:[],jackpotTime:0,jackpotIntro:0,jackpotPulse:0,jackpotType:-1,jackpotCount:0,jackpotFx:[],jackpotResumeIndex:0,cutin:0,elites:0,elite1:false,elite2:false,xp:0,need:26,spawnT:0,shotT:.1,novaT:0,lightT:0,meteorT:1.4,railT:1.7,frostT:1.1,wellT:2.4,missileT:1.3,sonicT:1.6,prismT:2.3,shardT:1.3,satelliteT:2.0,riftT:2.2,fireworksT:1.7,crossT:2.6,beat:0,flash:0,shake:0,boss1:false,boss2:false,evolved:false,finalBossDead:false,phase:1,score:0,levelChoices:[],enemies:[],bullets:[],ebullets:[],gems:[],particles:[],texts:[],waves:[],lightningFx:[],shards:[],impacts:[],ghosts:[],muzzle:[],meteors:[],wells:[],missiles:[],weaponFx:[],chests:[],crystals:[],evoGravity:false,evoPrism:false,evoSat:false,evoRift:false,evoBloom:false,hexAnnounced:false,fxPulse:0,fxBeat:0,ghostClock:0,player:{x:0,y:0,px:0,py:0,r:20,hp:115,maxHp:115,shield:0,maxShield:0,inv:0,speed:208,damage:13,haste:1,magnet:110,crit:0,dash:0,dashRemain:0,dashX:0,dashY:0,face:1,dir:'down',isMoving:false,hexSlow:0,animPhase:0,wasMoving:false,mods:{pulse:1,orbit:0,nova:0,lightning:0,meteor:0,rail:0,frost:0,well:0,missile:0,sonic:0,prism:0,shard:0,satellite:0,rift:0,fireworks:0,cross:0,echo:0,crit:0,damage:0,haste:0,speed:0,magnet:0,vital:0,shield:0}}};window.RUU_SPECTACLE?.reset();window.RUU_PREMIUM?.reset();window.RUU_MUTATION?.reset();window.RUU_COMPANION?.reset();keys.clear();joy.active=false}
- function startGame(mode='normal'){
+ function startGame(mode='normal',challengeId=''){
    if(endingState){endingState=null;endingDom.pane.hidden=true;}
    // Trigger real BGM playback during START's trusted click/key user gesture.
    // Never let browser media policy/errors block gameplay.
@@ -675,11 +696,11 @@ function showAchievementArchive(){
      }catch(e){mixRunIndex=(mixRunIndex+1)%NORMAL_TRACK_COUNT}
    }
    musicIndicator.classList.remove('visible');musicMeter.classList.remove('visible');
-   bossAlert.classList.remove('active');deathScene=null;deathSequenceDone=false;bossBreakScene=null;window.RUU_EXPANSION?.reset();ui.hud.style.opacity='';musicIndicator.style.opacity='';resetGame();g.mode=mode==='endless'&&endingUnlocked()?'endless':'normal';g.maxCombo=0;g.damageTaken=0;g.fusions={};g.fusionTimers={};g.endlessNextBoss=145;g.endlessStarted=false;g.bossBreaks=0;state='playing';
+   bossAlert.classList.remove('active');deathScene=null;deathSequenceDone=false;bossBreakScene=null;window.RUU_EXPANSION?.reset();ui.hud.style.opacity='';musicIndicator.style.opacity='';resetGame();g.mode=mode==='endless'&&endingUnlocked()?'endless':mode==='challenge'&&endingUnlocked()?'challenge':'normal';window.RUU_OPERATIONS?.start(g,challengeId);g.maxCombo=0;g.damageTaken=0;g.fusions={};g.fusionTimers={};g.endlessNextBoss=145;g.endlessStarted=false;g.bossBreaks=0;state='playing';
    ui.hud.style.display='block';ui.pause.disabled=false;ui.pause.textContent='Ⅱ PAUSE';hideOverlay();
    try{startStageMusic(true);}catch(e){console.warn('Music unavailable',e);musicLabel('BGM ERROR / 再生ボタンを押して');showMusicRetry(true);}
    try{ensureAudio();const a=getAudio();if(a)a.ac.resume().then(()=>sfx('start')).catch(()=>{});}catch(e){}
-   toast(g.mode==='endless'?'∞ ENDLESS // NO FINAL LIMIT':'PHASE 01 // AWAKENING');updateHUD();
+   toast(g.mode==='endless'?'∞ ENDLESS // NO FINAL LIMIT':g.mode==='challenge'?'✦ CHALLENGE // '+(window.RUU_OPERATIONS?.currentInfo(g)?.name||'TRIAL'):'PHASE 01 // AWAKENING');updateHUD();
  }
 
   function showPaused(){state='paused';if(musicStarted)pauseAllMusic();musicLabel('♫ PAUSED // '+nowTrackName());ui.pause.textContent='▶ RESUME';setOverlay(`<div class="eyebrow">SIGNAL INTERRUPTED</div><h2 class="result-title" style="color:white">PAUSED</h2><p class="intro">再開すると、時間が動き出す。</p><button class="primary" id="resumeBtn">▶ 再 開</button><div class="help">ESCでも再開できる</div>`);document.getElementById('resumeBtn').onclick=()=>resumeGame()}
