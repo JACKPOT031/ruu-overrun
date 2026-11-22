@@ -1,4 +1,24 @@
-# RUU//OVERRUN — PUBLIC BETA (v1.12.0)
+# RUU//OVERRUN — PUBLIC BETA (v1.13.0)
+
+## v1.13.0 — ASTRAL COMPANION PROTOCOL
+
+Based on the creator's existing 星屑の鎧 -Guardian Genome- character sheets. ASTRAEA No.3 remains piloted by ルー・スクリヴナー in the original work. The game assets are simplified reference-inspired SVG sprites, not changes to the official canonical design.
+
+- **Mass-produced ASTRAL-SUIT:** Automatically accompanies Ruu from the start, follows the player, fires moderate support shots roughly every 1.5 seconds, and can intercept one nearby hostile projectile with a cooldown of roughly 9.5 seconds.
+- **SYNCHRO:** Earn gauge from enemy kills; extra gains from mutations, combos, elite kills and the first DEVORA boss.
+- **ASTRAEA No.3:** Unlocks when the 45-second DEVORA boss is defeated, survival reaches 75 seconds, and SYNCHRO is 100%. Press **X** or click/tap **ASTRAEA DEPLOY**. Only once per run, and not while a JACKPOT or finisher is active.
+- **MEMORY INHERITANCE:** Twelve seconds of pink winged effects, targeted volleys and a GUARDIAN RESONANCE finale. ASTRAEA's total damage to each boss is limited to 28% of that boss's maximum HP and cannot deliver the lethal blow.
+- **Assets:** New root JavaScript module and two small SVG sprites. Visual particles adapt to FX LITE / AUTO / HIGH; no new soundtrack is introduced.
+
+Preserved: NORMAL 100-second clear + final boss defeat, ENDLESS, all 16 tracks, 1% JACKPOT MODE and its 13-second invulnerability, 53-second ending, v1.12 mutations, achievements and Cloudflare rankings. No Cloudflare database/Worker migration is needed.
+
+### v1.13 browser test checklist
+
+1. Confirm ASTRAL-SUIT follows Ruu and fires at enemies from the start.
+2. Defeat the DEVORA boss, survive 75 seconds and fill SYNCHRO to unlock ASTRAEA.
+3. Press X or the on-screen button; confirm the 12-second intervention, capped boss damage, and single use.
+4. Check FX LITE and mobile layout, then retry a new run to ensure state resets.
+5. Verify NORMAL/ENDLESS scores, online ranking submissions and the original ending in the browser.
 
 ## v1.12.0 — DEVORA MUTATION / IMPACT SURGE
 
@@ -100,6 +120,7 @@ JACKPOTØ31 original browser survival game. Includes all 16 approved soundtracks
 - `assets/` — all game images and music. **Do not omit this directory.**
 - `public-features.js`, `public-features.css`, `leaderboard-config.js` — ranking and X share UI.
 - `devora-mutation.js` — mutation variants, boss PHASE II attack behavior and IMPACT SURGE effects (required for v1.12.0).
+- `astral-companion.js`, `assets/astral-suit-companion.svg`, `assets/astraea-companion.svg` — v1.13 companion features and reference-inspired sprites.
 - `backend/` — separate Cloudflare Workers + D1 API for a **shared** ranking. This folder is code only; GitHub Pages does not run it.
 - `.nojekyll` — avoid processing source assets with Jekyll.
 
