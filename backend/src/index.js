@@ -91,8 +91,8 @@ export default {
           name=excluded.name, title=excluded.title, score=excluded.score, kills=excluded.kills,
           level=excluded.level, time_seconds=excluded.time_seconds,
           won=excluded.won, updated_at=excluded.updated_at
-        WHERE excluded.score > scores.score
-           OR (excluded.score = scores.score AND excluded.won > scores.won)
+        WHERE excluded.score > ${table}.score
+           OR (excluded.score = ${table}.score AND excluded.won > ${table}.won)
       `).bind(playerId,name,title,score,kills,level,timeSeconds,won?1:0).run();
       const saved=await env.DB.prepare(`SELECT score, name, title FROM ${table} WHERE player_id=?`).bind(playerId).first();
       return json({ok:true,mode,updated:(result.meta?.changes||0)>0,bestScore:saved?.score??score,displayName:saved?.name??name,title:saved?.title??title});
