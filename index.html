@@ -217,8 +217,18 @@ body{background:radial-gradient(ellipse 80% 66% at 52% 24%,#2a2934 0%,#11131d 55
 /* v1.5.3 : cinematic 16:9 ending theatre */
 .ending-cinema{position:absolute;z-index:35;inset:0;display:block;overflow:hidden;background:#070913;color:#f3e9db;font-family:"Yu Gothic",Meiryo,system-ui,sans-serif;isolation:isolate}
 .ending-cinema[hidden],.ending-credits[hidden]{display:none!important}
-.ending-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;opacity:0;transform:scale(1);transition:opacity 1.6s ease-out;filter:saturate(.95) contrast(1.04);will-change:opacity}
+.ending-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;opacity:0;transform:scale(1);transition:opacity 1.6s ease-out;filter:saturate(1.01) contrast(1.03);will-change:opacity}
 .ending-photo.active{opacity:1;transform:scale(1)}
+/* Short ending: gentle drifting lights around the collage. */
+.ending-sparkles{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:2;mix-blend-mode:screen}
+.ending-spark{position:absolute;display:block;width:7px;height:7px;border-radius:50%;background:radial-gradient(circle,#fffefa 0%,#fff3dc 36%,#ffe3a180 66%,transparent 100%);box-shadow:0 0 12px 2px #ffe3aa57,0 0 24px 3px #9de4ff27;opacity:0;will-change:transform,opacity;animation:ruuSparkDrift var(--dur,7s) ease-in-out infinite alternate,ruuSparkTwinkle var(--twinkle,3s) ease-in-out infinite;animation-delay:var(--delay,0s),var(--delay,0s)}
+.ending-spark:before,.ending-spark:after{content:'';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);pointer-events:none;border-radius:10px}
+.ending-spark:before{width:1.5px;height:22px;background:linear-gradient(180deg,transparent,#fffefa,transparent)}
+.ending-spark:after{width:22px;height:1.5px;background:linear-gradient(90deg,transparent,#fffefa,transparent)}
+.ending-cinema.is-paused .ending-spark{animation-play-state:paused}
+@keyframes ruuSparkDrift{0%{transform:translate3d(0,0,0) rotate(20deg) scale(.4)}50%{transform:translate3d(var(--dx,8px),var(--dy,-18px),0) rotate(50deg) scale(1.1)}100%{transform:translate3d(var(--dx2,-5px),var(--dy2,-35px),0) rotate(120deg) scale(.55)}}
+@keyframes ruuSparkTwinkle{0%,100%{opacity:.07}22%{opacity:.38}49%{opacity:.94}71%{opacity:.18}88%{opacity:.65}}
+@media(prefers-reduced-motion:reduce){.ending-spark{animation:none;opacity:.25}}
 .ending-vignette{position:absolute;inset:0;pointer-events:none;background:linear-gradient(to bottom,#050613a3 0%,transparent 23%,transparent 55%,#040610bd 96%),linear-gradient(90deg,#05061296,transparent 23%,transparent 74%,#05061255);z-index:1}
 .ending-line{position:absolute;inset:2.6% 2.0%;border:1px solid #e6cba522;box-shadow:inset 0 0 0 1px #02020933;pointer-events:none;z-index:2}
 .ending-head{position:absolute;top:5%;left:5%;right:5%;z-index:3;display:flex;justify-content:space-between;align-items:flex-start;gap:16px;text-shadow:0 2px 12px #000b}
@@ -277,6 +287,7 @@ body{background:radial-gradient(ellipse 80% 66% at 52% 24%,#2a2934 0%,#11131d 55
   <section class="ending-cinema" id="endingCinema" hidden aria-label="クリア後のエンディング映像">
     <img class="ending-photo active" id="endingPhotoA" alt="エンディングのイラスト" draggable="false">
     <img class="ending-photo" id="endingPhotoB" alt="エンディングのイラスト" draggable="false">
+    <div class="ending-sparkles" id="endingSparkles" aria-hidden="true"></div>
     <div class="ending-vignette"></div><div class="ending-line"></div>
     <div class="ending-head"><span class="ending-title">RUU//OVERRUN <span style="color:#d9af7d">/ EPILOGUE</span></span><span class="ending-tag">JACKPOTØ31<br>ENDING THEME さすらえば</span></div>
     <div class="ending-wordmark" id="endingOpening"><b>RUU//OVERRUN</b><strong>THE JOURNEY CONTINUES</strong></div>
