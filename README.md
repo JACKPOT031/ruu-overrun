@@ -1,4 +1,20 @@
-# RUU//OVERRUN — PUBLIC BETA (v1.16.1)
+# RUU//OVERRUN — PUBLIC BETA (v1.16.2)
+
+## v1.16.2 — CLEAN ESCORT SPRITE / HIT BREAKS COMBO
+
+- Removed the **permanent elliptical, pilot-colored outline** around the mass-produced ASTRAL-SUIT. The escort remains 64×94 logical pixels, continues walking and firing, and retains all five temporary skill effects and floating labels.
+- **Real HP loss resets the ongoing COMBO to zero** and clears its countdown immediately. If the prior chain contained at least six kills, a brief `COMBO BREAK` message shows the broken chain.
+- **Fully shield-absorbed hits and invulnerable hits do not break COMBO** because no HP was lost; partial shield penetration does break it. The run's historic maximum combo (`MAX CHAIN`) is kept.
+- Bumped the ASTRAEA script reference to `astral-companion.js?v=1.16.2` to discourage browser caching of the old persistent outline.
+- No gameplay changes to the 25% escort roll, ASTRAEA emergency activation, music, rankings, JACKPOT 1%, normal/ENDLESS/CHALLENGE rules or ending. **Cloudflare unchanged.**
+
+### Checks
+
+1. In a pilot-winning run, confirm the ASTRAL-SUIT appears **without the former oval ring**.
+2. Build a chain, lose HP and check it resets to zero while MAX CHAIN is preserved.
+3. Repeat with a fully absorbed shield hit: COMBO should continue. If the shield is insufficient, it should break.
+4. Check that the five pilot abilities can still briefly draw their own effect rings during activation.
+
 
 ## v1.16.1 — SUPPORT PILOT SIGNAL VISIBILITY / CACHE PATCH
 
