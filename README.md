@@ -1,4 +1,52 @@
-# RUU//OVERRUN — PUBLIC BETA (v1.14.1)
+# RUU//OVERRUN — PUBLIC BETA (v1.15.0)
+
+## v1.15.0 — MASS-PRODUCED SUPPORT PILOT
+
+**A one-time 25% reinforcement roll at the start of every NORMAL, ENDLESS, or CHALLENGE run.**
+If successful, one of the five Guardian Genome / 18th-generation pilots is selected uniformly
+(**5% probability per named pilot across all runs**). This is an in-game crossover appearance
+and does not change the original story's character status. The other **75%** of runs retain
+the existing anonymous mass-produced ASTRAL-SUIT escort with no special pilot.
+
+**Arrival cinematic:** ~0.95s after game start, a named pilot portrait appears in the
+**right-side cut-in lane**, under the upper HUD. Their mass-produced ASTRAL-SUIT then
+**runs in from off-screen right** using the existing walking GIF, reaches Ruu after ~1.55s,
+and becomes the companion for that run. The 5 cut-in portraits are cropped from the owner's
+five supplied official character sheets and packed into one optimized 6.4 KB WebP atlas.
+Cut-ins do not cover the upper-left gauges. The selected pilot is displayed next to the
+escort and on the result screen; a failed roll gives the standard escort.
+
+### Distinct pilot support roles (moderate bonuses, no automatic win)
+
+| Pilot | Role | In-game effect |
+|---|---|---|
+| **Elio Warden** | GUARD / SANCTUARY | Escort interceptions recharge in ~5.5s instead of 9.5s. Grants up to 8 shield points every ~10.3s (18 minimum shield capacity). |
+| **Oz Redact** | MARKSMAN / EXECUTION | Every ~6.6s marks a nearby strong enemy for 4.5s, with a precision shot; marked targets take ~11% more damage during the mark. |
+| **Kai Trace** | ASSAULT / CROSS-FIRE | Escort fires two smaller shots at a quicker ~0.92s cadence and periodically attacks up to two nearby enemies. |
+| **Sera Note** | CONTROL / STILL LIGHT | Every ~8.3s slows nearby enemies and grants +4 DRIVE and +3 FINISHER charge. |
+| **Mina Phase** | RECORD / RECOVERY | +24 XP pickup range, +12% collected XP after arrival, bonus recovery pull, and +12% score for successful DEVORA INVASION repels. |
+
+**Rules:** Each run rolls exactly once; character selection is uniform among five,
+without repeat prevention or subsequent rerolls. It is a single **named version** of the
+existing companion, not a second companion. ASTRAEA No.3's 75s / DEVORA defeat /
+100% SYNCHRO special deployment stays separate and unchanged.
+
+**Unchanged:** Normal 100s + final boss clear, ENDLESS, CHALLENGE restrictions and offline
+record isolation, all 16 tracks, JACKPOT MODE 1%, the original 53s ending and Cloudflare
+NORMAL/ENDLESS leaderboards. **No Cloudflare update required.**
+
+Required new files:
+- `support-pilots.js` (pilot randomization, ability timing and cut-in renderer)
+- `assets/support-pilot-faces.webp` (5 portraits in Elio / Oz / Kai / Sera / Mina order)
+- Existing `astral-companion.js` is updated with run-in choreography and dynamic support rates
+
+### v1.15 validation checklist
+
+1. Across many runs, most starts show the normal escort. A successful 25% roll shows a named right-side portrait and running arrival.
+2. Verify each of the five skills and the pilot's name in the result screen.
+3. Verify the ordinary escort still shoots and intercepts, and ASTRAEA still deploys after its original requirements.
+4. Confirm the 16 tracks, JACKPOT 1%, NORMAL/ENDLESS ranking and CHALLENGE score isolation.
+5. Check desktop/mobile layout, FX LITE and the right-side signature cut-ins.
 
 ## v1.14.1 — RIGHT-SIDE CUT-INS / CLEAN START SCREEN
 
@@ -174,6 +222,7 @@ JACKPOTØ31 original browser survival game. Includes all 16 approved soundtracks
 - `public-features.js`, `public-features.css`, `leaderboard-config.js` — ranking and X share UI.
 - `devora-mutation.js` — mutation variants, boss PHASE II attack behavior and IMPACT SURGE effects (required for v1.12.0).
 - `astral-companion.js`, `assets/astral-suit-companion.svg`, `assets/astraea-companion.svg` — v1.13 companion features and reference-inspired sprites.
+- `support-pilots.js`, `assets/support-pilot-faces.webp` — v1.15 named 25%-chance support pilots and their cut-in portrait atlas.
 - `survival-trials.js` — v1.14 invasion waves, LAST STAND danger feedback and challenge mission rules, saved locally.
 - `assets/astral-suit-walk.gif` — optimized 8-frame walking companion GIF (required for animated escort in v1.13.1).
 - `backend/` — separate Cloudflare Workers + D1 API for a **shared** ranking. This folder is code only; GitHub Pages does not run it.
