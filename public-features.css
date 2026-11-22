@@ -21,3 +21,11 @@
 .ruu-public-table tr:nth-child(-n+3) td:first-child{color:#ffdc90;font-weight:900}
 .ruu-public-note{font:600 11px/1.5 system-ui,sans-serif;color:#a6a7b3;margin:12px 0 0}
 @media(max-width:720px){.ruu-public-panel{padding:12px}.ruu-public-table{font-size:10px}.ruu-public-table th,.ruu-public-table td{padding:8px 3px}.ruu-public-start{gap:5px}.ruu-nickname{width:130px;min-width:105px}.ruu-mini-btn{padding:8px}.ruu-score-box{padding:7px;gap:6px}}
+
+/* v1.11.0: mode tabs for independently ranked NORMAL / ENDLESS play */
+.ruu-public-top{flex-wrap:wrap}
+.ruu-mode-tabs{display:flex;flex-basis:100%;gap:8px;margin:9px 0 3px}
+.ruu-mode-tabs .ruu-mini-btn{flex:1;background:#1a2330;color:#f5ddb9}
+.ruu-mode-tabs .ruu-mini-btn:disabled{opacity:1;cursor:default;color:#fff7e8;border-color:#e5c391;background:#604c3f}
+.ruu-public-table th:nth-child(3),.ruu-public-table td:nth-child(3){max-width:125px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media(max-width:720px){.ruu-mode-tabs{gap:4px}.ruu-mode-tabs .ruu-mini-btn{font-size:9px;padding:7px 5px}}
