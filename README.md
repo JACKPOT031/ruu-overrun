@@ -1,4 +1,12 @@
-# RUU//OVERRUN — PUBLIC BETA (v1.13.0)
+# RUU//OVERRUN — PUBLIC BETA (v1.13.1)
+
+## v1.13.1 — MASS-PRODUCED ASTRAL-SUIT WALK ANIMATION
+
+- **Smaller companion:** Mass-produced ASTRAL-SUIT now renders at 64×94 logical pixels (previously 86×125), approximately 25% smaller. ASTRAEA No.3 remains at its original special-reinforcement scale.
+- **Walking GIF:** The supplied 8-frame side-walking animation has been optimized into `assets/astral-suit-walk.gif` (44×65 source pixels, 120ms per frame, transparent, approximately 7 KB) and installed in the game. The original uncompressed source remains separate.
+- **Motion-aware animation:** The escort walks while it is moving and freezes its idle pose when stationary. The right-facing animation is mirrored during leftward movement. Frame advance follows in-game simulation time, so pause/level-up also pauses animation when decoded frames are available.
+- **Compatibility:** Modern browsers use ImageDecoder for stable frame-by-frame Canvas playback; other browsers fall back to the GIF image with the previous SVG as the stationary backup. Support shooting, projectile interception, SYNCHRO, and ASTRAEA deployment gameplay are unchanged.
+- **No Cloudflare update is needed.** The main entry point and results version are now v1.13.1.
 
 ## v1.13.0 — ASTRAL COMPANION PROTOCOL
 
@@ -121,6 +129,7 @@ JACKPOTØ31 original browser survival game. Includes all 16 approved soundtracks
 - `public-features.js`, `public-features.css`, `leaderboard-config.js` — ranking and X share UI.
 - `devora-mutation.js` — mutation variants, boss PHASE II attack behavior and IMPACT SURGE effects (required for v1.12.0).
 - `astral-companion.js`, `assets/astral-suit-companion.svg`, `assets/astraea-companion.svg` — v1.13 companion features and reference-inspired sprites.
+- `assets/astral-suit-walk.gif` — optimized 8-frame walking companion GIF (required for animated escort in v1.13.1).
 - `backend/` — separate Cloudflare Workers + D1 API for a **shared** ranking. This folder is code only; GitHub Pages does not run it.
 - `.nojekyll` — avoid processing source assets with Jekyll.
 
