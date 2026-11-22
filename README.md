@@ -1,4 +1,40 @@
-# RUU//OVERRUN — PUBLIC BETA (v1.13.1)
+# RUU//OVERRUN — PUBLIC BETA (v1.14.0)
+
+## v1.14.0 — SURVIVAL TRIALS (DEVORA INVASION / LAST STAND / CHALLENGE MISSIONS)
+
+### DEVORA INVASION — special raids at 30 / 60 / 90 seconds
+
+- A **RUST SWARM** (30s), **IRON SIEGE** (60s), and **NULL ONSLAUGHT** (90s) arrive during both NORMAL and ENDLESS and during CHALLENGE play.
+- Invaders arrive from off-player positions over time, with a warning banner, color-coded attack identity, and a kill-quota / time-left UI. No enemy appears directly on the player.
+- Complete each raid's quota **7 / 10 / 12** kills within **17 / 19 / 20** seconds to earn a score / XP / DRIVE / FINISHER bonus. Mere survival does not earn the bonus.
+- Rewards are 1,600 / 3,200 / 5,000 score plus XP and modest gauge boosts. Failed invasions award no bonus. No additional bosses are created.
+
+### LAST STAND — low-HP danger presentation
+
+- Activates when HP falls to **25% or less** (with 31% recovery hysteresis). Adds a subtle red vignette, pulse-warning text, and two quiet synthesized heartbeat notes through the existing SFX engine.
+- Only a **presentation** change: does not increase damage, trigger healing, extend invincibility or interfere with enemy attack readability. Follows SFX ON/OFF and FX LITE / AUTO / HIGH.
+
+### CHALLENGE MISSIONS — local-only high-difficulty runs
+
+- After clearing NORMAL once, **CHALLENGE MISSIONS** appears on the title screen alongside ENDLESS MODE and ENDING THEATER.
+- **UNTOUCHED:** Complete 100 seconds plus final boss with zero HP damage. Shield-absorbed hits do not count as HP damage.
+- **ZERO LUCK:** JACKPOT MODE cannot appear in level-up choices. Other upgrades remain available.
+- **SINGLE BARREL:** Only the starting 零式ネオン・バラージ can be upgraded as a weapon. Additional weapons, fusion, evolution and JACKPOT MODE are unavailable; survival and passive upgrades remain.
+- Each successful trial awards an original **challenge-only title**; clear count and highest qualifying score live in browser localStorage. Titles may be equipped from the challenge archive.
+- **IMPORTANT:** CHALLENGE mode does **not** write or update NORMAL personal best, ENDLESS personal best or either Cloudflare global ranking. The result view offers X sharing and a PNG result card, not online score submission. Retry preserves the selected challenge.
+- Losing, or completing the base game after failing a challenge's additional restriction, never unlocks the challenge title.
+
+**Unchanged:** NORMAL 100s + final boss clear, ENDLESS rules, full 16-track playlist, 1% JACKPOT MODE, 13s invulnerability, 53-second ending, all v1.12 mutations and v1.13 ASTRAL companion features. **No Cloudflare migration is required for v1.14.0.**
+
+**Required new file:** `survival-trials.js` alongside `index.html`, `astral-companion.js`, `devora-mutation.js` and related assets.
+
+### Quick QA
+
+1. Play NORMAL through 30, 60 and 90 seconds and observe raid waves, countdowns, and bonus for successful repels.
+2. Drop below 25% HP and verify danger feedback; heal above 31% to exit LAST STAND.
+3. Clear NORMAL, select each challenge, check jackpot and weapon restrictions, and verify success/failure titles.
+4. Verify challenge results never enter a public ranking and do not overwrite NORMAL / ENDLESS records.
+5. Confirm the original ending, mobile layout, FX LITE and 16 soundtracks.
 
 ## v1.13.1 — MASS-PRODUCED ASTRAL-SUIT WALK ANIMATION
 
@@ -129,6 +165,7 @@ JACKPOTØ31 original browser survival game. Includes all 16 approved soundtracks
 - `public-features.js`, `public-features.css`, `leaderboard-config.js` — ranking and X share UI.
 - `devora-mutation.js` — mutation variants, boss PHASE II attack behavior and IMPACT SURGE effects (required for v1.12.0).
 - `astral-companion.js`, `assets/astral-suit-companion.svg`, `assets/astraea-companion.svg` — v1.13 companion features and reference-inspired sprites.
+- `survival-trials.js` — v1.14 invasion waves, LAST STAND danger feedback and challenge mission rules, saved locally.
 - `assets/astral-suit-walk.gif` — optimized 8-frame walking companion GIF (required for animated escort in v1.13.1).
 - `backend/` — separate Cloudflare Workers + D1 API for a **shared** ranking. This folder is code only; GitHub Pages does not run it.
 - `.nojekyll` — avoid processing source assets with Jekyll.
