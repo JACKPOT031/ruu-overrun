@@ -1,8 +1,17 @@
-# RUU//OVERRUN — PUBLIC BETA (v1.24.0)
+# RUU//OVERRUN — PUBLIC BETA (v1.25.0)
 
 JACKPOTØ31が制作するオリジナル・ブラウザサバイバルアクション。
 
 **[ゲームを遊ぶ](https://jackpot031.github.io/ruu-overrun/)** / **[公開開始v1.5.3からの更新履歴](./CHANGELOG.md)**
+
+## v1.25.0 — LIVE LOADOUT & SUPPORT INTEL
+
+- プレイ中に **現在装備・支援効果を一覧できる「LOADOUT / 装備・支援情報」画面**を追加。PCは **Iキー**、ゲーム画面内の **⌑ LOADOUT**、下部の **⌑ 装備 / SUPPORT** ボタンから開く。スマホもタップで確認できる。
+- 装備画面を開くとゲーム時間・敵・弾幕を一時停止。閉じると戦闘再開。通常のPAUSE画面から開いた場合は、閉じた後にPAUSEへ戻る。ESC / P / Iにも対応。
+- 武器、残響追撃、パッシブ・防御、進化6種、複合技4種のうち**今のプレイで実際に取得しているものだけ**を表示。武器・強化はLVと最大LV・説明文を表示。瞬間回復は装備として扱わない。HP・SHIELD・攻撃・会心・速度なども確認可能。
+- **量産型ASTRAL-SUITが参戦している場合だけ**、実際の搭乗パイロットと固有支援効果を表示。エリオ／オズ／カイ／セラ／ミナの射撃・迎撃・マーキング・ゲージ補給・XP回収・侵攻報酬の各仕様を、現行のコードに合わせた説明で表示。ASTRAEA緊急出撃の状態も併記。
+- 未参戦のプレイは **NO ALLIED SIGNAL** と抽選率25%を明示。開幕のINBOUND状態と合流後ACTIVE状態を区別。
+- **閲覧専用の機能追加**。抽選率、支援性能、ボス、スコア、ランキング、BGM、実績の解除条件、EDに変更なし。ゲーム本体と同じフォルダに `run-inspector.js` と `run-inspector.css` が必要。
 
 ## v1.24.0 — MASS-PRODUCED ASTRAL-SUIT / SPRITE REFORGE
 
@@ -524,6 +533,7 @@ JACKPOTØ31 original browser survival game. Includes all 16 approved soundtracks
 ## Files
 
 - `index.html` — GitHub Pages entrypoint. Loads the game and public-ranking UI.
+- `run-inspector.js`, `run-inspector.css` — プレイ中の装備確認・量産型ASTRAL-SUIT支援効果の表示。
 - `assets/` — all game images and music. **Do not omit this directory.**
 - `public-features.js`, `public-features.css`, `leaderboard-config.js` — ranking and X share UI.
 - `devora-mutation.js` — mutation variants, boss PHASE II attack behavior and IMPACT SURGE effects (required for v1.12.0).

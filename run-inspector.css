@@ -1,0 +1,55 @@
+
+/* RUU//OVERRUN v1.25.0 — live equipment inspector */
+.overlay.loadout-overlay{align-items:flex-start;overscroll-behavior:contain}
+.start-panel.run-inspector-wide{width:min(1050px,100%);margin:auto}
+.loadout-panel{text-align:left;background:linear-gradient(148deg,#141b2bf2,#100e1afa 65%,#171323f6);border:1px solid #b7a1c383;border-radius:12px;box-shadow:0 20px 55px #000c,inset 0 0 55px #bd7fd00b;padding:16px;color:#eee5e4;font-family:system-ui,"Yu Gothic",Meiryo,sans-serif;line-height:1.5}
+.loadout-kicker{color:#85dfcf;font:800 10px ui-monospace,Consolas,monospace;letter-spacing:.20em;margin-bottom:6px}
+.loadout-header{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:10px}
+.loadout-header h2{color:#f5e6dc;font:italic 900 clamp(19px,2.7vw,33px) Impact,'Arial Black',system-ui,sans-serif;letter-spacing:.035em;margin:0 0 5px}
+.loadout-header p{font-size:11px;color:#b9c3cc;line-height:1.55;margin:0;max-width:600px}
+.loadout-back{border:1px solid #d2b49d;background:linear-gradient(135deg,#41333c,#252433);color:#ffe6d2;border-radius:6px;padding:10px 14px;cursor:pointer;font:800 11px system-ui,sans-serif;white-space:nowrap}
+.loadout-back:hover,.loadout-back:focus-visible{border-color:white;background:#51424e}
+.loadout-stats{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:5px;margin:12px 0 14px}
+.loadout-stat{display:flex;flex-direction:column;align-items:center;justify-content:center;background:#101b2ce6;border:1px solid #61778870;border-radius:5px;padding:8px 3px;min-width:0}
+.loadout-stat small{color:#91c6c8;font:800 8px ui-monospace,Consolas,monospace;letter-spacing:.045em}
+.loadout-stat b{color:#f8ece7;font:900 13px ui-monospace,Consolas,monospace;font-variant-numeric:tabular-nums}
+.loadout-columns{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(270px,1fr);gap:13px;align-items:start}
+.loadout-section-caption{font:800 9px ui-monospace,Consolas,monospace;color:#a0cfd8;letter-spacing:.07em;margin-bottom:7px}
+.loadout-main{min-width:0}.loadout-group{margin-bottom:14px}
+.loadout-group-heading{display:flex;gap:10px;justify-content:space-between;align-items:center;margin:0 0 7px;border-bottom:1px solid #60708b55;padding-bottom:5px}
+.loadout-group-heading h3{margin:0;color:#dcc3eb;font:900 12px ui-monospace,Consolas,monospace}
+.loadout-group-heading span{font:700 9px ui-monospace,Consolas,monospace;color:#83c4bd}
+.loadout-items{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+.loadout-item{padding:9px;background:linear-gradient(150deg,#20283a,#111725);border:1px solid #61778e74;border-radius:7px;min-width:0}
+.loadout-item-top{display:flex;align-items:center;gap:7px}
+.loadout-item-mark{font-size:20px;flex:0 0 23px;color:#a7eae7}
+.loadout-item strong{font-size:11px;color:#fff1dc;flex:1;min-width:0;line-height:1.35}
+.loadout-item-level{font:800 9px ui-monospace,Consolas,monospace;color:#f2cf97;white-space:nowrap}
+.loadout-item p{font-size:10px;line-height:1.5;color:#b9c5d2;margin:6px 0 0}
+.loadout-level-track{height:4px;border-radius:8px;margin-top:8px;background:#394154;overflow:hidden}
+.loadout-level-track span{height:100%;display:block;background:linear-gradient(90deg,#7fcdca,#e0bad9)}
+.loadout-note,.loadout-empty{font-size:10px;color:#afbac5;line-height:1.6;margin:10px 0 0}
+.loadout-support{background:linear-gradient(140deg,#251c34,#15182a 65%);border:1px solid #bc91c491;border-radius:9px;padding:13px;min-width:0}
+.loadout-support-heading{display:flex;justify-content:space-between;gap:7px;color:#f4c5e8;font:900 10px ui-monospace,Consolas,monospace;letter-spacing:.02em}
+.loadout-support-heading span{color:#b5f1da;font-size:9px}
+.loadout-pilot{display:flex;align-items:center;gap:10px;margin:13px 0;padding:12px 0;border-bottom:1px solid #ac83b466}
+.loadout-pilot-avatar{height:58px;width:58px;flex:0 0 58px;display:grid;place-items:center;background:linear-gradient(145deg,#e2dbd0,#58566b);color:#292e40;border:2px solid #b4abb5;border-radius:7px;font:1000 24px ui-monospace,Consolas,monospace}
+.loadout-pilot-jp{color:#e6c6d9;font-size:10px;font-weight:800}
+.loadout-pilot h3{font:900 16px ui-monospace,Consolas,monospace;color:#fff2e5;margin:2px 0}
+.loadout-pilot p{font-size:9px;color:#bfbbcb;margin:3px 0}
+.loadout-support-effect{padding:9px 0;border-bottom:1px solid #ad96bd25}
+.loadout-support-effect b{display:block;color:#f5d9ad;font-size:11px;margin-bottom:3px}
+.loadout-support-effect span{display:block;color:#d1cad8;font-size:10px;line-height:1.58}
+.loadout-astraea{background:#30203595;border:1px solid #bb7eac70;border-radius:6px;padding:10px;margin:11px 0}
+.loadout-astraea b{display:block;color:#ffb5e8;font-size:11px;margin-bottom:5px}
+.loadout-astraea span{font-size:10px;color:#d7cedd}
+.loadout-support-foot{color:#99ddcc;font:800 9px ui-monospace,Consolas,monospace;margin-top:12px}
+.loadout-support-empty h3{font:900 19px ui-monospace,Consolas,monospace;color:#f4dee4;margin:18px 0 8px}
+.loadout-support-empty p{color:#b9b4c6;font-size:11px}
+.loadout-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;border-top:1px solid #ad9eaa55;margin-top:12px;padding-top:11px;flex-wrap:wrap}
+.loadout-footer span,.loadout-footer small{font:800 9px ui-monospace,Consolas,monospace;color:#92b3c4}
+.loadout-quick{position:absolute;z-index:12;right:3.3%;bottom:27%;padding:8px 10px;border:1px solid #b2b3c3a4;border-radius:6px;background:#111d2ad9;color:#f9e4d5;font:900 clamp(9px,.85vw,12px) ui-monospace,Consolas,monospace;cursor:pointer;box-shadow:0 4px 15px #000b}
+.loadout-quick:hover,.loadout-quick:focus-visible{border-color:#ffffff;color:white;background:#45334c}
+.loadout-quick[hidden]{display:none!important}
+@media(max-width:760px){.loadout-header{flex-wrap:wrap}.loadout-stats{grid-template-columns:repeat(4,minmax(0,1fr))}.loadout-columns{grid-template-columns:1fr}.loadout-items{grid-template-columns:repeat(2,minmax(0,1fr))}.loadout-quick{bottom:46%;right:3%;padding:5px 7px;font-size:9px}.loadout-panel{padding:10px}.loadout-back{padding:8px 10px}}
+@media(max-width:400px){.loadout-items{grid-template-columns:1fr}.loadout-header h2{font-size:19px}.loadout-support-heading{font-size:9px}.loadout-stat b{font-size:11px}}
