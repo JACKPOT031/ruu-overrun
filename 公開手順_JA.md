@@ -1,4 +1,14 @@
-# RUU//OVERRUN — GitHub公開・更新手順（v1.19.0 PUBLIC BETA）
+# RUU//OVERRUN — GitHub公開・更新手順（v1.23.1 PUBLIC BETA）
+
+## v1.23.1 — 安定性と文言の整合
+
+- `index.html`、`astral-companion.js`、`boss-rewards.js`、`devora-true-end.js`、`secret-ruu-boss.js`、`expansion-system.js`、`survival-trials.js`、`public-features.js` を同じコミットから更新する。HTMLの読み込みURLには変更モジュールの `v=1.23.1` を付けている。
+- 主な修正は、ボスの消失と同時撃破時の進行停止、ENDLESSの報酬待機、弾幕警告、支援のダメージ上限、ED・BGM、記録・ランキングの競合。詳細はREADME先頭を参照。
+- 公開後はタイトルの **v1.23.1 PUBLIC BETA**、実績24種類、既存の自己ベスト／称号、NORMAL・ENDLESS・CHALLENGEの表示を確認する。古い画面が残る場合はブラウザを強制再読み込みする。
+- フロントエンド修正は既存のランキングAPIと互換。`backend/src/index.js` のLIMIT整数化だけはWorkerの別デプロイが必要。DB変更は不要。このGitHub更新だけでは稼働中のWorkerは変更されない。
+- 開発者キットv1.23.1（内部ツール版v1.3.1）は、修正後の固定コミットを使用する。公開ソースへ開発者パネルを入れない。
+
+> 以下は過去の更新時の手順・仕様。古い版の数値や条件は当時の記録として残している。
 
 ## v1.19.0 — 真のボスDEVORA・三体／五体同時戦闘
 
@@ -115,7 +125,7 @@
 - 戦闘中の30秒、60秒、90秒のDEVORA INVASION、HP25%以下のLAST STAND、およびクリア後のCHALLENGE MISSIONS（3種）を実装。
 - チャレンジ記録はブラウザのlocalStorageで管理し、**NORMAL/ENDLESSのオンラインランキングには絶対に送信しない。** 専用称号を解放して選択できる。
 - チャレンジ中も元の100秒生存・最終ボス撃破という条件は維持する。
-- JAM/PACKなど既存のゲームモード、BGM16曲、JACKPOT MODE 1％、ASTRAEA出撃、53秒EDは継続。
+- NORMAL／ENDLESSなど既存のゲームモード、BGM16曲、JACKPOT MODE 1％、ASTRAEA出撃、53秒EDは継続。
 - Cloudflare D1 / Workerには新しい作業は不要。GitHub側の `index.html`、`public-features.js`、`survival-trials.js` が整合していればよい。
 - ブラウザで `Ctrl + Shift + R` を実行し、タイトルのv1.14.0表記、通常戦闘の侵攻予告、クリア後のチャレンジメニュー、結果のランキング送信防止を確認する。
 

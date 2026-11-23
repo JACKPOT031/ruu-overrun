@@ -1,12 +1,12 @@
-/* RUU//OVERRUN v1.23.0 — ACHIEVEMENT REFORGE (legacy V1 storage preserved) */
+/* RUU//OVERRUN v1.23.1 — ACHIEVEMENT REFORGE (legacy V1 storage preserved) */
 (()=>{
 'use strict';
 const TAU=6.283185307179586,clamp=(x,a,b)=>Math.max(a,Math.min(b,x)), K='RUU_ACHIEVEMENTS_V1',TK='RUU_TITLE_V1';
 const achievements=[
 {id:'first',jp:'最初の一撃',title:'侵食への反逆者',desc:'敵を1体倒す',mark:'✦'},
 {id:'boss',jp:'王を砕く者',title:'王を砕く者',desc:'中ボスを撃破',mark:'◇'},
-{id:'final',jp:'虚無の終焉',title:'虚無の終焉',desc:'最終ボスを撃破',mark:'✕'},
-{id:'clear',jp:'星屑の生還者',title:'星屑の生還者',desc:'100秒モードをクリア',mark:'Ø'},
+{id:'final',jp:'虚無の終焉',title:'虚無の終焉',desc:'NULL EMPERORを撃破',mark:'✕'},
+{id:'clear',jp:'星屑の生還者',title:'星屑の生還者',desc:'通常モードをクリア',mark:'Ø'},
 {id:'flawless',jp:'無傷の星',title:'無傷の星',desc:'HPダメージ0で通常クリア',mark:'✧'},
 {id:'combo50',jp:'連鎖の鼓動',title:'連鎖の鼓動',desc:'50コンボ達成',mark:'↯'},
 {id:'combo100',jp:'極限共鳴',title:'極限共鳴',desc:'100コンボ達成',mark:'✹'},
@@ -52,7 +52,7 @@ const fusions=[
 ];
 let unlocked=new Set(),chosen='',boss=null,combo=null,effects=[],clock=0;
 try{const v=JSON.parse(localStorage.getItem(K)||'[]');if(Array.isArray(v))unlocked=new Set(v.filter(id=>achievements.some(a=>a.id===id)));chosen=localStorage.getItem(TK)||'';}catch(e){}
-function unlock(id){const a=achievements.find(x=>x.id===id);if(!a||unlocked.has(id))return null;unlocked.add(id);try{localStorage.setItem(K,JSON.stringify([...unlocked]));}catch(e){}return a}
+function unlock(id){if(window.RUU_LOCAL_DEV_MODE)return null;const a=achievements.find(x=>x.id===id);if(!a||unlocked.has(id))return null;unlocked.add(id);try{localStorage.setItem(K,JSON.stringify([...unlocked]));}catch(e){}return a}
 function progressFor(id,g){
  if(!g)return null;
  const values={combo50:[g.maxCombo||g.combo||0,50],combo100:[g.maxCombo||g.combo||0,100],combo200:[g.maxCombo||g.combo||0,200],
@@ -63,7 +63,7 @@ function progressFor(id,g){
 function status(g){return achievements.map(a=>({...a,unlocked:unlocked.has(a.id),progress:progressFor(a.id,g)}))}
 function selectedId(){return unlocked.has(chosen)?chosen:''}
 function selectedTitle(){const a=achievements.find(a=>a.id===chosen&&unlocked.has(a.id));return a?.title||''}
-function changeTitle(id){if(id&&(!unlocked.has(id)||!achievements.some(a=>a.id===id)))return false;chosen=id;try{localStorage.setItem(TK,id);}catch(e){}return true}
+function changeTitle(id){if(id&&(!unlocked.has(id)||!achievements.some(a=>a.id===id)))return false;chosen=id;if(!window.RUU_LOCAL_DEV_MODE)try{localStorage.setItem(TK,id);}catch(e){}return true}
 function reset(){boss=null;combo=null;effects=[];clock=0}
 function eligible(mods,flags){return fusions.filter(s=>!flags?.[s.id]&&(mods?.[s.a]||0)>=2&&(mods?.[s.b]||0)>=2).map(x=>({...x}))}
 function activate(g,id){const f=fusions.find(x=>x.id===id);if(!f||g?.fusions?.[id])return null;g.fusions??={};g.fusionTimers??={};g.fusions[id]=true;g.fusionTimers[id]=.35;return f}

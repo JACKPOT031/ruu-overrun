@@ -18,6 +18,11 @@ const COLLECTIVE=Object.freeze({
 let banner=null,clock=0,rewards=0;
 function reset(){banner=null;clock=0;rewards=0}
 function status(){return {banner:banner?.name||'',remaining:banner?.life||0,grants:rewards}}
+function rechargeGauge(value,amount){
+ const current=Math.max(0,Number(value)||0);
+ // Stop newly granted charge at 95%, while preserving a higher existing charge.
+ return Math.max(current,Math.min(95,current+amount));
+}
 function grant(g,detail,e,api,cinema=false){
  if(!g?.player)return false;
  const p=g.player,oldHp=Number(p.hp)||0;
@@ -29,9 +34,9 @@ function grant(g,detail,e,api,cinema=false){
  g.score=(Number(g.score)||0)+detail.score;
  g.xp=(Number(g.xp)||0)+detail.xp;
  if(g.driveTime>0)g.driveTime=Math.min(10,g.driveTime+1.5);
- else g.driveGauge=Math.min(95,Math.max(0,Number(g.driveGauge)||0)+detail.drive);
+ else g.driveGauge=rechargeGauge(g.driveGauge,detail.drive);
  // Recharge without auto-firing a finisher during the victory cut-in.
- if(g.finisherTime<=0)g.finisherGauge=Math.min(95,Math.max(0,Number(g.finisherGauge)||0)+detail.finisher);
+ if(g.finisherTime<=0)g.finisherGauge=rechargeGauge(g.finisherGauge,detail.finisher);
  const description=`SCORE +${detail.score.toLocaleString('en-US')}  /  XP +${detail.xp}  /  HP +${hpAdd}  /  SHIELD +${Math.round(p.shield-oldShield)}`;
  banner={name:detail.name,description,color:detail.color,life:cinema?2.7:2.0,max:cinema?2.7:2.0};
  rewards++;

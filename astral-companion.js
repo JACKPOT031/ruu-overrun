@@ -105,11 +105,16 @@ function activateEmergency(g,api,q='auto'){
 }
 function hitAssist(e,dmg,api){
  if(!e||e.hp<=0||!api?.hit)return;
- if(e.trueDevora&&window.RUU_TRUE_END?.isIntro?.())return; // No phantom assist damage while the cut-in protects the cores.
- if(e.kind==='boss'||e.kind==='final'||e.trueDevora){
+ if(e.trueDevora&&window.RUU_TRUE_END?.isIntro?.()||e.secretRuu&&window.RUU_SECRET_BOSS?.isIntro?.())return;
+ if(e.kind==='boss'||e.kind==='final'||e.trueDevora||e.secretRuu){
   // Per-boss cap: at most 28% of max HP from ASTRAEA, never a lethal blow.
-  dmg=Math.max(0,Math.min(dmg,e.maxHp*.28-(e.astraeaAssistDamage||0),e.hp-1));
-  e.astraeaAssistDamage=(e.astraeaAssistDamage||0)+dmg;
+  // Apply the cap after DRIVE / critical / mark / resistance modifiers, then
+  // record the actual HP removed rather than the unmodified shot amount.
+  const remaining=Math.max(0,e.maxHp*.28-(e.astraeaAssistDamage||0));
+  if(remaining<=0||e.hp<=1||dmg<=0)return;
+  const dealt=api.hit(e,dmg,pink,{maxDamage:remaining,nonlethal:true});
+  e.astraeaAssistDamage=(e.astraeaAssistDamage||0)+Math.max(0,Number(dealt)||0);
+  return;
  }
  if(dmg>0)api.hit(e,dmg,pink);
 }

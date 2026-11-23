@@ -9,13 +9,13 @@ const BARRAGE_RATE=1.20; // Apply to every 3/5 DEVORA core; keep safe lanes.
 const RARE_FIVE_CHANCE=.10,ROLES=['HUNTER','ORACLE','SIEGE','FRACTURE','REAPER'];
 const COLORS=['#ff719f','#e9a1fd','#ffbd86','#c78bff','#ff668c'];
 const ART={};if(typeof Image!=='undefined')for(const [key,src] of Object.entries({three:'assets/devora_true_end_three.webp',five:'assets/devora_true_end_five.webp'})){const image=new Image();image.src=src;ART[key]=image}
-const initial=()=>({queued:false,active:false,finished:false,total:0,remaining:0,rare:false,intro:0,introMax:2.65,clock:0,despair:0,banner:0,finishPulse:0,defeated:0,rolls:0});
+const initial=()=>({queued:false,active:false,finished:false,total:0,remaining:0,maxHp:0,rare:false,intro:0,introMax:2.65,clock:0,despair:0,banner:0,finishPulse:0,defeated:0,rolls:0});
 let S=initial();function reset(){S=initial()}
 function queue(g,e,rng=Math.random){
  if(!g||e?.kind!=='final'||e.trueEndQueued||S.active||S.queued)return false;
  e.trueEndQueued=true;S.queued=true;S.rolls++;
  const v=Number(rng());S.rare=Number.isFinite(v)&&v>=0&&v<RARE_FIVE_CHANCE;
- S.total=S.rare?5:3;S.remaining=S.total;S.defeated=0;
+ S.total=S.rare?5:3;S.remaining=S.total;S.maxHp=0;S.defeated=0;
  g.trueEndPending=true;g.trueEndCleared=false;g.trueEndCount=S.total;g.trueEndRemaining=S.total;
  return true;
 }
@@ -33,7 +33,8 @@ function spawnQueued(g,api){
   mob.elite=false;mob.shoot=999;mob.attack=2.8;mob.trueRageDash=0;
   mob.trueBrain={role:ROLES[i],cd:1.6+i*.56,wind:0,windMax:1.0,targetX:p.x,targetY:p.y,angle:a,shots:0};
  }
- S.total=g.enemies.filter(e=>e.trueDevora&&e.hp>0).length;S.remaining=S.total;
+ const cores=g.enemies.filter(e=>e.trueDevora&&e.hp>0);
+ S.total=cores.length;S.remaining=S.total;S.maxHp=cores.reduce((sum,e)=>sum+e.maxHp,0);
  g.trueEndCount=S.total;g.trueEndRemaining=S.total;
  if(!S.total){S.active=false;S.finished=true;g.trueEndCleared=true;g.trueEndPending=false;return false}
  p.inv=Math.max(p.inv||0,2.8);
@@ -59,7 +60,7 @@ function onKill(e,g,api){
 function status(g){return{queued:S.queued,active:S.active,finished:S.finished,total:S.total,remaining:S.remaining,
  rare:S.rare,intro:S.intro,rolls:S.rolls,
  hp:(g?.enemies||[]).reduce((v,e)=>v+(e.trueDevora&&e.hp>0?e.hp:0),0),
- maxHp:(g?.enemies||[]).reduce((v,e)=>v+(e.trueDevora?(e.maxHp||0):0),0)};}
+ maxHp:S.maxHp};}
 function projectile(g,e,a,speed,damage,col,r=8){
  if(g.ebullets.length>=135)return false;
  g.ebullets.push({x:e.x+Math.cos(a)*e.r*.66,y:e.y+Math.sin(a)*e.r*.66,vx:Math.cos(a)*speed,vy:Math.sin(a)*speed,r,ttl:4.15,col,damage,trueDevora:true});
@@ -71,7 +72,7 @@ function fire(e,g,api){
  if(role==='HUNTER'){e.trueRageDash=.50;for(const d of [-.18,0,.18])emit(aim+d,255,11,7)}
  else if(role==='ORACLE'){for(const d of [-.26,-.13,0,.13,.26])emit(aim+d,305,13,7)}
  else if(role==='SIEGE')for(let j=0;j<17;j++){const a=j*TAU/17+.10,d=Math.abs(Math.atan2(Math.sin(a-b.angle),Math.cos(a-b.angle)));if(d>=.43&&Math.abs(d-Math.PI)>=.43)emit(a,225,12,8)}
- else if(role==='FRACTURE')for(let j=0;j<12;j++){if(j%6!==0)emit(j*TAU/12+g.time*.22,247,12,7)}
+ else if(role==='FRACTURE')for(let j=0;j<12;j++){if(j%6!==0)emit(j*TAU/12+b.angle,247,12,7)}
  else for(let j=0;j<7;j++)emit(aim+(j-3)*.145,302,13,7);
  b.shots+=count;api?.wave?.(e.x,e.y,e.r*2.2,e.col);api?.burst?.(e.x,e.y,e.col,14,175);
  api?.sound?.(role==='ORACLE'?'rail':role==='SIEGE'?'boss':'bolt');

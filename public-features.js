@@ -1,5 +1,6 @@
 (() => {
   'use strict';
+  if (window.RUU_LOCAL_DEV_MODE) return;
   const config = window.RUU_PUBLIC_CONFIG || {};
   const api = String(config.apiUrl || '').trim().replace(/\/+$/,'');
   const menu = document.getElementById('menu');
@@ -14,19 +15,24 @@
   };
   let nickname = storage.get(STORE_NAME);
   let busy = false;
-  let boardMode='normal';let serverModes=null;
+  let boardMode='normal';let serverModes=null,modeRequest=null,boardRequest=0,deleting=false;
   async function supportedModes(){
     if(serverModes!==null)return serverModes;
     if(!api)return ['normal'];
-    try{const r=await fetch(api+'/api/health',{cache:'no-store'});const d=await r.json();
-      serverModes=Array.isArray(d.rankingModes)?d.rankingModes.filter(x=>x==='normal'||x==='endless'):['normal'];
-    }catch(e){serverModes=['normal']};return serverModes;
+    if(modeRequest)return modeRequest;
+    modeRequest=(async()=>{
+      try{const r=await fetch(api+'/api/health',{cache:'no-store'});if(!r.ok)throw new Error('HTTP '+r.status);const d=await r.json();
+        serverModes=Array.isArray(d.rankingModes)?d.rankingModes.filter(x=>x==='normal'||x==='endless'):['normal'];
+        return serverModes;
+      }catch(e){return ['normal']}
+    })();
+    try{return await modeRequest}finally{modeRequest=null}
   }
   function playerId() {
     let id=storage.get(STORE_ID);
     if (!/^[0-9a-f]{32}$/.test(id)) {
       const a=new Uint8Array(16);
-      if (crypto?.getRandomValues) crypto.getRandomValues(a);
+      if (window.crypto?.getRandomValues) window.crypto.getRandomValues(a);
       else for(let i=0;i<a.length;i++) a[i]=Math.floor(Math.random()*256);
       id=Array.from(a,v=>v.toString(16).padStart(2,'0')).join('');
       storage.set(STORE_ID,id);
@@ -34,7 +40,7 @@
     return id;
   }
   function safeName(value) {
-    return Array.from(String(value||'').normalize('NFKC').trim().replace(/\s+/g,' ').replace(/[\x00-\x1F\x7F]/g,'')).slice(0,16).join('');
+    return Array.from(String(value||'').normalize('NFKC').trim().replace(/\s+/g,' ').replace(/[<>\x00-\x1F\x7F]/g,'')).slice(0,16).join('');
   }
   function result() {
     const r=window.RUU_PUBLIC_SNAPSHOT?.();
@@ -69,17 +75,20 @@
   tabs.append(normalTab,endlessTab);modal.querySelector('.ruu-public-top').appendChild(tabs);
   const message=modal.querySelector('#ruu-board-message');
   const rows=modal.querySelector('#ruu-board-rows');
-  function closeBoard(){modal.hidden=true;}
+  function closeBoard(){modal.hidden=true;boardRequest++;}
   const forget=createButton('自分の記録を削除', async () => {
+    if(deleting)return;
     if(!api){message.textContent=API_MESSAGE;return}
+    const deleteMode=boardMode;
     if(!window.confirm('このブラウザで登録したランキング記録を削除する？'))return;
+    deleting=true;forget.disabled=true;
     try{
-      if(boardMode==='endless'&&!(await supportedModes()).includes('endless')){message.textContent='ENDLESSの共通ランキングはCloudflare Workerの更新待ち。';return;}
-      const r=await fetch(api+'/api/score',{method:'DELETE',headers:{'Content-Type':'application/json'},body:JSON.stringify({playerId:playerId(),mode:boardMode})});
+      if(deleteMode==='endless'&&!(await supportedModes()).includes('endless')){if(!modal.hidden&&boardMode===deleteMode)message.textContent=serverModes===null?'ランキングの対応状況を確認できません。通信を確認して再試行してね。':'ENDLESSの共通ランキングはサーバー更新待ち。';return;}
+      const r=await fetch(api+'/api/score',{method:'DELETE',headers:{'Content-Type':'application/json'},body:JSON.stringify({playerId:playerId(),mode:deleteMode})});
       if(!r.ok)throw new Error('HTTP '+r.status);
-      await showBoard();
-      message.textContent='このブラウザの登録記録を削除したよ。';
-    }catch(e){message.textContent='削除に失敗した。通信設定を確認してね。';console.warn(e)}
+      if(!modal.hidden&&boardMode===deleteMode){const refresh=showBoard(deleteMode),requestId=boardRequest;await refresh;if(!modal.hidden&&boardRequest===requestId)message.textContent=deleteMode.toUpperCase()+'の登録記録を削除したよ。';}
+    }catch(e){if(!modal.hidden&&boardMode===deleteMode)message.textContent='削除に失敗した。通信設定を確認してね。';console.warn(e)}
+    finally{deleting=false;forget.disabled=false}
   });
   modal.querySelector('.ruu-public-top').appendChild(forget);
   modal.querySelector('#ruu-board-close').addEventListener('click',closeBoard);
@@ -87,13 +96,16 @@
   window.addEventListener('keydown',e=>{if(!modal.hidden){e.stopImmediatePropagation();if(e.key==='Escape'){e.preventDefault();closeBoard();}}},true);
   async function showBoard(mode){
     if(mode==='normal'||mode==='endless')boardMode=mode;
+    const requestedMode=boardMode,requestId=++boardRequest;
+    const isCurrent=()=>requestId===boardRequest&&!modal.hidden;
     modal.hidden=false;message.textContent=api?'読み込み中…':API_MESSAGE;rows.replaceChildren();
     normalTab.disabled=boardMode==='normal';endlessTab.disabled=boardMode==='endless';
     if(!api)return;
     try{
       const modes=await supportedModes();
-      if(boardMode==='endless'&&!modes.includes('endless')){
-        message.textContent='∞ ENDLESS共通ランキングはCloudflare Worker更新待ち。通常ランキングとは完全分離。';
+      if(!isCurrent())return;
+      if(requestedMode==='endless'&&!modes.includes('endless')){
+        message.textContent=serverModes===null?'∞ ENDLESSの対応状況を確認できません。通信を確認して再試行してね。':'∞ ENDLESS共通ランキングはサーバー更新待ち。通常ランキングとは別に記録されます。';
         const best=JSON.parse(storage.get('RUU_OVERRUN_ENDLESS_RECORD_V1')||'null');
         if(best){const tr=document.createElement('tr');
           ['LOCAL',nickname||'YOU','—',Number(best.score||0).toLocaleString('ja-JP'),String(best.kills||0),String(best.level||1),'ENDLESS'].forEach(t=>{const td=document.createElement('td');td.textContent=t;tr.appendChild(td)});
@@ -101,12 +113,12 @@
         }
         return;
       }
-      const response=await fetch(api+'/api/leaderboard?mode='+boardMode+'&t='+Date.now(),{cache:'no-store'});
+      const response=await fetch(api+'/api/leaderboard?mode='+requestedMode+'&t='+Date.now(),{cache:'no-store'});
       if(!response.ok)throw new Error('HTTP '+response.status);
       const data=await response.json();
-      if(modal.hidden)return;
+      if(!isCurrent())return;
       const entries=Array.isArray(data.entries)?data.entries:[];
-      message.textContent=entries.length?`${boardMode.toUpperCase()} TOP ${entries.length} / SCORE DESC`:'まだ登録記録がない。最初のプレイヤーになろう。';
+      message.textContent=entries.length?`${requestedMode.toUpperCase()} TOP ${entries.length} / SCORE DESC`:'まだ登録記録がない。最初のプレイヤーになろう。';
       const fragment=document.createDocumentFragment();
       entries.forEach((v,index)=>{
         const tr=document.createElement('tr');
@@ -115,7 +127,7 @@
         });fragment.appendChild(tr);
       });
       rows.appendChild(fragment);
-    }catch(err){message.textContent='ランキング取得に失敗した。通信やサーバー設定を確認してね。';console.warn('Ranking load error:',err)}
+    }catch(err){if(isCurrent())message.textContent='ランキング取得に失敗した。通信やサーバー設定を確認してね。';console.warn('Ranking load error:',err)}
   }
   function shareToX(){
     const r=result();if(!r)return;
@@ -155,10 +167,11 @@
     if(!nickname){status.textContent='まずプレイヤー名を入力してね。';scoreInput.focus();return}
     if(!api){status.textContent=API_MESSAGE;return}
     const r=result();if(!r){status.textContent='プレイ終了後の記録だけ登録できるよ。';return}if(r.mode==='challenge'){status.textContent='チャレンジ記録はローカル専用。通常ランキングに送信しないよ。';return;}
-    if(r.mode==='endless'&&!(await supportedModes()).includes('endless')){status.textContent='ENDLESS自己ベストは保存済み。オンライン登録はCloudflare更新後に使えるよ。';return;}
+    const submittedName=nickname;
     busy=true;status.textContent='送信中…';
     try{
-      const response=await fetch(api+'/api/score',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({playerId:playerId(),name:nickname,title:r.title||'',mode:r.mode||'normal',score:r.score,kills:r.kills,level:r.level,timeSeconds:r.durationSeconds,won:r.won,version:r.version})});
+      if(r.mode==='endless'&&!(await supportedModes()).includes('endless')){status.textContent=serverModes===null?'ランキングの対応状況を確認できません。通信を確認して、もう一度登録してね。':'ENDLESS自己ベストは保存済み。オンライン登録はサーバー更新後に使えるよ。';return;}
+      const response=await fetch(api+'/api/score',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({playerId:playerId(),name:submittedName,title:r.title||'',mode:r.mode||'normal',score:r.score,kills:r.kills,level:r.level,timeSeconds:r.durationSeconds,won:r.won,version:r.version})});
       const body=await response.json().catch(()=>({}));
       if(!response.ok)throw new Error(body.error||('HTTP '+response.status));
       status.textContent=body.updated?'ランキングに登録した！':'登録済みの自己ベストを維持したよ。';

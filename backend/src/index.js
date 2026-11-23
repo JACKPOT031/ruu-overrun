@@ -39,7 +39,7 @@ export default {
       return json({ok:true,game:'RUU//OVERRUN',ranking:'beta',rankingModes:['normal','endless'],version:'1.11.0'});
     }
     if (url.pathname === '/api/leaderboard' && request.method === 'GET') {
-      const limit = Math.max(1, Math.min(50, Number(url.searchParams.get('limit')) || 30));
+      const limit = Math.max(1, Math.min(50, Math.floor(Number(url.searchParams.get('limit')) || 30)));
       const mode=url.searchParams.get('mode')==='endless'?'endless':'normal';
       const table=mode==='endless'?'endless_scores':'scores';
       const {results} = await env.DB.prepare(`

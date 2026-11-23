@@ -5,8 +5,8 @@
 const TAU=Math.PI*2;
 const DB='RUU_TRIAL_RECORDS_V1',TITLE='RUU_TRIAL_TITLE_V1';
 const MISSIONS=[
-{id:'untouched',name:'UNTOUCHED',jp:'無傷の生還',title:'無傷の生還者',icon:'✧',desc:'HPダメージ0で100秒生存・最終ボス撃破。シールド吸収は可。'},
-{id:'no_jackpot',name:'ZERO LUCK',jp:'運命への反抗',title:'運命に頼らぬ者',icon:'Ø',desc:'JACKPOT MODEを封印して100秒生存・最終ボス撃破。'},
+{id:'untouched',name:'UNTOUCHED',jp:'無傷の生還',title:'無傷の生還者',icon:'✧',desc:'HPダメージ0でチャレンジをクリア。シールド吸収は可。'},
+{id:'no_jackpot',name:'ZERO LUCK',jp:'運命への反抗',title:'運命に頼らぬ者',icon:'Ø',desc:'JACKPOT MODEを封印してチャレンジをクリア。'},
 {id:'one_weapon',name:'SINGLE BARREL',jp:'一条の光',title:'一条の光',icon:'Ⅰ',desc:'零式ネオン・バラージ以外の武器、進化、融合、JACKPOTを封印してクリア。'}
 ];
 const WAVES=[
@@ -18,7 +18,7 @@ function load(){
  try{
   const v=JSON.parse(localStorage.getItem(DB)||'{}'),out={};
   if(!v||typeof v!=='object'||Array.isArray(v))return out;
-  for(const m of MISSIONS){const a=v[m.id];if(Number.isSafeInteger(a?.best)&&a.best>=0&&a.clears>0)out[m.id]={best:a.best,clears:Math.min(9999,Math.floor(a.clears))}}
+  for(const m of MISSIONS){const a=v[m.id];if(Number.isSafeInteger(a?.best)&&a.best>=0&&Number.isSafeInteger(a.clears)&&a.clears>0)out[m.id]={best:a.best,clears:Math.min(9999,a.clears)}}
   return out;
  }catch{return{}}
 }
@@ -28,7 +28,7 @@ function reset(){trial=null;nextWave=0;wave=null;banner=null;danger=false;beat=0
 function start(g,id=''){reset();if(g?.mode!=='challenge'||!MISSIONS.some(m=>m.id===id))return;g.challengeId=id;trial={id,failed:false,reason:'',success:false,done:false}}
 function status(){const rec=load();return MISSIONS.map(m=>({...m,best:rec[m.id]?.best||0,clears:rec[m.id]?.clears||0,cleared:!!rec[m.id],equipped:equipped===m.id}))}
 function selectedTitle(){return MISSIONS.find(m=>m.id===equipped&&load()[m.id])?.title||''}
-function selectTitle(id=''){if(id&&!MISSIONS.some(m=>m.id===id&&load()[m.id]))return false;equipped=id;try{localStorage.setItem(TITLE,id)}catch{}return true}
+function selectTitle(id=''){if(id&&!MISSIONS.some(m=>m.id===id&&load()[m.id]))return false;equipped=id;if(!window.RUU_LOCAL_DEV_MODE)try{localStorage.setItem(TITLE,id)}catch{}return true}
 function currentInfo(g){const m=MISSIONS.find(m=>m.id===g?.challengeId);return m?{...m,success:!!trial?.success,failed:!!trial?.failed,reason:trial?.reason||''}:null}
 function allowJackpot(g){return !(g?.mode==='challenge'&&['no_jackpot','one_weapon'].includes(g.challengeId))}
 function allowUpgrade(g,u){return g?.mode!=='challenge'||g.challengeId!=='one_weapon'||(u&&((u.type==='WEAPON'&&u.id==='pulse')||!['WEAPON','EVOLUTION','FUSION','JACKPOT_MODE'].includes(u.type)))}
@@ -37,7 +37,7 @@ function complete(g,win){
  if(g?.mode!=='challenge'||!trial)return null;
  if(!trial.done){
   trial.done=true;trial.success=!!win&&!trial.failed&&g.time>=100&&g.finalBossDead===true;
-  if(trial.success){const a=load(),p=a[trial.id];a[trial.id]={best:Math.max(p?.best||0,Math.max(0,Math.floor(g.score))),clears:Math.min(9999,(p?.clears||0)+1)};try{localStorage.setItem(DB,JSON.stringify(a))}catch{}}
+  if(trial.success&&!window.RUU_LOCAL_DEV_MODE){const a=load(),p=a[trial.id];a[trial.id]={best:Math.max(p?.best||0,Math.max(0,Math.floor(g.score))),clears:Math.min(9999,(p?.clears||0)+1)};try{localStorage.setItem(DB,JSON.stringify(a))}catch{}}
   if(!trial.success&&!trial.reason)trial.reason=win?'条件未達成':'クリア失敗';
  }
  return{success:trial.success,id:trial.id,reason:trial.reason,name:currentInfo(g)?.name||''};

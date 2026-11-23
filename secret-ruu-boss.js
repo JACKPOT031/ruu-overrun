@@ -346,7 +346,7 @@ function drawGround(ctx,cam,g,q='auto'){
   ctx.lineWidth=1.8;ctx.strokeStyle='#fff0f5';ctx.beginPath();ctx.arc(hx,hy,h.r*(.24+.76*t),0,TAU);ctx.stroke();
  }
  if(S.active&&S.wind>0&&(S.pattern===6||S.pattern===7)){
-  const p=S.pattern===7?g.player:e;ctx.globalAlpha=.16+.24*(1-S.wind/Math.max(.01,S.windMax));
+  const p=S.pattern===7?{x:S.targetX,y:S.targetY}:e;ctx.globalAlpha=.16+.24*(1-S.wind/Math.max(.01,S.windMax));
   ctx.strokeStyle=S.frenzy?'#ff8baa':'#e5b6ff';ctx.lineWidth=3;
   ctx.setLineDash([10,9]);ctx.beginPath();ctx.arc(p.x-cam.x,p.y-cam.y,S.pattern===7?420:220,0,TAU);ctx.stroke();ctx.setLineDash([]);
  }
