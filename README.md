@@ -1,5 +1,35 @@
-# RUU//OVERRUN — PUBLIC BETA (v1.19.0)
+# RUU//OVERRUN — PUBLIC BETA (v1.22.0)
 
+JACKPOTØ31が制作するオリジナル・ブラウザサバイバルアクション。
+
+**[ゲームを遊ぶ](https://jackpot031.github.io/ruu-overrun/)** / **[公開開始v1.5.3からの更新履歴](./CHANGELOG.md)**
+
+## v1.22.0 — ECLIPSE BULLET HELL / BOSS SPOILS
+
+- **隠しボスの弾幕強化：** 二連／三連の扇状攻撃、三重リング、連続月蝕カーテン、中心へ収束する包囲弾幕、挟撃、斬撃、警告フィールドを強化。HP20%以下の LAST LIGHT は攻撃間隔をさらに短縮。
+- **7種類の専用弾デザイン：** Crescent（月刃）、Halo（月輪）、Needle（結晶針）、Blade（斬撃）、Prism（菱形）、Core（侵食核）、Ember（星形）。通常の丸弾描画から切り替え、最大188発と描画キャッシュで負荷を制御。
+- **豪華な撃破報酬（従来の撃破スコアに追加）：**
+  - 中ボス DEVORA：追加スコア **+5,000**、XP+90、最大HPの12%回復、シールド+8、DRIVE+30、FINISHER+25。レリックも確定ドロップ。
+  - NULL EMPEROR：**+15,000**、XP+170、最大HPの18%回復、シールド+12、DRIVE+40、FINISHER+35。レリックも確定ドロップ。
+  - TRUE DEVORA各個体：**+3,750**、XP+62、最大HPの5.5%回復、シールド+5、DRIVE+12、FINISHER+12。
+  - TRUE DEVORA全滅：3体では追加 **+16,500**、5体では追加 **+24,500** と、追加XP・回復・シールド・ゲージ特典。
+  - RUU : ECLIPSE：**+38,000**、XP+300、最大HPの25%回復、シールド+25、DRIVE+55、FINISHER+55。
+- **BOSS REWARDシネマ：** 撃破報酬バナー、光輪・衝撃・スコア表示を追加。最終撃破後は約2.7秒表示してからエンディングに移行する。
+- **HP50%の裏ボス判定は維持：** DEVORA最後の1体撃破時点のHPを、撃破報酬の回復より先に判定する。条件未達成なら、後からHPを回復してもRUU : ECLIPSEは出現しない。
+
+## v1.21.0 — ECLIPSE OVERDRIVE
+
+RUU : ECLIPSEに4×4 WebPアトラスで待機・歩行・走行・攻撃モーションを追加。二連扇状弾、二重リング、三連ダッシュ、ライン斬撃、クロスケージ、範囲攻撃とLAST LIGHTを導入。
+
+## v1.20.0 — SECRET BOSS / RUU : ECLIPSE
+
+NULL EMPEROR撃破後のTRUE DEVORA全個体を倒した瞬間、**プレイヤーHPが最大値の50%以上**なら裏ボスが出現。裏ボスの撃破もクリア条件に加わる。ENDLESSは対象外。
+
+## v1.19.1〜v1.19.3 — VISUAL CLARITY / PERFORMANCE / FPS
+
+3体／5体カットインの縦横比修正、高DPI Canvas、描画品質改善、通常敵出現密度の軽減、実測FPS・DRAW ms表示を実装。
+
+---
 ## v1.19.0 — TRUE END / DEVORA COLLECTIVE APOCALYPSE
 
 ### New mission and launch copy
