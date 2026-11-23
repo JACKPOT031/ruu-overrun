@@ -1,8 +1,38 @@
-# RUU//OVERRUN — PUBLIC BETA (v1.30.0)
+# RUU//OVERRUN — PUBLIC BETA (v1.31.0)
 
 JACKPOTØ31が制作するオリジナル・ブラウザサバイバルアクション。
 
 **[ゲームを遊ぶ](https://jackpot031.github.io/ruu-overrun/)** / **[公開開始v1.5.3からの更新履歴](./CHANGELOG.md)**
+
+## v1.31.0 — OPERATION: TAKAMIYA / ASTRAEA & SCREEN WAVES
+
+裏ボス戦に**弾受けの雑魚2ウェーブ**と、敵側の**ASTRAEA1体**を追加。最終編成はECLIPSE3体・DEVORA3体・ASTRAEA1体になる。
+
+- **雑魚増援は合計2回・24体。** 開戦時（ECLIPSEの登場演出終了時）に12体、ASTRAEA参戦時に12体を出す。各ウェーブはBRUTE8体＋RUNNER4体の近接型。ボスとプレイヤーの間を優先し、プレイヤーから170以上離れた場所へ0.7秒の到着予兆付きで出現する。通常弾や新しい自動照準の標的を受け持ち、ボスへの攻撃を分散する。
+- **武器ごとの既存ルールを使用。** 貫通弾、範囲攻撃、すでに別の敵を追尾しているミサイルを一律に無効化する壁は作らない。雑魚は個別HPを持つ通常の攻撃対象で、通常撃破のスコア・XP・コンボに反映される。無限の再出現はない。
+- **ASTRAEAは戦闘開始20秒で参戦。** 2秒の到着予兆を経て飛行し、0.95秒予告の狙撃レーザー、1.15秒予告の3方向レーザー、1.2秒予告の突撃を順に使う。予兆中に始点・向き・射程を固定し、表示した経路で判定する。HP50%未満で攻撃間隔を短縮するが、予兆時間は短縮しない。
+- **既存のアニメーションを再利用。** 承認済みのASTRAEA飛行アトラスで描画し、赤い敵表示・専用HPバーで識別する。味方のASTRAEA緊急参戦とは別に管理する。
+- **完全クリアは主要ボス7体の撃破。** 先に従来の6体を倒した場合は、20秒を待たずASTRAEAと第2ウェーブを出す。ASTRAEAを先に倒しても、ECLIPSE・DEVORAが残っていれば続行する。主要ボス全滅時の残り雑魚は報酬・撃破数を増やさず撤収させ、最終報酬・実績・完全クリアEDを1回だけ開始する。
+- **結果とHP表示を更新。** 集合HPには登場前からASTRAEAの最大HPを含める。HUDに3系統の残数とウェーブ数、結果カードにASTRAEAの撃破数とWAVES 0〜2/2を追加する。味方ASTRAEAのボス別累計28%・とどめ不可の制限も、敵ASTRAEAに適用する。
+- **追加負荷を制限。** 雑魚は最大24体、ASTRAEAは1体。ASTRAEAのレーザーは最大3本・残像は最大12個に制限し、既存の敵弾上限846発は増やさない。ECLIPSE3体の弾数50%増、DEVORA3体の12秒増援、HP50%以上の出現条件は継続する。
+
+検証コマンド（Node 18+）：
+
+```sh
+node tests/astraea-siege.test.cjs
+node tests/takamiya-operation.test.cjs
+node tests/complete-ending.test.cjs
+node tests/render-stability.test.cjs
+node tests/performance-engine.test.cjs
+node --check enemy-astraea.js
+node --check secret-ruu-boss.js
+node --check boss-rewards.js
+node --check astral-companion.js
+node --check support-pilots.js
+node --check public-features.js
+```
+
+追加戦18/18、既存TAKAMIYA21/21、完全クリアED16/16、描画安定性16/16の計71項目と、性能制御テストを通過。2ウェーブ・7体の撃破順・通常弾の吸収・予兆と攻撃判定・報酬とEDの重複防止・支援上限を実ゲーム関数で確認した。増援の座標重複と、重力武器でASTRAEAの突進が予告経路からずれるケースも修正し、回帰テストを追加。外部JS6ファイルとHTML内JSの構文チェックも通過。検証はNode VMと記録用Canvasで行い、ブラウザの実表示、実機FPS、実際の攻略難易度はこの環境では未測定。
 
 ## v1.30.0 — OPERATION: TAKAMIYA
 

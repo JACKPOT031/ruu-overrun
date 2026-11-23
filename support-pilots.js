@@ -1,4 +1,4 @@
-/* RUU//OVERRUN v1.15.3 MASS-PRODUCED SUPPORT PILOT / VISUAL SIGNALS
+/* RUU//OVERRUN v1.31.0 MASS-PRODUCED SUPPORT PILOT / HOSTILE ASTRAEA TARGETING
    Roll once per run (25%); five Guardian Genome pilots equally likely. */
 (()=>{
 'use strict';
@@ -134,10 +134,10 @@ function skill(g,api){
   }
  }else if(id==='oz'){
   S.cd=6.6;
-  const e=nearby(g,p.x,p.y,790,t=>t.kind==='boss'||t.kind==='final'||t.trueDevora||t.elite)[0]||nearby(g,p.x,p.y,700)[0];
+  const e=nearby(g,p.x,p.y,790,t=>t.kind==='boss'||t.kind==='final'||t.trueDevora||t.enemyAstraea||t.elite)[0]||nearby(g,p.x,p.y,700)[0];
   if(e){
    e.pilotMarkUntil=g.time+4.5;S.marks++;
-   const damage=e.kind==='boss'||e.kind==='final'||e.trueDevora?23:31;
+   const damage=e.kind==='boss'||e.kind==='final'||e.trueDevora||e.enemyAstraea?23:31;
    api?.hit?.(e,damage,col);
    ray(at.x,at.y-56,e.x,e.y,col,9,.62);
    ring(e.x,e.y,e.r+72,col,'target',.86);ring(e.x,e.y,e.r+28,col,'target',.72);
@@ -400,5 +400,5 @@ function drawWorld(ctx,cam,g){
  ctx.restore();
 }
 
-window.RUU_PILOTS={VERSION:'1.19.0',PILOTS,PROBABILITY,DELAY,RUN_TIME,start,active,hasEscort,status,entering,ready,shotRate,interceptRate,shotColor,isKai,xpMultiplier,markedMultiplier,onInvasionRepelled,onEscortShot,onIntercept,onGemPickup,tick,drawScreen,drawWorld,drawGround,drawFront};
+window.RUU_PILOTS={VERSION:'1.31.0',PILOTS,PROBABILITY,DELAY,RUN_TIME,start,active,hasEscort,status,entering,ready,shotRate,interceptRate,shotColor,isKai,xpMultiplier,markedMultiplier,onInvasionRepelled,onEscortShot,onIntercept,onGemPickup,tick,drawScreen,drawWorld,drawGround,drawFront};
 })();

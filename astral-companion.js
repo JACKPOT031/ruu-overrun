@@ -1,4 +1,4 @@
-/* v1.24.0 ASTRAL COMPANION / 18th-generation SUIT SPRITE REFORGE — game-only.
+/* v1.31.0 ASTRAL COMPANION / HOSTILE ASTRAEA SUPPORT LIMITS — game-only.
    ASTRAL-SUIT: a 25%-chance named escort. ASTRAEA No.3: once per run,
    auto-dispatch at a FINAL boss spawn if a pilot joined and Ruu HP <= 50%.
    Sprites are stylized game interpretations of the supplied character sheets.
@@ -105,8 +105,8 @@ function activateEmergency(g,api,q='auto'){
 }
 function hitAssist(e,dmg,api){
  if(!e||e.hp<=0||!api?.hit)return;
- if(e.trueDevora&&window.RUU_TRUE_END?.isIntro?.()||e.secretRuu&&window.RUU_SECRET_BOSS?.isIntro?.())return;
- if(e.kind==='boss'||e.kind==='final'||e.trueDevora||e.secretRuu){
+ if(e.trueDevora&&window.RUU_TRUE_END?.isIntro?.(e)||(e.secretRuu||e.secretScreen)&&window.RUU_SECRET_BOSS?.isIntro?.(e)||e.enemyAstraea&&window.RUU_ENEMY_ASTRAEA?.isIntro?.(e))return;
+ if(e.kind==='boss'||e.kind==='final'||e.trueDevora||e.secretRuu||e.enemyAstraea){
   // Per-boss cap: at most 28% of max HP from ASTRAEA, never a lethal blow.
   // Apply the cap after DRIVE / critical / mark / resistance modifiers, then
   // record the actual HP removed rather than the unmodified shot amount.
@@ -121,7 +121,7 @@ function hitAssist(e,dmg,api){
 function fireSuit(g,api,q){
  const e=targetList(g,z.allyX,z.allyY,520,1)[0];if(!e)return;
  z.allyAttackFace=e.x>=z.allyX?1:-1;z.allyAttackTime=SUIT_SHOOT_TIME;
- const pilot=window.RUU_PILOTS,base=clamp(8.5+(g.level||1)*.48,9,15.5)*(e.kind==='boss'||e.kind==='final'||e.trueDevora?.6:1);
+ const pilot=window.RUU_PILOTS,base=clamp(8.5+(g.level||1)*.48,9,15.5)*((e.kind==='boss'||e.kind==='final'||e.trueDevora||e.enemyAstraea)?.6:1);
  const color=pilot?.shotColor?.()||gold,rapid=pilot?.isKai?.()===true;
  const hits=rapid?2:1,damage=rapid?base*.70:base;
  for(let n=0;n<hits;n++)api?.hit?.(e,damage,color);
@@ -146,7 +146,7 @@ function burstAstraea(g,api,q){
  z.flightFace=primary.x>=z.astraX?1:-1;
  const gunX=z.astraX+z.flightFace*55,gunY=z.astraY+10;
  for(const [i,e] of enemies.entries()){
-  const amount=e.kind==='boss'||e.kind==='final'||e.trueDevora?27:42+(g.level||1)*1.12;
+  const amount=e.kind==='boss'||e.kind==='final'||e.trueDevora||e.enemyAstraea?27:42+(g.level||1)*1.12;
   hitAssist(e,amount,api);
   fxLine(gunX,gunY,e.x,e.y,pink,i===0?9:5.2,.35);
   fxLine(gunX,gunY,e.x,e.y,white,i===0?3.2:2.1,.16);
@@ -162,7 +162,7 @@ function finalAstraea(g,api,q){
  z.finished=true;const p=g.player,range=365;
  for(const e of g.enemies){
   if(e.hp<=0||(e.x-p.x)**2+(e.y-p.y)**2>(range+e.r)**2)continue;
-  hitAssist(e,e.kind==='final'||e.kind==='boss'||e.trueDevora?105:100+(g.level||1)*4,api);
+  hitAssist(e,e.kind==='final'||e.kind==='boss'||e.trueDevora||e.enemyAstraea?105:100+(g.level||1)*4,api);
  }
  for(let i=0;i<8;i++){const a=i*PI/8;fxLine(p.x,p.y,p.x+Math.cos(a)*295,p.y+Math.sin(a)*295,white,6,.52)}
  api?.wave?.(p.x,p.y,range,pink);api?.burst?.(p.x,p.y,pink,45,300);
@@ -360,5 +360,5 @@ function drawScreen(ctx,W,H,g,q='auto'){
  }
  if(z.flash>0&&q!=='lite'){ctx.save();ctx.globalAlpha=z.flash*.18;ctx.strokeStyle=pink;ctx.lineWidth=8;ctx.strokeRect(7,7,W-14,H-14);ctx.restore()}
 }
-window.RUU_COMPANION={VERSION:'1.24.0',SUIT_ATLAS,SUIT_SIZE,SUIT_CELL,reset,status,onKill,onFinalBossSpawn,tick,drawGround,drawUnits,drawFront,drawScreen,position:()=>z.allyX===null?null:{x:z.allyX,y:z.allyY}};
+window.RUU_COMPANION={VERSION:'1.31.0',SUIT_ATLAS,SUIT_SIZE,SUIT_CELL,reset,status,onKill,onFinalBossSpawn,tick,drawGround,drawUnits,drawFront,drawScreen,position:()=>z.allyX===null?null:{x:z.allyX,y:z.allyY}};
 })();

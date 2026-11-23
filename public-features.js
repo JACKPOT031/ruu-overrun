@@ -295,12 +295,15 @@
     const eclipseKilled=Math.max(0,Math.min(eclipseTotal,Math.floor(Number(bp.eclipseKilled)||0)));
     const devoraTotal=Math.max(0,Math.floor(Number(bp.eclipseDevoraTotal)||0));
     const devoraKilled=Math.max(0,Math.min(devoraTotal,Math.floor(Number(bp.eclipseDevoraKilled)||0)));
-    const operationRecord=eclipseTotal?`ECLIPSE ${eclipseKilled}/${eclipseTotal} · DEVORA ${devoraKilled}/${devoraTotal}`+(bp.eclipseCleared?' / COMPLETE':bp.eclipseDevoraSpawned?'':' / INBOUND'):'';
+    const astraeaTotal=Math.max(0,Math.floor(Number(bp.eclipseAstraeaTotal)||0));
+    const astraeaKilled=Math.max(0,Math.min(astraeaTotal,Math.floor(Number(bp.eclipseAstraeaKilled)||0)));
+    const screenWaves=Math.max(0,Math.min(2,Math.floor(Number(bp.eclipseScreenWaves)||0)));
+    const operationRecord=eclipseTotal?`ECLIPSE ${eclipseKilled}/${eclipseTotal} · DEVORA ${devoraKilled}/${devoraTotal}`+(astraeaTotal?` · ASTRAEA ${astraeaKilled}/${astraeaTotal}`:'')+(bp.eclipseCleared?' / COMPLETE':''):'';
     const milestones=[
       {name:'01 DEVORA',status:bp.devora?'DEFEATED':bp.devoraReached?'ENGAGED':'NOT REACHED',clear:!!bp.devora},
       {name:'02 NULL EMPEROR',status:bp.nullEmperor?'DEFEATED':bp.nullReached?'ENGAGED':'NOT REACHED',clear:!!bp.nullEmperor},
       {name:'03 TRUE DEVORA'+(cores?' ×'+cores:''),status:bp.trueCleared?'ALL CORES CLEARED':cores?`${killed} / ${cores} CORES`:(bp.nullEmperor?'AWAKENING':'NOT REACHED'),clear:!!bp.trueCleared},
-      {name:eclipseTotal?'04 OPERATION: TAKAMIYA':'04 RUU : ECLIPSE',status:operationRecord||(bp.eclipseCleared?'SECRET CLEAR':bp.eclipseSeen?'ENCOUNTERED':bp.trueCleared?'NOT TRIGGERED':'NOT REACHED'),clear:!!bp.eclipseCleared}
+      {name:eclipseTotal?'04 OPERATION: TAKAMIYA':'04 RUU : ECLIPSE',status:operationRecord||(bp.eclipseCleared?'SECRET CLEAR':bp.eclipseSeen?'ENCOUNTERED':bp.trueCleared?'NOT TRIGGERED':'NOT REACHED'),detail:astraeaTotal?`WAVES ${screenWaves}/2`:'',clear:!!bp.eclipseCleared}
     ];
     panel(680,181,468,394,'#191427ed','#94779491');
     text('BOSS / CLEAR RECORD',697,213,'900 20px ui-monospace,Consolas,monospace','#f1d7e2',439);
@@ -309,6 +312,7 @@
       const y=246+i*53,col=m.clear?'#a7f0d5':m.status==='ENGAGED'||m.status==='ENCOUNTERED'?'#ffd69d':'#a6a6b2';
       panel(696,y,435,47,m.clear?'#18312d9c':'#171b2adc',m.clear?'#729a8f8c':'#5a617457');
       text(m.name,709,y+19,'900 14px ui-monospace,Consolas,monospace','#f1e5e2',282);
+      if(m.detail)text(m.detail,1091,y+19,'800 9px ui-monospace,Consolas,monospace',col,88,'right');
       text(m.clear?'✓':'—',1115,y+19,'900 15px ui-monospace,Consolas,monospace',col,28,'right');
       text(m.status,709,y+36,'800 11px ui-monospace,Consolas,monospace',col,409);
     });

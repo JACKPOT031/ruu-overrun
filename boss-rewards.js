@@ -1,4 +1,4 @@
-/* RUU//OVERRUN v1.30.0 — BOSS SPOILS / OPERATION: TAKAMIYA CLEAR REWARD
+/* RUU//OVERRUN v1.31.0 — BOSS SPOILS / OPERATION: TAKAMIYA CLEAR REWARD
    Extra rewards stacked ON TOP OF the game's original kill score and gems.
    This module runs only after TRUE DEVORA's last-core HP gate is evaluated.
 */
@@ -51,7 +51,7 @@ function grant(g,detail,e,api,cinema=false){
 }
 function onKill(e,g,api){
  if(!e||!g||e.hp>0||e.bossRewardGranted)return false;
- const key=e.secretRuu?'secret_ruu':e.trueDevora?'true_devora':e.kind;
+ const key=e.secretRuu||e.enemyAstraea?'secret_ruu':e.trueDevora?'true_devora':e.kind;
  const detail=REWARDS[key];if(!detail)return false;
  e.bossRewardGranted=true;
  // Major bosses also drop a guaranteed collectible relic chest.
@@ -60,10 +60,10 @@ function onKill(e,g,api){
   if(g.chests.length>6)g.chests.shift();
  }
  const finalCore=key==='true_devora'&&!e.secretReinforcement&&g.trueEndCleared&&!g.trueEndRewardGranted;
- const secretComplete=(e.secretRuu||e.secretReinforcement)&&g.secretBossCleared&&!g.secretRewardClear;
+ const secretComplete=(e.secretRuu||e.secretReinforcement||e.enemyAstraea)&&g.secretBossCleared&&!g.secretRewardClear;
  // ECLIPSE's grand reward belongs to the whole encounter. Escorts retain their
  // individual core reward, but cannot repeat the earlier 3/5-core collective.
- if(!e.secretRuu)grant(g,detail,e,api,false);
+ if(!e.secretRuu&&!e.enemyAstraea)grant(g,detail,e,api,false);
  if(finalCore){
   g.trueEndRewardGranted=true;
   const count=g.trueEndCount===5?5:3;
@@ -110,5 +110,5 @@ function drawScreen(ctx,W,H){
  ctx.fillText('✦ BOSS REWARDS // DRIVE + FINISHER CHARGE ✦',W*.5,y+95,boxW*.90);
  ctx.restore();
 }
-window.RUU_BOSS_REWARDS={VERSION:'1.30.0',REWARDS,COLLECTIVE,reset,onKill,tick,status,drawScreen};
+window.RUU_BOSS_REWARDS={VERSION:'1.31.0',REWARDS,COLLECTIVE,reset,onKill,tick,status,drawScreen};
 })();
