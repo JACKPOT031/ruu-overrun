@@ -552,7 +552,7 @@ const WALK_ATLAS=new Image();WALK_ATLAS.src='assets/ruu_walk_atlas.webp';
  // AUTO quality adapts to GPU load instead of defaulting to blurry 72% pixels.
  let fxPreset='auto',fxMax=false,renderScale=1,renderInterval=1000/30,autoQuality=1;
  let lastPaint=0,lastPaintState='',nextPaintDue=0,paintCount=0,paintTotalMs=0,perfTick=performance.now(),lastFxHit=0;
- let updateCount=0,updateTotalMs=0,lastUpdateMs=0,lastRafGap=0,lastRafAt=0,perfSummary=null;
+ let updateCount=0,updateTotalMs=0,lastUpdateMs=0,lastRafGap=0,lastRafAt=0,rafGapSinceDraw=0,perfSummary=null;
  // v1.19.3: Count completed canvas draws against actual rAF timestamps,
  // not an assumed display refresh rate or the selected FPS cap.
  const fpsSamples=[];
@@ -565,7 +565,7 @@ const WALK_ATLAS=new Image();WALK_ATLAS.src='assets/ruu_walk_atlas.webp';
    // Separate game update CPU cost, Canvas command CPU cost, and browser rAF stalls.
    if(lastFpsFrame&&timestamp-lastFpsFrame>650)fpsSamples.length=0;
    lastFpsFrame=timestamp;
-   fpsSamples.push({t:timestamp,draw:drawMs,update:lastUpdateMs,raf:lastRafGap});
+   fpsSamples.push({t:timestamp,draw:drawMs,update:lastUpdateMs,raf:rafGapSinceDraw});
    while(fpsSamples.length>2&&fpsSamples[0].t<timestamp-1500)fpsSamples.shift();
    if(timestamp-lastFpsUpdate<350)return;
    lastFpsUpdate=timestamp;
@@ -2881,6 +2881,7 @@ ui.healthFill.style.width=`${100*p.hp/p.maxHp}%`;ui.healthText.textContent=`${Ma
  function drawJoy(){if(!joy.active||state!=='playing')return;ctx.save();ctx.globalAlpha=.58;strokeCircle(joy.sx,joy.sy,57,'#83feeb',3);fillCircle(joy.sx+clamp(joy.x-joy.sx,-55,55),joy.sy+clamp(joy.y-joy.sy,-55,55),19,'#83feed');ctx.restore()}
  function loop(now){
    lastRafGap=lastRafAt?Math.max(0,now-lastRafAt):0;lastRafAt=now;
+   rafGapSinceDraw=Math.max(rafGapSinceDraw,lastRafGap);
    const dt=Math.min(Math.max(0,(now-last)/1000),.048);last=now;
    const updateStart=performance.now();
    if(state==='playing'){if(g?.impactFreeze>0)g.impactFreeze=Math.max(0,g.impactFreeze-dt);else update(dt);}
@@ -2912,6 +2913,7 @@ ui.healthFill.style.width=`${100*p.hp/p.maxHp}%`;ui.healthText.textContent=`${Ma
      if(state==='dying')window.RUU_DEATH?.draw(ctx,W,H,deathScene?.elapsed||0,fxPreset);
      const drawMs=performance.now()-begin;paintCount++;paintTotalMs+=drawMs;
      if(active)recordFpsSample(now,drawMs);
+     rafGapSinceDraw=0;
    }
    // BGM continues even while the level-up panel freezes simulation.
    if(state==='levelup'&&Math.floor(now/200)!==Math.floor((now-17)/200))updateMusicUI();
