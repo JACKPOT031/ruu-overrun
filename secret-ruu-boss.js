@@ -1,6 +1,6 @@
-/* RUU//OVERRUN v1.30.0 — OPERATION: TAKAMIYA
-   Three independent ECLIPSE bosses, followed by three DEVORA reinforcements.
-   All six must fall. Projectile counts grow 50%; all shots share a bounded pool.
+/* RUU//OVERRUN v1.31.0 — OPERATION: TAKAMIYA / ASTRAEA SIEGE
+   Three ECLIPSE, three DEVORA and one hostile ASTRAEA form the seven-boss gate.
+   Two finite melee screens protect them; screen cleanup never grants rewards.
 */
 (()=>{
 'use strict';
@@ -12,6 +12,7 @@ const ATLAS=new Image();ATLAS.decoding='async';ATLAS.src='assets/secret_ruu_anim
 const ATLAS_CELL=320,ATLAS_COLS=4,ECLIPSE_TOTAL=3,REINFORCEMENT_TOTAL=3;
 const PROJECTILE_CAP=846,REINFORCEMENT_RESERVE=96,ECLIPSE_PROJECTILE_CAP=PROJECTILE_CAP-REINFORCEMENT_RESERVE;
 const REINFORCEMENT_DELAY=12;
+const ASTRAEA_TOTAL=1,ASTRAEA_DELAY=20,SCREEN_WAVE_TOTAL=2,SCREEN_WAVE_SIZE=12,SCREEN_ARRIVAL=.7;
 // Pre-render 7 premium projectile glyphs only once. Each live bullet is one
 // Canvas drawImage rather than a new shadowBlur + radial gradient per frame.
 const GLYPHS=['crescent','halo','needle','blade','prism','core','ember'];
@@ -104,28 +105,41 @@ const BRAIN=index=>({
 const INITIAL=()=>({
  triggered:false,active:false,finished:false,intro:0,introMax:3.1,clock:0,combatClock:0,
  bosses:[],reinforcements:Array(REINFORCEMENT_TOTAL).fill(null),reinforcementsSpawned:false,
+ astraea:null,astraeaSpawned:false,astraeaMaxHp:0,screens:[],screenWaves:0,
+ screenSlots:Array.from({length:SCREEN_WAVE_TOTAL},()=>Array(SCREEN_WAVE_SIZE).fill(null)),
  level:1,qualifiedHp:0,eclipseMaxHp:0,reinforcementMaxHp:0,plannedReinforcementHp:[],
  finishPulse:0,emitted:0,attempted:0,budgetArray:null,budgetLength:-1,budget:null
 });
 let S=INITIAL();
 function reset(){S=INITIAL()}
 function isActive(){return S.active}
-function isIntro(){return S.active&&S.intro>0}
+function isIntro(e){
+ if(e?.secretScreen)return S.active&&e.secretScreenIntro>0;
+ if(e?.enemyAstraea)return !!window.RUU_ENEMY_ASTRAEA?.isIntro?.(e);
+ if(e?.secretReinforcement)return !!window.RUU_TRUE_END?.isIntro?.(e);
+ return S.active&&S.intro>0;
+}
 function isBoss(e){return !!e?.secretRuu}
-function isEncounterEnemy(e){return !!(e?.secretRuu||e?.secretReinforcement)}
+function isEncounterEnemy(e){return !!(e?.secretRuu||e?.secretReinforcement||e?.enemyAstraea||e?.secretScreen)}
 function remainingBosses(){return S.bosses.reduce((n,e)=>n+(!e.secretDeathCounted?1:0),0)}
+function remainingOriginalBosses(){return remainingBosses()+S.reinforcements.reduce((n,e)=>n+(!e?.secretDeathCounted?1:0),0)}
 function status(){
  const alive=S.bosses.filter(e=>!e.secretDeathCounted&&e.hp>0),first=alive[0]?.secretBrain;
  const eclipseRemaining=remainingBosses(),reinforcementRemaining=S.triggered?S.reinforcements.reduce((n,e)=>n+(!e?.secretDeathCounted?1:0),0):0;
  const eclipseHp=S.bosses.reduce((n,e)=>n+Math.max(0,e.hp||0),0);
  const reinforcementHp=S.triggered?S.reinforcements.reduce((n,e,i)=>n+(e?Math.max(0,e.hp||0):S.plannedReinforcementHp[i]||0),0):0;
+ const astraeaRemaining=S.triggered&&!S.astraea?.secretDeathCounted?ASTRAEA_TOTAL:0;
+ const astraeaHp=S.triggered?(S.astraea?Math.max(0,S.astraea.hp||0):S.astraeaMaxHp):0;
+ const screenRemaining=S.screens.reduce((n,e)=>n+(e.hp>0&&!e.secretDeathCounted?1:0),0);
  return {
   triggered:S.triggered,active:S.active,finished:S.finished,intro:S.intro,combatClock:S.combatClock,
   enraged:alive.some(e=>e.secretBrain.enraged),frenzy:alive.some(e=>e.secretBrain.frenzy),pattern:first?.pattern||0,
   eclipseTotal:S.triggered?ECLIPSE_TOTAL:0,eclipseRemaining,eclipseHp,eclipseMaxHp:S.eclipseMaxHp,
   reinforcementTotal:S.triggered?REINFORCEMENT_TOTAL:0,reinforcementRemaining,reinforcementHp,reinforcementMaxHp:S.reinforcementMaxHp,
-  reinforcementsSpawned:S.reinforcementsSpawned,totalThreats:S.triggered?ECLIPSE_TOTAL+REINFORCEMENT_TOTAL:0,remainingThreats:eclipseRemaining+reinforcementRemaining,
-  hp:eclipseHp+reinforcementHp,maxHp:S.eclipseMaxHp+S.reinforcementMaxHp||1,
+  reinforcementsSpawned:S.reinforcementsSpawned,astraeaTotal:S.triggered?ASTRAEA_TOTAL:0,astraeaRemaining,astraeaHp,astraeaMaxHp:S.astraeaMaxHp,astraeaSpawned:S.astraeaSpawned,
+  screenWaves:S.screenWaves,screenRemaining,screenSpawned:S.screens.length,
+  totalThreats:S.triggered?ECLIPSE_TOTAL+REINFORCEMENT_TOTAL+ASTRAEA_TOTAL:0,remainingThreats:eclipseRemaining+reinforcementRemaining+astraeaRemaining,
+  hp:eclipseHp+reinforcementHp+astraeaHp,maxHp:S.eclipseMaxHp+S.reinforcementMaxHp+S.astraeaMaxHp||1,
   qualifiedHp:S.qualifiedHp,encounterLevel:S.level,emitted:S.emitted,attempted:S.attempted,animation:first?.anim||'idle',
   projectilesCap:PROJECTILE_CAP,eclipseProjectilesCap:ECLIPSE_PROJECTILE_CAP,reinforcementProjectilesCap:REINFORCEMENT_RESERVE
  };
@@ -135,6 +149,7 @@ function reveal(g,api){
  const p=g.player,ratio=p.hp/Math.max(1,p.maxHp);
  if(p.hp<=0||ratio+1e-9<.5)return false;
  if(typeof api?.spawn!=='function'||typeof window.RUU_TRUE_END?.spawnReinforcement!=='function'||typeof window.RUU_TRUE_END?.reinforcementHp!=='function')return false;
+ if(typeof window.RUU_ENEMY_ASTRAEA?.spawn!=='function'||typeof window.RUU_ENEMY_ASTRAEA?.maxHp!=='function')return false;
  const bosses=[],level=Number(g.level)||1;
  for(let i=0;i<ECLIPSE_TOTAL;i++){
   const a=-Math.PI/3+i*TAU/ECLIPSE_TOTAL,dist=405+i*24;
@@ -145,6 +160,7 @@ function reveal(g,api){
  S=INITIAL();S.triggered=true;S.active=true;S.bosses=bosses;S.qualifiedHp=ratio;S.level=level;S.intro=S.introMax;
  S.plannedReinforcementHp=Array.from({length:REINFORCEMENT_TOTAL},(_,i)=>window.RUU_TRUE_END.reinforcementHp(level,i));
  S.reinforcementMaxHp=S.plannedReinforcementHp.reduce((a,b)=>a+b,0);
+ S.astraeaMaxHp=window.RUU_ENEMY_ASTRAEA.maxHp(level);
  for(let i=0;i<bosses.length;i++){
   const e=bosses[i];e.secretRuu=true;e.secretBossIndex=i;e.secretBrain=BRAIN(i);e.secretPhase=1;
   e.maxHp=Math.ceil(2350+level*33);e.hp=e.maxHp;S.eclipseMaxHp+=e.maxHp;
@@ -155,6 +171,8 @@ function reveal(g,api){
  g.enemies=bosses.slice();g.ebullets.length=0;
  const progress=g.bossProgress||(g.bossProgress={});
  progress.eclipseTotal=ECLIPSE_TOTAL;progress.eclipseKilled=0;progress.eclipseDevoraTotal=REINFORCEMENT_TOTAL;progress.eclipseDevoraKilled=0;progress.eclipseDevoraSpawned=false;
+ progress.eclipseAstraeaTotal=ASTRAEA_TOTAL;progress.eclipseAstraeaKilled=0;progress.eclipseAstraeaSpawned=false;
+ progress.eclipseScreenWaves=0;progress.eclipseScreenSpawned=0;progress.eclipseScreenKilled=0;
  p.inv=Math.max(p.inv||0,S.introMax+.4);
  g.shake=Math.max(g.shake||0,25);g.flash=Math.max(g.flash||0,.45);
  g.scenePulse=Math.max(g.scenePulse||0,1.4);
@@ -177,17 +195,92 @@ function spawnReinforcements(g,api){
  api?.toast?.('TAKAMIYA REINFORCEMENTS // DEVORA ×3',true);
  return true;
 }
+function spawnAstraea(g,api){
+ if(S.astraeaSpawned)return true;
+ const e=window.RUU_ENEMY_ASTRAEA?.spawn?.(g,api,S.level);
+ if(!e)return false;
+ S.astraea=e;S.astraeaSpawned=true;
+ if(g.bossProgress)g.bossProgress.eclipseAstraeaSpawned=true;
+ return true;
+}
+function spawnScreenWave(g,api,index){
+ const slots=S.screenSlots[index];
+ if(!slots||!g?.player||typeof api?.spawn!=='function')return false;
+ if(slots.every(Boolean))return true;
+ const p=g.player,targets=[...S.bosses,...S.reinforcements,S.astraea].filter(e=>e&&e.hp>0&&!e.secretDeathCounted);
+ const occupied=S.screens.filter(e=>e.hp>0&&!e.secretDeathCounted);
+ const available=(x,y)=>occupied.every(e=>Math.hypot(e.x-x,e.y-y)>=30);
+ for(let i=0;i<SCREEN_WAVE_SIZE;i++){
+  if(slots[i]||S.screens.length>=SCREEN_WAVE_TOTAL*SCREEN_WAVE_SIZE)continue;
+  const targetIndex=targets.length?i%targets.length:0,target=targets[targetIndex];
+  const dx=target?target.x-p.x:0,dy=target?target.y-p.y:0,distance=Math.hypot(dx,dy);
+  const angle=distance>1?Math.atan2(dy,dx):-Math.PI/2+(i%3)*TAU/3+index*.2;
+  const groupSize=targets.length?Math.floor((SCREEN_WAVE_SIZE-1-targetIndex)/targets.length)+1:4;
+  const rank=targets.length?Math.floor(i/targets.length):Math.floor(i/3);
+  const side=(rank-(groupSize-1)/2)*34;
+  // Favor the line between player and boss. A nearby boss never overrides safe arrival distance.
+  const radius=target?clamp(distance*.55,170,Math.max(170,Math.min(320,distance-70))):220;
+  let x=p.x+Math.cos(angle)*radius-Math.sin(angle)*side,y=p.y+Math.sin(angle)*radius+Math.cos(angle)*side;
+  if(!available(x,y)){
+   const bearing=Math.atan2(y-p.y,x-p.x),range=Math.hypot(x-p.x,y-p.y);
+   // Nearby bearings can converge as bosses move. Keep individual screen bodies distinct.
+   // Prefer a small angular adjustment; a finite outer ring handles a crowded arrival.
+   for(let attempt=0;attempt<84;attempt++){
+    const shift=attempt<12?Math.ceil((attempt+1)/2)*.12*(attempt%2?-1:1):(attempt-12)*TAU/72;
+    const distance=attempt<12?range:390;
+    const xx=p.x+Math.cos(bearing+shift)*distance,yy=p.y+Math.sin(bearing+shift)*distance;
+    if(available(xx,yy)){x=xx;y=yy;break}
+   }
+  }
+  const kind=i%3===2?'runner':'brute',e=api.spawn(kind,x,y,1);
+  if(!e)continue;
+  e.secretScreen=true;e.secretScreenWave=index+1;e.secretScreenIntro=SCREEN_ARRIVAL;
+  e.secretScreenSpeed=kind==='brute'?70:120;e.speed=0;e.dmg=kind==='brute'?10:8;
+  e.maxHp=(kind==='brute'?180+S.level*5:75+S.level*2);e.hp=e.maxHp;
+  e.attack=SCREEN_ARRIVAL+.2;e.shoot=9999;e.elite=false;e.pushX=0;e.pushY=0;
+  delete e.mutation;delete e.bossMutation;delete e.phase3;
+  slots[i]=e;S.screens.push(e);occupied.push(e);
+  if(g.bossProgress)g.bossProgress.eclipseScreenSpawned=S.screens.length;
+ }
+ if(!slots.every(Boolean))return false;
+ S.screenWaves=Math.max(S.screenWaves,index+1);
+ if(g.bossProgress)g.bossProgress.eclipseScreenWaves=S.screenWaves;
+ api?.sound?.('shield');api?.toast?.('TAKAMIYA SCREEN // WAVE '+(index+1)+' / '+SCREEN_WAVE_TOTAL,true);
+ return true;
+}
+function spawnSupport(g,api,force=false){
+ if(!S.active||!g?.player)return;
+ const finalWave=force||S.combatClock>=ASTRAEA_DELAY;
+ // The new major target exists before its melee screen chooses positions.
+ if(finalWave)spawnAstraea(g,api);
+ if(force||S.intro<=0){
+  if(spawnScreenWave(g,api,0)&&finalWave)spawnScreenWave(g,api,1);
+ }
+}
+function cleanupScreens(g){
+ const owned=new Set(S.screens);
+ for(const e of S.screens){
+  if(e.hp<=0||e.secretDeathCounted)continue;
+  e.hp=0;e.killCounted=true;e.secretDeathCounted=true;e.secretScreenCleaned=true;e.secretScreenIntro=0;
+ }
+ // No kill callbacks: disposal grants no score, XP, drops, combo or recorded kills.
+ g.enemies=g.enemies.filter(e=>!owned.has(e));
+}
 function onKill(e,g,api){
  if(!isEncounterEnemy(e)||e.hp>0||e.secretDeathCounted||!S.active||!g)return false;
- if(!S.bosses.includes(e)&&!S.reinforcements.includes(e))return false;
+ if(!S.bosses.includes(e)&&!S.reinforcements.includes(e)&&S.astraea!==e&&!S.screens.includes(e))return false;
  e.secretDeathCounted=true;
  if(e.secretBrain){const b=e.secretBrain;b.events.length=0;b.hazards.length=0;b.dashLeft=0;b.aftershock=0;b.wind=0;b.crossWarning=null}
  const progress=g.bossProgress||(g.bossProgress={});
+ if(e.secretScreen){progress.eclipseScreenKilled=(progress.eclipseScreenKilled||0)+1;return false}
  if(e.secretRuu)progress.eclipseKilled=(progress.eclipseKilled||0)+1;
- else progress.eclipseDevoraKilled=(progress.eclipseDevoraKilled||0)+1;
+ else if(e.secretReinforcement)progress.eclipseDevoraKilled=(progress.eclipseDevoraKilled||0)+1;
+ else if(e.enemyAstraea){progress.eclipseAstraeaKilled=(progress.eclipseAstraeaKilled||0)+1;window.RUU_ENEMY_ASTRAEA?.onDefeat?.(e,g,api)}
  api?.wave?.(e.x,e.y,225,'#ffd4c2');api?.burst?.(e.x,e.y,'#d7b2ff',28,200);
  if(!remainingBosses()&&!S.reinforcementsSpawned)spawnReinforcements(g,api);
- if(!S.reinforcementsSpawned||status().remainingThreats>0)return false;
+ if(!remainingOriginalBosses())spawnSupport(g,api,true);
+ if(!S.reinforcementsSpawned||!S.astraeaSpawned||status().remainingThreats>0)return false;
+ cleanupScreens(g);
  S.active=false;S.finished=true;S.intro=0;S.finishPulse=1.7;
  if(g){g.secretBossPending=false;g.secretBossCleared=true;g.score+=8500;
   g.scenePulse=Math.max(g.scenePulse||0,1.4);g.shake=Math.max(g.shake||0,24)}
@@ -208,7 +301,14 @@ function tick(dt,g,api){
   for(let i=b.dashTrail.length-1;i>=0;i--){const t=b.dashTrail[i];t.life-=dt;if(t.life<=0)b.dashTrail.splice(i,1)}
   if(S.intro>0){e.speed=0;e.attack=Math.max(e.attack||0,.25)}
  }
+ for(const e of S.screens){
+  if(e.hp<=0||e.secretDeathCounted)continue;
+  e.secretScreenIntro=Math.max(0,e.secretScreenIntro-dt);
+  e.speed=e.secretScreenIntro>0?0:e.secretScreenSpeed;
+  if(e.secretScreenIntro>0)e.attack=Math.max(e.attack||0,.22);
+ }
  if(!S.reinforcementsSpawned&&(S.combatClock>=REINFORCEMENT_DELAY||!remainingBosses()))spawnReinforcements(g,api);
+ spawnSupport(g,api,!remainingOriginalBosses());
 }
 function projectileCounts(g){
  const list=g?.ebullets;if(!Array.isArray(list))return null;
@@ -443,6 +543,16 @@ function step(e,dt,g,api,q='auto'){
 }
 function drawGround(ctx,cam,g,q='auto'){
  if(!S.active)return;
+ ctx.save();
+ for(const e of S.screens){
+  if(e.hp<=0||e.secretDeathCounted||e.secretScreenIntro<=0)continue;
+  const x=e.x-cam.x,y=e.y-cam.y;if(x<-90||x>1290||y<-90||y>765)continue;
+  const progress=clamp(1-e.secretScreenIntro/SCREEN_ARRIVAL,0,1),radius=e.r+16+(1-progress)*16;
+  ctx.globalAlpha=.25+.45*progress;ctx.strokeStyle='#ffd394';ctx.fillStyle='#b46c3a22';ctx.lineWidth=2;
+  ctx.setLineDash([6,6]);ctx.beginPath();ctx.arc(x,y,radius,0,TAU);ctx.fill();ctx.stroke();ctx.setLineDash([]);
+  ctx.lineWidth=1;ctx.beginPath();ctx.arc(x,y,e.r+10,0,TAU);ctx.stroke();
+ }
+ ctx.restore();
  for(const e of S.bosses)if(e.hp>0&&!e.secretDeathCounted)drawBossGround(ctx,e,cam,g,q);
 }
 function drawBossGround(ctx,e,cam,g,q){
@@ -559,12 +669,13 @@ function drawScreen(ctx,W,H,g,q='auto'){
  ctx.textAlign='left';ctx.fillStyle='#e5c7f8';ctx.font='900 19px ui-monospace,Consolas,monospace';
  ctx.fillText('OPERATION: TAKAMIYA',W*.105,H*.34);
  ctx.fillStyle='#fff5ea';ctx.font='italic 900 54px Impact,Arial,sans-serif';ctx.fillText('RUU : ECLIPSE ×3',W*.105,H*.475,W*.6);
- ctx.font='900 23px Yu Gothic,Meiryo,sans-serif';ctx.fillText('裏ボス3体 / DEVORA増援3体',W*.105,H*.565);
+ ctx.font='900 23px Yu Gothic,Meiryo,sans-serif';ctx.fillText('DEVORA増援×3 / 敵ASTRAEA×1 / 雑魚2波',W*.105,H*.565,W*.68);
  ctx.fillStyle='#f0b0c2';ctx.font='800 13px ui-monospace,monospace';
- ctx.fillText('HIDDEN SIGNAL // HP ≥ 50% / DEFEAT ALL SIX',W*.105,H*.64);
+ ctx.fillText('HIDDEN SIGNAL // HP ≥ 50% / DEFEAT ALL 7 BOSSES',W*.105,H*.64);
  ctx.strokeStyle='#bfa6d2';ctx.lineWidth=2;ctx.strokeRect(W*.065,H*.16,W*.87,H*.65);
  ctx.restore();
 }
-window.RUU_SECRET_BOSS={VERSION:'1.30.0',ART,ATLAS,ECLIPSE_TOTAL,REINFORCEMENT_TOTAL,REINFORCEMENT_DELAY,PROJECTILE_CAP,REINFORCEMENT_RESERVE,
+window.RUU_SECRET_BOSS={VERSION:'1.31.0',ART,ATLAS,ECLIPSE_TOTAL,REINFORCEMENT_TOTAL,REINFORCEMENT_DELAY,PROJECTILE_CAP,REINFORCEMENT_RESERVE,
+ ASTRAEA_TOTAL,ASTRAEA_DELAY,SCREEN_WAVE_TOTAL,SCREEN_WAVE_SIZE,SCREEN_ARRIVAL,
  drawBullet,reset,reveal,tick,step,onKill,status,isActive,isIntro,isBoss,isEncounterEnemy,canEmitReinforcement,drawGround,drawCharacter,drawScreen};
 })();

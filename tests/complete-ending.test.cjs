@@ -82,7 +82,7 @@ function fixture(options={}){
     ending:()=>run('endingState'),unlocked:()=>run('completeEndingUnlocked()'),
     cardResult:()=>JSON.parse(JSON.stringify(run('result()'))),html:()=>menuHTML,titleVisits:()=>titleVisits,
     advance(ms){clock+=ms;},completeAssignments:()=>assignments.filter(a=>a.url===COMPLETE),
-    loadSecretBoss(){for(const name of ['devora-true-end.js','secret-ruu-boss.js'])
+    loadSecretBoss(){for(const name of ['devora-true-end.js','enemy-astraea.js','secret-ruu-boss.js'])
       vm.runInContext(fs.readFileSync(path.join(root,name),'utf8'),box);}};
 }
 
@@ -192,20 +192,23 @@ test('silent ending completes through its wall clock and restores result access'
   const f=fixture({secret:true,audioBlocked:true,soundOn:false});f.run('startEndingCinema(false)');
   f.advance(54000);f.run('updateEndingCinema(performance.now())');assertResult(f,true);
 });
-test('complete-art preload waits for all six encounter deaths and runs once',()=>{
+test('complete-art preload waits for all seven major encounter deaths and runs once',()=>{
   const f=fixture();f.loadSecretBoss();assert.equal(f.completeAssignments().length,0);
   f.box.enemy={kind:'secret_ruu',secretRuu:true,hp:0,x:0,y:0,r:34,xp:200,col:'#fff'};
   f.run('killEnemy(enemy)');assert.equal(f.box.g.secretBossCleared,false);assert.equal(f.completeAssignments().length,0);
   f.box.makeEnemy=(kind,x,y)=>{const e={kind,x,y,hp:1,r:34,xp:200,col:'#fff'};f.box.g.enemies.push(e);return e;};
   assert.equal(f.run('window.RUU_SECRET_BOSS.reveal(g,{spawn:makeEnemy})'),true);
+  f.run('window.RUU_SECRET_BOSS.tick(3.2,g,{spawn:makeEnemy})');
   const bosses=[...f.box.g.enemies.filter(e=>e.secretRuu)];assert.equal(bosses.length,3);
   for(const e of bosses){e.hp=0;f.box.enemy=e;f.run('killEnemy(enemy)');
     assert.equal(f.box.g.secretBossCleared,false);assert.equal(f.completeAssignments().length,0);}
   const escorts=f.box.g.enemies.filter(e=>e.secretReinforcement);assert.equal(escorts.length,3);
   for(const [i,e] of escorts.entries()){
     e.hp=0;f.box.enemy=e;f.run('killEnemy(enemy)');
-    if(i<2){assert.equal(f.box.g.secretBossCleared,false);assert.equal(f.completeAssignments().length,0);}
+    assert.equal(f.box.g.secretBossCleared,false);assert.equal(f.completeAssignments().length,0);
   }
+  const hostile=f.box.g.enemies.filter(e=>e.enemyAstraea);assert.equal(hostile.length,1);
+  hostile[0].hp=0;f.box.enemy=hostile[0];f.run('killEnemy(enemy)');
   assert.equal(f.box.g.secretBossCleared,true);
   assert.equal(f.completeAssignments().length,1);assert.equal(f.completeAssignments()[0].id,'preload');assert.equal(f.unlocked(),true);
   f.run('killEnemy(enemy)');assert.equal(f.completeAssignments().length,1);
