@@ -1965,7 +1965,7 @@ function rollRareChoice(choices){
  if(!stepping&&p.wasMoving)p.animPhase=0;
  p.animPhase=(p.animPhase+dt*(stepping?(p.dashRemain>0?12:8.5)*clamp(p.speed/208,.8,1.4):2.25))%ANIM_COLS;
  p.wasMoving=stepping;
- window.RUU_OPERATIONS?.tick(dt,g,{spawn:makeEnemy,toast,sound:sfx,wave:shockwave,gainDrive,gainFinisher});
+ if(!window.RUU_SECRET_BOSS?.isActive?.())window.RUU_OPERATIONS?.tick(dt,g,{spawn:makeEnemy,toast,sound:sfx,wave:shockwave,gainDrive,gainFinisher});
  window.RUU_SWARM?.tick(dt,g,{spawn:makeEnemy,decorate:(e,game)=>window.RUU_MUTATION?.decorate(e,game),toast,sfx},fxPreset);
  // About 15% fewer routine spawns without touching boss / true-end patterns.
  let rate=clamp((.91-g.time*.0055)*1.02*(g.time>=75?.90:1),.225,.96);
