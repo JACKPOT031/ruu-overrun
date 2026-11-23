@@ -2146,13 +2146,18 @@ function rollRareChoice(choices){
  }
  applyOrbit(dt);
  const enemyGrid=window.RUU_PERF_ENGINE?.enemyGrid||null;
+ const indexedEnemyCount=g.enemies.length;
  if(enemyGrid)enemyGrid.build(g.enemies);
  for(let i=g.bullets.length-1;i>=0;i--){
    const b=g.bullets[i];b.ttl-=dt;b.x+=b.vx*dt;b.y+=b.vy*dt;
    if(b.ttl<=0){g.bullets.splice(i,1);continue}
-   let gone=false;
-   const near=enemyGrid?enemyGrid.candidates(b.x,b.y,b.r):g.enemies;
-   for(const e of near){
+   let gone=false,knownLength=indexedEnemyCount;
+   // FRACTURE can create children during a hit. Include those children in this
+   // same piercing bullet, and use the original scan for subsequent bullets.
+   const near=enemyGrid&&g.enemies.length===indexedEnemyCount?
+     enemyGrid.candidates(b.x,b.y,b.r):g.enemies;
+   for(let j=0;j<near.length;j++){
+     const e=near[j];
      if(e.hp<=0||b.hit.has(e))continue;
      const dx=b.x-e.x,dy=b.y-e.y;
      if(dx*dx+dy*dy<(e.r+b.r)**2){
@@ -2162,6 +2167,10 @@ function rollRareChoice(choices){
        applyDamage(e,b.dmg,n.x*80,n.y*80,b.kind==='ice'?'#aae8ff':'#fff6be');
        burst(b.x,b.y,b.col,5,55);
        if(b.pierce--<=0){gone=true;break}
+       if(near!==g.enemies&&g.enemies.length>knownLength){
+         for(let k=knownLength;k<g.enemies.length;k++)near.push(g.enemies[k]);
+         knownLength=g.enemies.length;
+       }
      }
    }
    if(gone)g.bullets.splice(i,1);
