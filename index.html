@@ -2871,38 +2871,58 @@ ui.healthFill.style.width=`${100*p.hp/p.maxHp}%`;ui.healthText.textContent=`${Ma
  const joyEnd=ev=>{if(joy.id===ev.pointerId)joy.active=false};c.addEventListener('pointerup',joyEnd);c.addEventListener('pointercancel',joyEnd);
  function drawJoy(){if(!joy.active||state!=='playing')return;ctx.save();ctx.globalAlpha=.58;strokeCircle(joy.sx,joy.sy,57,'#83feeb',3);fillCircle(joy.sx+clamp(joy.x-joy.sx,-55,55),joy.sy+clamp(joy.y-joy.sy,-55,55),19,'#83feed');ctx.restore()}
  function loop(now){
+   lastRafGap=lastRafAt?Math.max(0,now-lastRafAt):0;lastRafAt=now;
    const dt=Math.min(Math.max(0,(now-last)/1000),.048);last=now;
-   if(state==='playing'){if(g?.impactFreeze>0)g.impactFreeze=Math.max(0,g.impactFreeze-dt);else update(dt);}if(state==='bossbreak')updateBossBreak(dt);if(state==='dying')updateDeathSequence(dt);if(state==='ending')updateEndingCinema(now);if(musicFade&&state!=='paused')updateMusicFade(dt);
-   if(state!==lastFpsState){lastFpsState=state;resetFpsMeter();perfTick=now;paintCount=0;paintTotalMs=0;}
+   const updateStart=performance.now();
+   if(state==='playing'){if(g?.impactFreeze>0)g.impactFreeze=Math.max(0,g.impactFreeze-dt);else update(dt);}
+   if(state==='bossbreak')updateBossBreak(dt);
+   if(state==='dying')updateDeathSequence(dt);
+   if(state==='ending')updateEndingCinema(now);
+   if(musicFade&&state!=='paused')updateMusicFade(dt);
+   lastUpdateMs=performance.now()-updateStart;
+   if(state!==lastFpsState){
+     lastFpsState=state;resetFpsMeter();
+     perfTick=now;paintCount=0;paintTotalMs=0;updateCount=0;updateTotalMs=0;nextPaintDue=0;
+   }
    const active=state==='playing'||state==='start'||state==='dying'||state==='bossbreak';
-   const shouldPaint=(active&&now-lastPaint>=renderInterval)||(!active&&lastPaintState!==state);
+   if(active){updateCount++;updateTotalMs+=lastUpdateMs;}
+   // A deadline clock avoids skipping 60Hz display refreshes when the exact
+   // 33.333ms interval falls microscopically after an animation callback.
+   const shouldPaint=(active&&(nextPaintDue===0||now>=nextPaintDue-1))||(!active&&lastPaintState!==state);
    if(shouldPaint){
+     if(active){
+       nextPaintDue=nextPaintDue?nextPaintDue+renderInterval:now+renderInterval;
+       if(nextPaintDue<now-1||nextPaintDue>now+renderInterval*2)nextPaintDue=now+renderInterval;
+     }else nextPaintDue=0;
      lastPaint=now;lastPaintState=state;
-     const begin=performance.now();ctx.setTransform(renderScale,0,0,renderScale,0,0);ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';
-     render();drawJoy();if(state==='bossbreak')window.RUU_EXPANSION?.drawBoss(ctx,W,H,fxPreset);if(state==='dying')window.RUU_DEATH?.draw(ctx,W,H,deathScene?.elapsed||0,fxPreset);
+     const begin=performance.now();
+     ctx.setTransform(renderScale,0,0,renderScale,0,0);
+     ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';
+     render();drawJoy();
+     if(state==='bossbreak')window.RUU_EXPANSION?.drawBoss(ctx,W,H,fxPreset);
+     if(state==='dying')window.RUU_DEATH?.draw(ctx,W,H,deathScene?.elapsed||0,fxPreset);
      const drawMs=performance.now()-begin;paintCount++;paintTotalMs+=drawMs;
      if(active)recordFpsSample(now,drawMs);
    }
-   // BGM must continue at full speed even while the level-up panel freezes simulation.
+   // BGM continues even while the level-up panel freezes simulation.
    if(state==='levelup'&&Math.floor(now/200)!==Math.floor((now-17)/200))updateMusicUI();
    if(now-perfTick>1200){
+     const elapsed=Math.max(1,now-perfTick);
      const perFrame=paintTotalMs/Math.max(1,paintCount);
-     // The HUD is updated from a rolling window of actual drawn frames.
-     // Keep these batch statistics exclusively for adaptive quality decisions.
+     const perUpdate=updateTotalMs/Math.max(1,updateCount);
      if(fxPreset==='auto'&&active&&!document.hidden){
-       const fps=paintCount*1000/Math.max(1,now-perfTick);
-       // Slow adaptation only under sustained load; never use the old .54 fallback.
+       const fps=paintCount*1000/elapsed;
        let target=autoQuality;
-       if(perFrame>26||fps<19)target=Math.max(.72,autoQuality-.12);
-       else if(perFrame>19||fps<23)target=Math.max(.84,autoQuality-.07);
-       else if(perFrame<14&&fps>27)target=Math.min(1,autoQuality+.04);
+       if(perFrame>26||perUpdate>17||fps<19)target=Math.max(.72,autoQuality-.12);
+       else if(perFrame>19||perUpdate>10||fps<23)target=Math.max(.84,autoQuality-.07);
+       else if(perFrame<14&&perUpdate<6&&fps>27)target=Math.min(1,autoQuality+.04);
        if(Math.abs(target-autoQuality)>.005){
-         autoQuality=target;syncCanvasResolution();
-         perfHud.title=autoQuality<.99?'高精細描画 / 負荷に応じて最適化中':'高精細描画';
+         autoQuality=target;syncCanvasResolution();nextPaintDue=0;
        }
-       renderInterval=1000/(fps<18?24:30);
+       // Drop the 30FPS cap only for sustained CPU-heavy overload.
+       renderInterval=1000/((fps<17&&(perFrame>19||perUpdate>10))?24:30);
      }
-     perfTick=now;paintCount=0;paintTotalMs=0;
+     perfTick=now;paintCount=0;paintTotalMs=0;updateCount=0;updateTotalMs=0;
    }
    requestAnimationFrame(loop);
  }
