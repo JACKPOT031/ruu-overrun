@@ -15,7 +15,7 @@ assert.ok(start>=0,'Inline game script not found');
 const end=index.indexOf('</script>',start);
 assert.ok(end>start,'Inline game closing tag not found');
 new vm.Script(index.slice(start+'<script>'.length,end),{filename:'index.html inline game'});
-assert.ok(index.includes('performance-engine.js?v=1.28.0'));
+assert.ok(index.includes('performance-engine.js?v=1.28.1'));
 
 const context={
   window:{},
