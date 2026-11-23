@@ -1,8 +1,17 @@
-# RUU//OVERRUN — PUBLIC BETA (v1.22.1)
+# RUU//OVERRUN — PUBLIC BETA (v1.23.0)
 
 JACKPOTØ31が制作するオリジナル・ブラウザサバイバルアクション。
 
 **[ゲームを遊ぶ](https://jackpot031.github.io/ruu-overrun/)** / **[公開開始v1.5.3からの更新履歴](./CHANGELOG.md)**
+
+## v1.23.0 — ACHIEVEMENT REFORGE
+
+- 実績が **12種から24種** に。STORY（4）、COMBAT（9）、SURVIVAL（3）、GUARDIAN（2）、SECRET（6）の5カテゴリ。
+- TRUE DEVORA 1体撃破／3体・5体撃破、RUU : ECLIPSEの出現・LAST LIGHT・撃破、ASTRAEA緊急参戦、支援パイロット参戦、通常必殺技、第三形態目撃、1プレイ500体撃破、ENDLESS 300秒生存を追加。
+- アーカイブに達成率、カテゴリタブ、BRONZE〜MYTHICのランク、今回のコンボ・撃破数・生存時間の進捗バーを追加。
+- 未獲得のSECRET実績は名称と解除条件を伏せ、解除後に内容と称号を公開。
+- 既存12実績のIDと獲得記録キー `RUU_ACHIEVEMENTS_V1`、装備称号キー `RUU_TITLE_V1` は変えず、旧記録を引き継ぐ。新規実績は実際に条件を満たした時点から解除。
+- CHALLENGE専用称号、ゲーム難易度、既存ボス報酬、オンラインランキング、16曲のBGM、クリア条件は維持。
 
 ## v1.22.1 — BARRAGE PRESSURE (+20%)
 

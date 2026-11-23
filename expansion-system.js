@@ -1,4 +1,4 @@
-/* RUU//OVERRUN v1.11.0 — Overdrive Expansion */
+/* RUU//OVERRUN v1.23.0 — ACHIEVEMENT REFORGE (legacy V1 storage preserved) */
 (()=>{
 'use strict';
 const TAU=6.283185307179586,clamp=(x,a,b)=>Math.max(a,Math.min(b,x)), K='RUU_ACHIEVEMENTS_V1',TK='RUU_TITLE_V1';
@@ -15,6 +15,35 @@ const achievements=[
 {id:'fusion',jp:'境界の錬成者',title:'境界の錬成者',desc:'複合技を獲得',mark:'✥'},
 {id:'kills300',jp:'三百の残光',title:'三百の残光',desc:'1プレイで300体撃破',mark:'✶'},
 {id:'endless180',jp:'終わらない旅人',title:'終わらない旅人',desc:'ENDLESSで180秒生存',mark:'∞'}];
+// v1.23.0 — achievement archive expansion. Keep the original IDs intact.
+const categories=[
+ {id:'story',jp:'STORY / 進行',mark:'◇'},
+ {id:'combat',jp:'COMBAT / 戦闘',mark:'⚔'},
+ {id:'survival',jp:'SURVIVAL / 生存',mark:'✧'},
+ {id:'guardian',jp:'GUARDIAN / 共闘',mark:'✦'},
+ {id:'secret',jp:'SECRET / 機密',mark:'Ø'}
+];
+const legacyMeta={
+ first:['story','BRONZE'],boss:['story','SILVER'],final:['story','GOLD'],clear:['story','GOLD'],
+ flawless:['survival','PLATINUM'],combo50:['combat','BRONZE'],combo100:['combat','SILVER'],
+ combo200:['combat','GOLD'],jackpot:['combat','GOLD'],fusion:['combat','SILVER'],
+ kills300:['combat','SILVER'],endless180:['survival','SILVER']
+};
+for(const a of achievements){const v=legacyMeta[a.id]||['story','BRONZE'];a.category=v[0];a.rank=v[1]}
+achievements.push(
+ {id:'kills500',jp:'五百の残光',title:'五百の灯',desc:'1プレイで500体撃破',mark:'❖',category:'combat',rank:'GOLD'},
+ {id:'signature',jp:'決着の閃光',title:'決着を刻む者',desc:'SIGNATURE FINISHER初発動',mark:'⚡',category:'combat',rank:'BRONZE'},
+ {id:'phase3',jp:'第三形態の目撃者',title:'臨界の観測者',desc:'DEVORAまたはNULL EMPERORの第3形態を目撃',mark:'Ⅲ',category:'combat',rank:'SILVER'},
+ {id:'endless300',jp:'終わりなき五分',title:'終わりなき観測者',desc:'ENDLESSで300秒生存',mark:'⧖',category:'survival',rank:'PLATINUM'},
+ {id:'escort',jp:'第十八期の増援',title:'仲間を迎えた者',desc:'支援パイロットが参戦',mark:'✦',category:'guardian',rank:'SILVER'},
+ {id:'astraea',jp:'星屑の翼',title:'ASTRAEAの加護',desc:'ASTRAEAの緊急参戦が発動',mark:'✧',category:'guardian',rank:'GOLD'},
+ {id:'true_core',jp:'侵食核の崩壊',title:'核を砕く者',desc:'TRUE DEVORAを1体撃破',mark:'◆',category:'secret',rank:'GOLD',secret:true},
+ {id:'true_trinity',jp:'三重の終末',title:'三災の討伐者',desc:'TRUE DEVORAの3体を全滅',mark:'✴',category:'secret',rank:'PLATINUM',secret:true},
+ {id:'true_quintet',jp:'五重の終末',title:'五災を超えし者',desc:'TRUE DEVORAの5体を全滅',mark:'✺',category:'secret',rank:'PLATINUM',secret:true},
+ {id:'eclipse_found',jp:'月蝕の目撃者',title:'月蝕を見た者',desc:'隠しボスRUU : ECLIPSEと遭遇',mark:'☾',category:'secret',rank:'PLATINUM',secret:true},
+ {id:'eclipse_frenzy',jp:'最後の灯を見た',title:'LAST LIGHTの証人',desc:'RUU : ECLIPSEのLAST LIGHTに到達',mark:'✷',category:'secret',rank:'PLATINUM',secret:true},
+ {id:'eclipse_clear',jp:'月蝕を越えて',title:'月蝕の超越者',desc:'RUU : ECLIPSEを撃破',mark:'Ø',category:'secret',rank:'MYTHIC',secret:true}
+);
 const fusions=[
 {id:'frostThunder',name:'氷雷絶唱',desc:'氷晶散華×尾雷チェインストーム。氷雷の追撃が連鎖。',a:'frost',b:'lightning',color:'#a0f0ff',interval:3.8,type:'FUSION',max:1},
 {id:'meteorBloom',name:'天焦焔華',desc:'墜星雨×超新星ファイアワークス。星火の大爆発。',a:'meteor',b:'fireworks',color:'#ffbc88',interval:5,type:'FUSION',max:1},
@@ -24,7 +53,15 @@ const fusions=[
 let unlocked=new Set(),chosen='',boss=null,combo=null,effects=[],clock=0;
 try{const v=JSON.parse(localStorage.getItem(K)||'[]');if(Array.isArray(v))unlocked=new Set(v.filter(id=>achievements.some(a=>a.id===id)));chosen=localStorage.getItem(TK)||'';}catch(e){}
 function unlock(id){const a=achievements.find(x=>x.id===id);if(!a||unlocked.has(id))return null;unlocked.add(id);try{localStorage.setItem(K,JSON.stringify([...unlocked]));}catch(e){}return a}
-function status(){return achievements.map(a=>({...a,unlocked:unlocked.has(a.id)}))}
+function progressFor(id,g){
+ if(!g)return null;
+ const values={combo50:[g.maxCombo||g.combo||0,50],combo100:[g.maxCombo||g.combo||0,100],combo200:[g.maxCombo||g.combo||0,200],
+ kills300:[g.kills||0,300],kills500:[g.kills||0,500],
+ endless180:[g.mode==='endless'?g.time||0:0,180],endless300:[g.mode==='endless'?g.time||0:0,300]};
+ const v=values[id];return v?{current:Math.min(v[1],Math.floor(Math.max(0,v[0]))),target:v[1]}:null;
+}
+function status(g){return achievements.map(a=>({...a,unlocked:unlocked.has(a.id),progress:progressFor(a.id,g)}))}
+function selectedId(){return unlocked.has(chosen)?chosen:''}
 function selectedTitle(){const a=achievements.find(a=>a.id===chosen&&unlocked.has(a.id));return a?.title||''}
 function changeTitle(id){if(id&&(!unlocked.has(id)||!achievements.some(a=>a.id===id)))return false;chosen=id;try{localStorage.setItem(TK,id);}catch(e){}return true}
 function reset(){boss=null;combo=null;effects=[];clock=0}
@@ -105,5 +142,5 @@ function drawBoss(ctx,W,H,q){
  if(b.final&&t>b.duration-.33){ctx.globalAlpha=Math.min(.62,(t-(b.duration-.33))/.33*.62);ctx.fillStyle='#fffdf8';ctx.fillRect(0,0,W,H);}
  ctx.restore();
 }
-window.RUU_EXPANSION={achievements,fusions,unlock,status,selectedTitle,changeTitle,reset,eligible,activate,fusionStep,comboMilestone,bossStart,bossState,endBoss,tick,drawWorld,drawCombo,drawBoss};
+window.RUU_EXPANSION={achievements,categories,fusions,unlock,status,selectedId,selectedTitle,changeTitle,reset,eligible,activate,fusionStep,comboMilestone,bossStart,bossState,endBoss,tick,drawWorld,drawCombo,drawBoss};
 })();
