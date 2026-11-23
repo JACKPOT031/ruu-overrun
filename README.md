@@ -1,8 +1,35 @@
-# RUU//OVERRUN — PUBLIC BETA (v1.29.0)
+# RUU//OVERRUN — PUBLIC BETA (v1.30.0)
 
 JACKPOTØ31が制作するオリジナル・ブラウザサバイバルアクション。
 
 **[ゲームを遊ぶ](https://jackpot031.github.io/ruu-overrun/)** / **[公開開始v1.5.3からの更新履歴](./CHANGELOG.md)**
+
+## v1.30.0 — OPERATION: TAKAMIYA
+
+暫定最終アップデート。完全クリアを突破したプレイヤーへの次の挑戦として、裏ボス戦を **RUU : ECLIPSE 3体＋DEVORA増援3体** の総力戦へ変更。
+
+- **ECLIPSEが3体同時に登場。** 各個体は従来と同じHP・攻撃力・耐性を持ち、HP48%以下のPHASE II、20%以下のLAST LIGHTを個別に発動。初手と攻撃開始をずらし、行動・予兆・ダッシュ・アニメーションを独立して管理する。
+- **各ECLIPSEの弾幕発射数を50%増量。** 既存の発射頻度倍率1.20は維持し、各攻撃の弾数を1.5倍にする。奇数の端数は個体・攻撃ごとに持ち越す。3体が生存している間の合計発射設定は、旧1体戦の最大4.5倍相当（同時弾数の上限到達時を除く）。各パターンの予兆・安全通路を維持する。
+- **戦闘開始12秒後にDEVORA3体が増援。** 登場演出を除くゲーム内戦闘時間で判定し、HUNTER・ORACLE・SIEGEが参戦。各個体に1.2秒の到着予兆を設ける。12秒より前にECLIPSEを3体とも倒した場合は、その時点で増援を出す。
+- **完全クリア条件は6体全滅。** 撃破順にかかわらず、ECLIPSE3体と増援DEVORA3体をすべて倒したときだけ、完全クリア実績・最終報酬・記念イラストEDを解放する。中間のECLIPSE撃破では最終報酬や勝利待機を開始しない。増援各体には通常の真DEVORA単体報酬を与え、前の真ボス戦の集合撃破報酬は再付与しない。
+- **進捗表示を更新。** タイトルと戦闘HUDにアップデート名を表示。集合HPは未到着の増援分も含めた固定最大値を使う。結果カードにはECLIPSEと増援DEVORAそれぞれの撃破数を記録し、元のTRUE DEVORA3体／5体戦とは区別する。
+- **負荷を制限。** 敵弾は全体最大846発、ECLIPSE側750発・増援側96発の枠で管理。弾グラフィックと軌跡をキャッシュして描画し、毎フレームの弾単位のグラデーション生成を避ける。FX LITEでも実弾の数や当たり判定は変えない。
+- **既存の解放条件と記録を引き継ぐ。** 通常の真DEVORAを全滅させた時点でHP50%以上という出現条件は継続し、回復報酬より先に判定。ENDLESSは対象外。過去の完全クリア実績・ED再鑑賞の解放は保持する。
+
+検証コマンド（Node 18+）：
+
+```sh
+node tests/takamiya-operation.test.cjs
+node tests/complete-ending.test.cjs
+node tests/render-stability.test.cjs
+node tests/performance-engine.test.cjs
+node --check secret-ruu-boss.js
+node --check devora-true-end.js
+node --check boss-rewards.js
+node --check public-features.js
+```
+
+新編成の回帰テスト21ケース（弾幕81条件、4種類の撃破順、出現条件、報酬・EDの1回性、死亡後の誤クリア防止、弾数上限、描画関数・キャッシュを含む）、ED16ケース、描画安定性16ケースが成功。既存の衝突判定比較・30FPSスケジューラ検証とJavaScript構文確認も成功。描画の検証はNode VMの記録用Canvasによる実行確認であり、ブラウザ上の実表示・実機FPS・クリア難易度はこの環境では未測定。
 
 ## v1.29.0 — COMPLETE CLEAR ENDING
 
