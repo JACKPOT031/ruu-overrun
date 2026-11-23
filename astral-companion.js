@@ -1,4 +1,4 @@
-/* v1.16.2 ASTRAL COMPANION / MASS-PRODUCED SUPPORT PILOT — game-only; no Cloudflare changes.
+/* v1.24.0 ASTRAL COMPANION / 18th-generation SUIT SPRITE REFORGE — game-only.
    ASTRAL-SUIT: a 25%-chance named escort. ASTRAEA No.3: once per run,
    auto-dispatch at a FINAL boss spawn if a pilot joined and Ruu HP <= 50%.
    Sprites are stylized game interpretations of the supplied character sheets.
@@ -11,21 +11,20 @@ for(const [id,src] of Object.entries({suit:'assets/astral-suit-companion.svg',as
  if(typeof Image==='undefined'){IMG[id]=null;continue}
  const img=new Image();img.src=src;IMG[id]=img;
 }
-// Chrome/Edge: decode the approved eight-frame animated GIF once, then advance
-// the frame in game-time. Pausing the game or standing still freezes the pose.
-const WALK_GIF='assets/astral-suit-walk.gif', walk={img:null,frames:[],duration:.12};
-if(typeof Image!=='undefined'){walk.img=new Image();walk.img.src=WALK_GIF}
-if(typeof ImageDecoder!=='undefined'&&typeof fetch==='function'){
- fetch(WALK_GIF).then(r=>{if(!r.ok)throw Error('GIF '+r.status);return r.arrayBuffer()}).then(async bytes=>{
-   const decoder=new ImageDecoder({data:bytes,type:'image/gif'});
-   try{
-     await decoder.tracks.ready;
-     const count=Math.min(8,decoder.tracks.selectedTrack?.frameCount||8);
-     const frames=[];
-     for(let i=0;i<count;i++){const data=await decoder.decode({frameIndex:i});frames.push(data.image)}
-     if(frames.length)walk.frames=frames;
-   }finally{decoder.close()}
- }).catch(()=>{}); // Local file:// and older browsers fall back to the GIF element.
+// v1.24.0: 4x4 deterministic WebP atlas; explicit front, side, back, and
+// firing poses. Never depend on GIF decoding or an old SVG front pose at rest.
+// Transparent atlas: 4 columns x 4 rows, 320px per cell; all frames are the
+// SAME suit from the original 18th-generation mass-production concept sheet.
+const SUIT_ATLAS=new Image();SUIT_ATLAS.decoding='async';
+SUIT_ATLAS.src='assets/astral_suit_support_atlas.webp';
+const SUIT_CELL=320,SUIT_SIZE=136,SUIT_FRAME_TIME=.17,SUIT_SHOOT_TIME=.28;
+function suitReady(){return SUIT_ATLAS.complete&&SUIT_ATLAS.naturalWidth>=SUIT_CELL*4&&SUIT_ATLAS.naturalHeight>=SUIT_CELL*4}
+function drawSuit(ctx,x,y,row,frame,flip=false){
+ ctx.save();ctx.translate(x,y);if(flip)ctx.scale(-1,1);
+ // Bottom of suit aligns with Ruu's sprite-ground anchor at about +38.
+ ctx.drawImage(SUIT_ATLAS,frame*SUIT_CELL,row*SUIT_CELL,SUIT_CELL,SUIT_CELL,
+   -SUIT_SIZE/2,-SUIT_SIZE+40,SUIT_SIZE,SUIT_SIZE);
+ ctx.restore();
 }
 // Twelve distinct patrol waypoints sweep across the entire 1200x675 camera.
 const FLIGHT_PATH=[
@@ -34,7 +33,7 @@ const FLIGHT_PATH=[
  {x:-235,y:-207},{x:246,y:173},{x:36,y:102},{x:341,y:-191}
 ];
 const ATLAS_CELL=256,ATLAS_COLS=4,FLIGHT_DURATION=12;
-function init(){return{sync:0,bossDown:false,used:false,t:0,intro:0,pending:0,queued:false,attempts:0,autoTriggered:false,triggerHpRatio:null,allyX:null,allyY:null,astraX:0,astraY:0,flightClock:0,flightStep:0,flightAnim:0,flightFace:-1,flightTrails:[],flightTrailTimer:0,laserCount:0,attack:.5,intercept:7,volley:.2,finished:false,rays:[],sparks:[],flash:0,shots:0,blocked:0,allyMoving:false,allyFacing:1,walkClock:0,walkSpeed:0}}
+function init(){return{sync:0,bossDown:false,used:false,t:0,intro:0,pending:0,queued:false,attempts:0,autoTriggered:false,triggerHpRatio:null,allyX:null,allyY:null,astraX:0,astraY:0,flightClock:0,flightStep:0,flightAnim:0,flightFace:-1,flightTrails:[],flightTrailTimer:0,laserCount:0,attack:.5,intercept:7,volley:.2,finished:false,rays:[],sparks:[],flash:0,shots:0,blocked:0,allyMoving:false,allyFacing:1,allyDir:'front',allyAttackFace:1,allyAttackTime:0,walkClock:0,walkSpeed:0}}
 let z=init();function reset(){z=init()}
 // No manual deployment and no second random roll.
 // The pilot roll already makes emergency support rare: 25% at most.
@@ -63,7 +62,8 @@ function status(g){
  z.attempts?'ASTRAEA / CONDITIONS NOT MET':'ASTRAEA / EMERGENCY LINK';
  return{used:z.used,active:z.t,queued:z.queued,autoTriggered:z.autoTriggered,
   triggerHpRatio:z.triggerHpRatio,attempts:z.attempts,ready:false,text,shots:z.shots,blocked:z.blocked,
-  flightX:z.astraX,flightY:z.astraY,flightStep:z.flightStep,laserCount:z.laserCount};
+  flightX:z.astraX,flightY:z.astraY,flightStep:z.flightStep,laserCount:z.laserCount,
+  escortAtlas:suitReady(),escortFacing:z.allyDir,escortMoving:z.allyMoving,escortSize:SUIT_SIZE};
 }
 function onKill(e,g){
  if(!e||!g)return;
@@ -120,6 +120,7 @@ function hitAssist(e,dmg,api){
 }
 function fireSuit(g,api,q){
  const e=targetList(g,z.allyX,z.allyY,520,1)[0];if(!e)return;
+ z.allyAttackFace=e.x>=z.allyX?1:-1;z.allyAttackTime=SUIT_SHOOT_TIME;
  const pilot=window.RUU_PILOTS,base=clamp(8.5+(g.level||1)*.48,9,15.5)*(e.kind==='boss'||e.kind==='final'||e.trueDevora?.6:1);
  const color=pilot?.shotColor?.()||gold,rapid=pilot?.isKai?.()===true;
  const hits=rapid?2:1,damage=rapid?base*.70:base;
@@ -205,6 +206,7 @@ function tick(dt,g,api,q='auto'){
   p.vx*=Math.exp(-3*dt);p.vy*=Math.exp(-3*dt);if(p.life<=0)z.sparks.splice(i,1);
  }
  const p=g.player;
+ z.allyAttackTime=Math.max(0,z.allyAttackTime-dt);
  if(window.RUU_PILOTS?.hasEscort?.()){
  const f=1-Math.exp(-dt*6),X=p.x-80*(p.face||1),Y=p.y+21;
  const incoming=window.RUU_PILOTS?.entering?.();
@@ -212,9 +214,9 @@ function tick(dt,g,api,q='auto'){
    // Run from off-screen right to the ordinary follow position.
    const prog=incoming.progress;
    z.allyX=p.x+640*(1-prog)-80*prog;z.allyY=Y;
-   z.allyFacing=-1;z.allyMoving=incoming.running;
+   z.allyFacing=-1;z.allyDir='side';z.allyMoving=incoming.running;
    z.walkSpeed=incoming.running?420:0;
-   if(incoming.running)z.walkClock+=dt*1.8;
+   if(incoming.running)z.walkClock+=dt*2.2;
    z.attack=Math.max(z.attack,.3);
  }else{
    if(z.allyX===null){z.allyX=X;z.allyY=Y}
@@ -223,8 +225,12 @@ function tick(dt,g,api,q='auto'){
    const moveX=z.allyX-beforeX,moveY=z.allyY-beforeY;
    z.walkSpeed=Math.hypot(moveX,moveY)/Math.max(dt,.001);
    z.allyMoving=z.walkSpeed>18;
-   if(Math.abs(moveX)>.12)z.allyFacing=moveX>0?1:-1;
-   if(z.allyMoving)z.walkClock+=dt*clamp(z.walkSpeed/160,.65,1.5);
+   if(z.allyMoving){
+     // The animation tracks the REAL travel direction; no fixed front sprite.
+     z.allyDir=Math.abs(moveY)>Math.abs(moveX)*1.12?(moveY<0?'back':'front'):'side';
+     if(z.allyDir==='side')z.allyFacing=moveX>0?1:-1;
+     z.walkClock+=dt*clamp(z.walkSpeed/150,.9,2.2);
+   }else z.allyDir='front';
    z.attack-=dt;if(z.attack<=0){z.attack=window.RUU_PILOTS?.shotRate?.()||1.5;fireSuit(g,api,q)}
    z.intercept-=dt;if(z.intercept<=0){z.intercept=.12;defend(g,api,q)}
  }
@@ -265,21 +271,27 @@ function drawImage(ctx,img,x,y,w,h,opacity,astro){
 function drawUnits(ctx,cam,g,q='auto'){
  if(!g?.player)return;
  if(window.RUU_PILOTS?.hasEscort?.()&&z.allyX!==null&&window.RUU_PILOTS?.entering?.()?.running!==false){
- // Reduced from 86x125 to 64x94 logical pixels, about 25% smaller.
- // Source GIF faces right. Flip the drawing when escort moves left.
- const xSuit=z.allyX-cam.x,ySuit=z.allyY-cam.y+6,suitW=64,suitH=94;
-ctx.save();ctx.translate(xSuit,ySuit);
- if(z.allyFacing<0)ctx.scale(-1,1);
- ctx.globalAlpha=.97;
- if(walk.frames.length){
-   const index=z.allyMoving?Math.floor(z.walkClock/walk.duration)%walk.frames.length:0;
-   ctx.drawImage(walk.frames[index],-suitW/2,-suitH,suitW,suitH);
- }else if(z.allyMoving&&isReady(walk.img)){
-   ctx.drawImage(walk.img,-suitW/2,-suitH,suitW,suitH);
- }else if(isReady(IMG.suit)){
-   ctx.drawImage(IMG.suit,-suitW/2,-suitH,suitW,suitH);
- }else fallback(ctx,false);
- ctx.restore();
+  const x=z.allyX-cam.x,y=z.allyY-cam.y+6;
+  if(suitReady()){
+   // Atlas rows: front walking 0, left-side walking 1, rear walking 2,
+   // rifle fire 3. Pause freezes the correct frame via game-time state.
+   const frame=z.allyMoving?Math.floor(z.walkClock/SUIT_FRAME_TIME)%4:1;
+   const dir=z.allyDir;
+   const shoot=z.allyAttackTime>0&&!window.RUU_PILOTS?.entering?.();
+   const row=shoot?3:dir==='back'?2:dir==='side'?1:0;
+   const shotFrame=Math.max(0,Math.min(3,Math.floor((1-z.allyAttackTime/SUIT_SHOOT_TIME)*4)));
+   // Side row faces LEFT; firing row faces RIGHT in the source atlas.
+   const flip=shoot?z.allyAttackFace<0:dir==='side'&&z.allyFacing>0;
+   drawSuit(ctx,x,y,row,shoot?shotFrame:frame,flip);
+  }else{
+   // Only a true asset-load failure uses legacy fallback; standing still no
+   // longer switches the suit to an old front-facing illustration.
+   ctx.save();ctx.translate(x,y);
+   if(z.allyFacing>0)ctx.scale(-1,1);
+   if(isReady(IMG.suit))ctx.drawImage(IMG.suit,-31,-114,62,114);
+   else fallback(ctx,false);
+   ctx.restore();
+  }
  }
  if(z.t<=0)return;
  const alpha=clamp(Math.min((FLIGHT_DURATION-z.t)*3,z.t*1.8),0,1),x=z.astraX-cam.x,y=z.astraY-cam.y;
@@ -348,5 +360,5 @@ function drawScreen(ctx,W,H,g,q='auto'){
  }
  if(z.flash>0&&q!=='lite'){ctx.save();ctx.globalAlpha=z.flash*.18;ctx.strokeStyle=pink;ctx.lineWidth=8;ctx.strokeRect(7,7,W-14,H-14);ctx.restore()}
 }
-window.RUU_COMPANION={VERSION:'1.19.0',reset,status,onKill,onFinalBossSpawn,tick,drawGround,drawUnits,drawFront,drawScreen,position:()=>z.allyX===null?null:{x:z.allyX,y:z.allyY}};
+window.RUU_COMPANION={VERSION:'1.24.0',SUIT_ATLAS,SUIT_SIZE,SUIT_CELL,reset,status,onKill,onFinalBossSpawn,tick,drawGround,drawUnits,drawFront,drawScreen,position:()=>z.allyX===null?null:{x:z.allyX,y:z.allyY}};
 })();

@@ -1,8 +1,17 @@
-# RUU//OVERRUN — PUBLIC BETA (v1.23.1)
+# RUU//OVERRUN — PUBLIC BETA (v1.24.0)
 
 JACKPOTØ31が制作するオリジナル・ブラウザサバイバルアクション。
 
 **[ゲームを遊ぶ](https://jackpot031.github.io/ruu-overrun/)** / **[公開開始v1.5.3からの更新履歴](./CHANGELOG.md)**
+
+## v1.24.0 — MASS-PRODUCED ASTRAL-SUIT / SPRITE REFORGE
+
+- 『星屑の鎧 -Guardian Genome-』の**量産型ASTRAL-SUIT**を提供された公式機体設定画に合わせて刷新。白灰色の装甲、黒い関節、肩の第18世代マーク、背面ユニット、携行火器を統一。
+- **4×4・計16コマの透過WebPスプライト**を実装。前進、側面歩行、後退、ライフル射撃の4行をゲーム時間で切り替える。
+- 従来のブラウザ依存GIFデコーダーを撤去し、Canvas上でフレームを直接選択。**立ち止まった瞬間に旧SVGの正面絵へ戻る問題を解消**。描画品質や一時停止に左右されず、歩行の各コマを選択できる。
+- 表示サイズは**136論理px（透明マージン込み）**。ルー本人（通常144論理px）より少し小さい設計。
+- 変更は随伴機の見た目とアニメーションのみ。**支援パイロットの登場率25%・5人の抽選・各自の能力・ASTRAEA緊急参戦条件・弾幕・スコア・ランキング・BGM・ED**は維持。
+- 新規必須画像 `assets/astral_suit_support_atlas.webp` を追加。旧GIF・旧SVG素材は互換用に残すが、正常に読み込める環境では使用しない。
 
 ## v1.23.1 — STABILITY & CONSISTENCY
 
