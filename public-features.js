@@ -246,7 +246,7 @@
     const bp=r.bossProgress||{},mode=String(r.mode||'normal'),isChallenge=mode==='challenge';
     const completed=!!r.won,challengeCleared=!!r.challengeSuccess;
     const outcome=isChallenge?(challengeCleared?'TRIAL CLEARED':completed?'TRIAL FAILED / ROUTE CLEARED':'TRIAL FAILED'):
-      mode==='endless'?'ENDLESS / RUN ENDED':completed?'MISSION COMPLETE':'MISSION FAILED';
+      mode==='endless'?'ENDLESS / RUN ENDED':completed?(bp.eclipseCleared&&bp.eclipseTotal?'COMPLETE CLEAR // TAKAMIYA':'MISSION COMPLETE'):'MISSION FAILED';
     const clearColor=completed?(isChallenge&&!challengeCleared?'#ffe1a0':'#91f0d3'):'#ffb0bb';
     const back=c.createLinearGradient(0,0,W,H);
     back.addColorStop(0,'#121e30');back.addColorStop(.48,'#261a29');back.addColorStop(1,'#0b0d1a');
@@ -270,7 +270,7 @@
     const secs=Math.max(0,Math.floor(Number(r.durationSeconds)||0));
     const duration=`${String(Math.floor(secs/60)).padStart(2,'0')}:${String(secs%60).padStart(2,'0')}`;
     const name=safeName(nickname)||'ANONYMOUS';
-    text('JACKPOTØ31 / ORIGINAL SURVIVAL GAME',52,64,'800 16px ui-monospace,Consolas,monospace','#c1b7aa',820);
+    text('JACKPOTØ31 / '+String(r.operation||'ORIGINAL SURVIVAL GAME'),52,64,'800 16px ui-monospace,Consolas,monospace','#c1b7aa',820);
     text('v'+String(r.version||'1.26.0'),1145,64,'800 15px ui-monospace,Consolas,monospace','#aaa4b1',200,'right');
     text('RUU//OVERRUN',51,127,'italic 1000 64px system-ui,sans-serif','#f8e7c8',1070);
     c.strokeStyle='#c6a48088';c.lineWidth=1;c.beginPath();c.moveTo(53,152);c.lineTo(1146,152);c.stroke();
@@ -291,11 +291,16 @@
 
     const cores=Math.max(0,Math.floor(Number(bp.trueTotal)||0));
     const killed=Math.max(0,Math.min(cores,Math.floor(Number(bp.trueKilled)||0)));
+    const eclipseTotal=Math.max(0,Math.floor(Number(bp.eclipseTotal)||0));
+    const eclipseKilled=Math.max(0,Math.min(eclipseTotal,Math.floor(Number(bp.eclipseKilled)||0)));
+    const devoraTotal=Math.max(0,Math.floor(Number(bp.eclipseDevoraTotal)||0));
+    const devoraKilled=Math.max(0,Math.min(devoraTotal,Math.floor(Number(bp.eclipseDevoraKilled)||0)));
+    const operationRecord=eclipseTotal?`ECLIPSE ${eclipseKilled}/${eclipseTotal} · DEVORA ${devoraKilled}/${devoraTotal}`+(bp.eclipseCleared?' / COMPLETE':bp.eclipseDevoraSpawned?'':' / INBOUND'):'';
     const milestones=[
       {name:'01 DEVORA',status:bp.devora?'DEFEATED':bp.devoraReached?'ENGAGED':'NOT REACHED',clear:!!bp.devora},
       {name:'02 NULL EMPEROR',status:bp.nullEmperor?'DEFEATED':bp.nullReached?'ENGAGED':'NOT REACHED',clear:!!bp.nullEmperor},
       {name:'03 TRUE DEVORA'+(cores?' ×'+cores:''),status:bp.trueCleared?'ALL CORES CLEARED':cores?`${killed} / ${cores} CORES`:(bp.nullEmperor?'AWAKENING':'NOT REACHED'),clear:!!bp.trueCleared},
-      {name:'04 RUU : ECLIPSE',status:bp.eclipseCleared?'SECRET CLEAR':bp.eclipseSeen?'ENCOUNTERED':bp.trueCleared?'NOT TRIGGERED':'NOT REACHED',clear:!!bp.eclipseCleared}
+      {name:eclipseTotal?'04 OPERATION: TAKAMIYA':'04 RUU : ECLIPSE',status:operationRecord||(bp.eclipseCleared?'SECRET CLEAR':bp.eclipseSeen?'ENCOUNTERED':bp.trueCleared?'NOT TRIGGERED':'NOT REACHED'),clear:!!bp.eclipseCleared}
     ];
     panel(680,181,468,394,'#191427ed','#94779491');
     text('BOSS / CLEAR RECORD',697,213,'900 20px ui-monospace,Consolas,monospace','#f1d7e2',439);
@@ -314,7 +319,7 @@
     text(pilot||'NO SUPPORT / NOT DEPLOYED',707,517,'900 19px ui-monospace,Consolas,monospace',pilot?'#fff1db':'#b8aabc',405);
     text(pilot?(pilotJp+(r.supportArrived?' / ALLIED REINFORCEMENT':' / INBOUND')):'No allied pilot joined this run',707,539,'800 12px system-ui,sans-serif','#c6b9c7',405);
 
-    const highest=bp.eclipseCleared?'SECRET CLEAR':bp.trueCleared?'TRUE DEVORA CLEARED':bp.nullEmperor?'NULL EMPEROR DEFEATED':bp.devora?'DEVORA DEFEATED':'SURVIVAL IN PROGRESS';
+    const highest=bp.eclipseCleared?(eclipseTotal?'OPERATION: TAKAMIYA CLEARED':'SECRET CLEAR'):bp.eclipseSeen&&eclipseTotal?'OPERATION: TAKAMIYA IN PROGRESS':bp.trueCleared?'TRUE DEVORA CLEARED':bp.nullEmperor?'NULL EMPEROR DEFEATED':bp.devora?'DEVORA DEFEATED':'SURVIVAL IN PROGRESS';
     text('LAST MILESTONE / '+highest,54,611,'800 14px ui-monospace,Consolas,monospace','#e4d2bd',1085);
     text('#RUUOVERRUN   #JACKPOTØ31',54,642,'800 15px ui-monospace,Consolas,monospace','#a3adb7',950);
     return canvas;

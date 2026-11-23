@@ -1,4 +1,4 @@
-/* RUU//OVERRUN v1.19.1 — TRUE END : DEVORA TRINITY / QUINTET
+/* RUU//OVERRUN v1.30.0 — TRUE END / OPERATION: TAKAMIYA REINFORCEMENTS
    Final boss defeat reveals a real, challenging second battle.
    Ordinary: three DEVORA. Rare: five (10%). All must be defeated to clear.
 */
@@ -10,7 +10,7 @@ const RARE_FIVE_CHANCE=.10,ROLES=['HUNTER','ORACLE','SIEGE','FRACTURE','REAPER']
 const COLORS=['#ff719f','#e9a1fd','#ffbd86','#c78bff','#ff668c'];
 const ART={};if(typeof Image!=='undefined')for(const [key,src] of Object.entries({three:'assets/devora_true_end_three.webp',five:'assets/devora_true_end_five.webp'})){const image=new Image();image.src=src;ART[key]=image}
 const initial=()=>({queued:false,active:false,finished:false,total:0,remaining:0,maxHp:0,rare:false,intro:0,introMax:2.65,clock:0,despair:0,banner:0,finishPulse:0,defeated:0,rolls:0});
-let S=initial();function reset(){S=initial()}
+let S=initial(),reinforcementsPresent=false;function reset(){S=initial();reinforcementsPresent=false}
 function queue(g,e,rng=Math.random){
  if(!g||e?.kind!=='final'||e.trueEndQueued||S.active||S.queued)return false;
  e.trueEndQueued=true;S.queued=true;S.rolls++;
@@ -18,6 +18,28 @@ function queue(g,e,rng=Math.random){
  S.total=S.rare?5:3;S.remaining=S.total;S.maxHp=0;S.defeated=0;
  g.trueEndPending=true;g.trueEndCleared=false;g.trueEndCount=S.total;g.trueEndRemaining=S.total;
  return true;
+}
+function reinforcementHp(level,index){
+ return Math.ceil((555+(Number(level)||1)*23)*(index===2?1.25:index===0?1.08:1));
+}
+function configureCore(mob,p,level,index,angle){
+ mob.trueDevora=true;mob.trueBossIndex=index;mob.trueBossRole=ROLES[index];mob.trueSpriteSize=288;
+ mob.maxHp=reinforcementHp(level,index);mob.hp=mob.maxHp;
+ mob.r=39;mob.speed=[104,79,60,88,115][index];mob.dmg=[16,14,19,15,17][index];mob.col=COLORS[index];mob.xp=55;
+ mob.elite=false;mob.shoot=999;mob.attack=2.8;mob.trueRageDash=0;
+ mob.trueBrain={role:ROLES[index],cd:1.6+index*.56,wind:0,windMax:1.0,targetX:p.x,targetY:p.y,angle,shots:0};
+ return mob;
+}
+function spawnReinforcement(g,api,index,level=g?.level){
+ if(!g?.player)return null;
+ const i=clamp(Math.floor(Number(index)||0),0,2),p=g.player;
+ const angle=-Math.PI/2+i*TAU/3,dist=540+(i%2)*65;
+ const mob=api?.spawn?.('true_devora',p.x+Math.cos(angle)*dist,p.y+Math.sin(angle)*dist,1);
+ if(!mob)return null;
+ configureCore(mob,p,level,i,angle);
+ // These units belong to the secret encounter, never to the completed 3/5-core wave.
+ mob.secretReinforcement=true;mob.trueIntro=1.2;mob.attack=1.4;reinforcementsPresent=true;
+ return mob;
 }
 function spawnQueued(g,api){
  if(!S.queued||!g?.player||S.active)return false;
@@ -27,13 +49,9 @@ function spawnQueued(g,api){
   const a=-Math.PI/2+i*TAU/count,dist=540+(i%2)*65;
   const mob=api?.spawn?.('true_devora',p.x+Math.cos(a)*dist,p.y+Math.sin(a)*dist,1);
   if(!mob)continue;
-  mob.trueDevora=true;mob.trueBossIndex=i;mob.trueBossRole=ROLES[i];mob.trueSpriteSize=288;
-  mob.maxHp=Math.ceil((555+level*23)*(i===2?1.25:i===0?1.08:1));mob.hp=mob.maxHp;
-  mob.r=39;mob.speed=[104,79,60,88,115][i];mob.dmg=[16,14,19,15,17][i];mob.col=COLORS[i];mob.xp=55;
-  mob.elite=false;mob.shoot=999;mob.attack=2.8;mob.trueRageDash=0;
-  mob.trueBrain={role:ROLES[i],cd:1.6+i*.56,wind:0,windMax:1.0,targetX:p.x,targetY:p.y,angle:a,shots:0};
+  configureCore(mob,p,level,i,a);
  }
- const cores=g.enemies.filter(e=>e.trueDevora&&e.hp>0);
+ const cores=g.enemies.filter(e=>e.trueDevora&&!e.secretReinforcement&&e.hp>0);
  S.total=cores.length;S.remaining=S.total;S.maxHp=cores.reduce((sum,e)=>sum+e.maxHp,0);
  g.trueEndCount=S.total;g.trueEndRemaining=S.total;
  if(!S.total){S.active=false;S.finished=true;g.trueEndCleared=true;g.trueEndPending=false;return false}
@@ -44,9 +62,9 @@ function spawnQueued(g,api){
  api?.sound?.('bossBreak');api?.toast?.(S.rare?'DEVORA QUINTET // EXTINCTION PROTOCOL':'DEVORA TRINITY // TRUE END',true);
  return true;
 }
-function isIntro(){return S.active&&S.intro>0}
+function isIntro(e){return e?.secretReinforcement?!!e.trueDevora&&e.trueIntro>0:S.active&&S.intro>0}
 function onKill(e,g,api){
- if(!e?.trueDevora||e.trueDeathCounted)return false;
+ if(!e?.trueDevora||e.secretReinforcement||e.trueDeathCounted||e.hp>0)return false;
  e.trueDeathCounted=true;S.remaining=Math.max(0,S.remaining-1);S.defeated++;
  if(g)g.trueEndRemaining=S.remaining;
  api?.wave?.(e.x,e.y,225,'#ff97e1');api?.burst?.(e.x,e.y,'#ff76cd',28,235);api?.sound?.('bossDown');
@@ -59,11 +77,14 @@ function onKill(e,g,api){
 }
 function status(g){return{queued:S.queued,active:S.active,finished:S.finished,total:S.total,remaining:S.remaining,
  rare:S.rare,intro:S.intro,rolls:S.rolls,
- hp:(g?.enemies||[]).reduce((v,e)=>v+(e.trueDevora&&e.hp>0?e.hp:0),0),
+ hp:(g?.enemies||[]).reduce((v,e)=>v+(e.trueDevora&&!e.secretReinforcement&&e.hp>0?e.hp:0),0),
  maxHp:S.maxHp};}
 function projectile(g,e,a,speed,damage,col,r=8){
- if(g.ebullets.length>=135)return false;
- g.ebullets.push({x:e.x+Math.cos(a)*e.r*.66,y:e.y+Math.sin(a)*e.r*.66,vx:Math.cos(a)*speed,vy:Math.sin(a)*speed,r,ttl:4.15,col,damage,trueDevora:true});
+ if(e.secretReinforcement){if(!window.RUU_SECRET_BOSS?.canEmitReinforcement?.(g))return false;}
+ else if(g.ebullets.length>=135)return false;
+ const shot={x:e.x+Math.cos(a)*e.r*.66,y:e.y+Math.sin(a)*e.r*.66,vx:Math.cos(a)*speed,vy:Math.sin(a)*speed,r,ttl:4.15,col,damage,trueDevora:true};
+ if(e.secretReinforcement)shot.secretReinforcement=true;
+ g.ebullets.push(shot);
  return true;
 }
 function fire(e,g,api){
@@ -78,33 +99,39 @@ function fire(e,g,api){
  api?.sound?.(role==='ORACLE'?'rail':role==='SIEGE'?'boss':'bolt');
 }
 function step(e,dt,g,api,q='auto'){
- if(!S.active||!e?.trueDevora||e.hp<=0||!g?.player)return;
+ if(!e?.trueDevora||e.hp<=0||!g?.player||(!S.active&&!e.secretReinforcement))return;
  const b=e.trueBrain;if(!b)return;
- if(S.intro>0){e.attack=Math.max(e.attack||0,.28);return}
+ if(e.secretReinforcement&&e.trueIntro>0){e.trueIntro=Math.max(0,e.trueIntro-Math.max(0,dt));e.attack=Math.max(e.attack||0,.28);return}
+ if(isIntro(e)){e.attack=Math.max(e.attack||0,.28);return}
  const p=g.player,dist=Math.hypot(p.x-e.x,p.y-e.y);
  if(dist>1150){const a=Math.atan2(e.y-p.y,e.x-p.x);e.x=p.x+Math.cos(a)*750;e.y=p.y+Math.sin(a)*750}
- if(b.wind>0){b.wind-=dt;if(b.wind<=0){b.wind=0;fire(e,g,api);b.cd=([2.55,3.1,3.8,3.3,2.8][e.trueBossIndex]*(S.rare?1.2:1)+b.windMax)/BARRAGE_RATE-b.windMax}}
+ if(b.wind>0){b.wind-=dt;if(b.wind<=0){b.wind=0;fire(e,g,api);b.cd=([2.55,3.1,3.8,3.3,2.8][e.trueBossIndex]*(!e.secretReinforcement&&S.rare?1.2:1)+b.windMax)/BARRAGE_RATE-b.windMax}}
  else {b.cd-=dt;if(b.cd<=0&&dist<820){b.targetX=p.x;b.targetY=p.y;b.angle=Math.atan2(p.y-e.y,p.x-e.x);
   b.windMax=b.role==='SIEGE'?1.18:.88;b.wind=b.windMax;api?.sound?.('shield')}}
 }
 function tick(dt){if(dt<=0)return;S.clock+=dt;S.intro=Math.max(0,S.intro-dt);S.banner=Math.max(0,S.banner-dt);S.finishPulse=Math.max(0,S.finishPulse-dt);
  S.despair=clamp(S.despair+(S.active?dt*1.5:-dt*.7),0,1)}
 function drawGround(ctx,cam,g,q='auto'){
- if(!S.active||!g?.enemies)return;
+ if((!S.active&&!reinforcementsPresent)||!g?.enemies)return;
  ctx.save();ctx.globalCompositeOperation='screen';
- for(const e of g.enemies){if(!e.trueDevora||e.hp<=0)continue;const x=e.x-cam.x,y=e.y-cam.y;
+ for(const e of g.enemies){if(!e.trueDevora||e.hp<=0||(!S.active&&!e.secretReinforcement))continue;const x=e.x-cam.x,y=e.y-cam.y;
   if(x<-150||x>1350||y<-150||y>825)continue;
   ctx.globalAlpha=.3;ctx.strokeStyle=e.col;ctx.lineWidth=q==='lite'?2:3;
-  ctx.beginPath();ctx.arc(x,y,e.r+25+Math.sin(S.clock*3+e.trueBossIndex)*5,0,TAU);ctx.stroke()}
+  ctx.beginPath();ctx.arc(x,y,e.r+25+Math.sin(S.clock*3+e.trueBossIndex)*5,0,TAU);ctx.stroke();
+  if(e.secretReinforcement&&e.trueIntro>0){
+   const progress=clamp(1-e.trueIntro/1.2,0,1);ctx.globalAlpha=.7;ctx.lineWidth=3;
+   ctx.beginPath();ctx.arc(x,y,96-progress*30,-Math.PI/2,-Math.PI/2+TAU*progress);ctx.stroke();
+  }
+ }
  ctx.restore();
 }
 function drawWorld(ctx,cam,g,q='auto'){
- if(!S.active||!g?.enemies)return;
- for(const e of g.enemies){if(!e.trueDevora||e.hp<=0)continue;const x=e.x-cam.x,y=e.y-cam.y,b=e.trueBrain;
+ if((!S.active&&!reinforcementsPresent)||!g?.enemies)return;
+ for(const e of g.enemies){if(!e.trueDevora||e.hp<=0||(!S.active&&!e.secretReinforcement))continue;const x=e.x-cam.x,y=e.y-cam.y,b=e.trueBrain;
   if(x<-220||x>1420||y<-220||y>895)continue;
   const width=108,yy=y-170;ctx.save();ctx.fillStyle='#090916e3';ctx.fillRect(x-width/2,yy,width,24);
   ctx.strokeStyle=e.col;ctx.lineWidth=1.5;ctx.strokeRect(x-width/2,yy,width,24);
-  ctx.fillStyle=e.col;ctx.font='900 10px ui-monospace,monospace';ctx.textAlign='center';ctx.fillText('DEVORA / '+(e.trueBossIndex+1),x,yy+10);
+  ctx.fillStyle=e.col;ctx.font='900 10px ui-monospace,monospace';ctx.textAlign='center';ctx.fillText(e.secretReinforcement?(e.trueIntro>0?'DEVORA / ARRIVING':'DEVORA / '+e.trueBossRole):'DEVORA / '+(e.trueBossIndex+1),x,yy+10);
   ctx.fillStyle='#241020';ctx.fillRect(x-width/2+6,yy+17,width-12,4);ctx.fillStyle=e.col;ctx.fillRect(x-width/2+6,yy+17,(width-12)*clamp(e.hp/e.maxHp,0,1),4);
   if(b?.wind>0){const a=Math.atan2(b.targetY-e.y,b.targetX-e.x),t=clamp(1-b.wind/b.windMax,0,1);
    ctx.strokeStyle=e.col;ctx.lineCap='round';ctx.globalAlpha=.13+.25*t;ctx.lineWidth=q==='lite'?11:21;ctx.beginPath();
@@ -150,5 +177,5 @@ function drawScreen(ctx,W,H,g,q='auto'){
   ctx.fillStyle='#100916d9';ctx.fillRect(W*.32,H*.85,W*.36,29);ctx.textAlign='center';ctx.fillStyle=S.rare?'#ff91a8':'#f6afd9';
   ctx.font='900 12px ui-monospace,monospace';ctx.fillText('DEVORA TRUE BOSS // '+S.remaining+' / '+S.total+' REMAINING',W/2,H*.85+19);ctx.restore()}
 }
-window.RUU_TRUE_END={VERSION:'1.22.1',RARE_FIVE_CHANCE,ROLES,reset,queue,spawnQueued,onKill,status,isIntro,step,tick,drawGround,drawWorld,drawScreen};
+window.RUU_TRUE_END={VERSION:'1.30.0',RARE_FIVE_CHANCE,ROLES,reset,queue,spawnQueued,spawnReinforcement,reinforcementHp,onKill,status,isIntro,step,tick,drawGround,drawWorld,drawScreen};
 })();

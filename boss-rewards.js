@@ -1,4 +1,4 @@
-/* RUU//OVERRUN v1.22.0 — BOSS SPOILS / CINEMATIC REWARDS
+/* RUU//OVERRUN v1.30.0 — BOSS SPOILS / OPERATION: TAKAMIYA CLEAR REWARD
    Extra rewards stacked ON TOP OF the game's original kill score and gems.
    This module runs only after TRUE DEVORA's last-core HP gate is evaluated.
 */
@@ -50,7 +50,7 @@ function grant(g,detail,e,api,cinema=false){
  return true;
 }
 function onKill(e,g,api){
- if(!e||!g||e.bossRewardGranted)return false;
+ if(!e||!g||e.hp>0||e.bossRewardGranted)return false;
  const key=e.secretRuu?'secret_ruu':e.trueDevora?'true_devora':e.kind;
  const detail=REWARDS[key];if(!detail)return false;
  e.bossRewardGranted=true;
@@ -59,9 +59,11 @@ function onKill(e,g,api){
   g.chests.push({x:e.x,y:e.y,t:0});
   if(g.chests.length>6)g.chests.shift();
  }
- const finalCore=key==='true_devora'&&g.trueEndCleared&&!g.trueEndRewardGranted;
- const isLast=key==='secret_ruu';
- grant(g,detail,e,api,isLast);
+ const finalCore=key==='true_devora'&&!e.secretReinforcement&&g.trueEndCleared&&!g.trueEndRewardGranted;
+ const secretComplete=(e.secretRuu||e.secretReinforcement)&&g.secretBossCleared&&!g.secretRewardClear;
+ // ECLIPSE's grand reward belongs to the whole encounter. Escorts retain their
+ // individual core reward, but cannot repeat the earlier 3/5-core collective.
+ if(!e.secretRuu)grant(g,detail,e,api,false);
  if(finalCore){
   g.trueEndRewardGranted=true;
   const count=g.trueEndCount===5?5:3;
@@ -69,8 +71,9 @@ function onKill(e,g,api){
   // ECLIPSE has already been selected (or rejected) using the HP value BEFORE this heal.
   if(!g.secretBossPending){g.bossRewardCinematic=2.65;persistentInvulnerability(g,2.85)}
  }
- if(isLast){
+ if(secretComplete){
   g.secretRewardClear=true;
+  grant(g,REWARDS.secret_ruu,e,api,true);
   g.bossRewardCinematic=2.75;persistentInvulnerability(g,2.95);
  }
  return true;
@@ -107,5 +110,5 @@ function drawScreen(ctx,W,H){
  ctx.fillText('✦ BOSS REWARDS // DRIVE + FINISHER CHARGE ✦',W*.5,y+95,boxW*.90);
  ctx.restore();
 }
-window.RUU_BOSS_REWARDS={VERSION:'1.22.0',REWARDS,COLLECTIVE,reset,onKill,tick,status,drawScreen};
+window.RUU_BOSS_REWARDS={VERSION:'1.30.0',REWARDS,COLLECTIVE,reset,onKill,tick,status,drawScreen};
 })();
