@@ -1121,7 +1121,7 @@ const WALK_ATLAS=new Image();WALK_ATLAS.src='assets/ruu_walk_atlas.webp';
 
  function burst(x,y,col,n=12,pow=110){const maxP=fxMax?190:fxPreset==='lite'?65:110;const num=Math.min(Math.ceil(n*(fxMax?.7:fxPreset==='lite'?.33:.52)),Math.max(0,maxP-g.particles.length));for(let i=0;i<num;i++){let a=rand(0,TAU),v=rand(20,pow),life=rand(.2,.75);g.particles.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v,life,max:life,r:rand(1.2,4),col})}if(n>=12&&fxPreset!=='lite')sparkBurst(x,y,col,Math.min(12,n),pow*1.17)}
  function floatText(x,y,t,col='#fff3ae',size=14){if(g.texts.length>55)g.texts.shift();g.texts.push({x,y,t:String(t),life:.75,col,size})}
- function shockwave(x,y,r=130,col='#8ffff0'){g.waves.push({x,y,r:12,max:r,t:0,life:.5,col})}
+ function shockwave(x,y,r=130,col='#8ffff0'){g.waves.push({x,y,r:12,max:r,t:0,life:.5,col});if(g.waves.length>28)g.waves.splice(0,g.waves.length-28)}
  function spawnElite(){
    const a=rand(0,TAU),rr=560,p=g.player,e=makeEnemy('brute',p.x+Math.cos(a)*rr,p.y+Math.sin(a)*rr);
    e.elite=true;e.hp*=2.25;e.maxHp=e.hp;e.speed*=.84;e.r=29;e.col='#ffdda2';e.xp+=12;
@@ -2145,7 +2145,27 @@ function rollRareChoice(choices){
  if(e.kind==='hex'&&e.shoot<=0&&d<470&&g.ebullets.length<100){e.shoot=4.3/BARRAGE_RATE;g.ebullets.push({x:e.x,y:e.y,vx:n.x*157,vy:n.y*157,r:10,ttl:3.4,col:'#ee83d5',damage:5,debuff:'hex'});if(fxPreset!=='lite')hitImpact(e.x,e.y,'#fa9bea',21)}
  }
  applyOrbit(dt);
- for(let i=g.bullets.length-1;i>=0;i--){const b=g.bullets[i];b.ttl-=dt;b.x+=b.vx*dt;b.y+=b.vy*dt;if(b.ttl<=0){g.bullets.splice(i,1);continue}let gone=false;for(const e of g.enemies){if(e.hp<=0||b.hit.has(e))continue;let dx=b.x-e.x,dy=b.y-e.y;if(dx*dx+dy*dy<(e.r+b.r)**2){b.hit.add(e);let n=norm(b.vx,b.vy);if(b.kind==='ice')e.slow=Math.max(e.slow,b.slow||1.4);applyDamage(e,b.dmg,n.x*80,n.y*80,b.kind==='ice'?'#aae8ff':'#fff6be');burst(b.x,b.y,b.col,5,55);if(b.pierce--<=0){gone=true;break}}}if(gone)g.bullets.splice(i,1)}
+ const enemyGrid=window.RUU_PERF_ENGINE?.enemyGrid||null;
+ if(enemyGrid)enemyGrid.build(g.enemies);
+ for(let i=g.bullets.length-1;i>=0;i--){
+   const b=g.bullets[i];b.ttl-=dt;b.x+=b.vx*dt;b.y+=b.vy*dt;
+   if(b.ttl<=0){g.bullets.splice(i,1);continue}
+   let gone=false;
+   const near=enemyGrid?enemyGrid.candidates(b.x,b.y,b.r):g.enemies;
+   for(const e of near){
+     if(e.hp<=0||b.hit.has(e))continue;
+     const dx=b.x-e.x,dy=b.y-e.y;
+     if(dx*dx+dy*dy<(e.r+b.r)**2){
+       b.hit.add(e);
+       const n=norm(b.vx,b.vy);
+       if(b.kind==='ice')e.slow=Math.max(e.slow,b.slow||1.4);
+       applyDamage(e,b.dmg,n.x*80,n.y*80,b.kind==='ice'?'#aae8ff':'#fff6be');
+       burst(b.x,b.y,b.col,5,55);
+       if(b.pierce--<=0){gone=true;break}
+     }
+   }
+   if(gone)g.bullets.splice(i,1);
+ }
  for(let i=g.ebullets.length-1;i>=0;i--){let b=g.ebullets[i];b.ttl-=dt;b.x+=b.vx*dt;b.y+=b.vy*dt;if(b.ttl<=0){g.ebullets.splice(i,1);continue}if(distance(b,p)<p.r+b.r){if(b.debuff==='hex'){p.hexSlow=Math.max(p.hexSlow,2.2);floatText(p.x,p.y-51,'SIGNAL JAM','#f5a8e6',12);sfx('shield')}damagePlayer(b.damage,b.x,b.y);g.ebullets.splice(i,1)}}
  g.enemies=g.enemies.filter(e=>e.hp>0&&(e.kind==='boss'||e.kind==='final'||e.trueDevora||e.secretRuu||distance(e,p)<1800));
  for(let i=g.gems.length-1;i>=0;i--){let gem=g.gems[i];gem.t+=dt*3;let d=distance(gem,p);if(d<p.magnet){let n=norm(p.x-gem.x,p.y-gem.y),sp=lerp(180,800,1-d/p.magnet);gem.x+=n.x*sp*dt;gem.y+=n.y*sp*dt}if(d<30){window.RUU_PILOTS?.onGemPickup?.(gem,g,fxPreset);g.xp+=gem.xp*(window.RUU_PILOTS?.xpMultiplier?.()||1);g.score+=gem.xp*6;sfx('gem');burst(gem.x,gem.y,'#87fcd4',3,38);g.gems.splice(i,1)}}
