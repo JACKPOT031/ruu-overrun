@@ -34,7 +34,7 @@ test('two finite melee screens arrive at combat start and 20 seconds, once each'
   assert.equal(f.g.bossProgress.eclipseScreenWaves,1);assert.equal(f.g.bossProgress.eclipseScreenSpawned,12);
   assert.equal(f.g.bossProgress.eclipseScreenKilled,0);assert.equal(f.status().screenRemaining,12);
   f.advance(.75);
-  for(const e of first){assert.equal(f.secret.isIntro(e),false);assert.equal(e.speed,e.kind==='brute'?70:120);}
+  for(const e of first){assert.equal(f.secret.isIntro(e),false);assert.equal(e.speed,e.kind==='brute'?100:165);}
   first[0].x=2500;first[0].y=0;f.update(.01);
   assert.ok(f.g.enemies.includes(first[0]),'An owned finite-wave body must not silently disappear at the ambient-enemy distance cutoff');
   f.advance(18.9);assert.equal(f.g.bossProgress.eclipseScreenWaves,1);assert.equal(f.hostileAstraea().length,0);
@@ -60,7 +60,7 @@ test('defeating the original six early forces the second wave and hostile ASTRAE
 test('planned ASTRAEA HP is included from reveal and screen bodies never change the major HP total',()=>{
   const f=fixture();f.reveal();const before=f.status();
   assert.equal(before.totalThreats,7);assert.equal(before.astraeaTotal,1);assert.equal(before.astraeaRemaining,1);
-  assert.equal(before.astraeaSpawned,false);assert.equal(before.astraeaMaxHp,3000+40*24);
+  assert.equal(before.astraeaSpawned,false);assert.equal(before.astraeaMaxHp,Math.ceil((3000+40*24)*1.25));
   assert.equal(before.astraeaHp,before.astraeaMaxHp);
   f.g.level=99;f.advance(23.3);const after=f.status();
   assert.equal(after.astraeaSpawned,true);assert.equal(f.hostileAstraea()[0].maxHp,before.astraeaMaxHp);
@@ -143,39 +143,39 @@ function hostileFixture(pattern=0,options={}){
   b.pattern=pattern;b.cooldown=0;f.astraea.step(e,.01,f.g,f.api);
   return {f,e,b};
 }
-for(const [pattern,name,duration,rayCount] of [[0,'aimed laser',.95,1],[1,'triple laser',1.15,3]]){
+for(const [pattern,name,duration,rayCount] of [[0,'aimed laser',.95,1],[2,'triple laser',1.15,3]]){
   test(`${name} warns before one damage pulse and fires along its frozen warning geometry`,()=>{
     const {f,e,b}=hostileFixture(pattern),warning=JSON.parse(JSON.stringify(b.warning));
     assert.equal(b.windMax,duration);assert.equal(warning.segments.length,rayCount);
     const origin={x:e.x,y:e.y};
     f.astraea.step(e,duration-.01,f.g,f.api);assert.equal(f.g.player.hp,1000);
     assert.deepEqual({x:e.x,y:e.y},origin,'The warning origin must not move during windup');
-    f.astraea.step(e,.02,f.g,f.api);assert.equal(f.g.player.hp,982);assert.equal(b.rays.length,rayCount);
+    f.astraea.step(e,.02,f.g,f.api);assert.equal(f.g.player.hp,978);assert.equal(b.rays.length,rayCount);
     assert.deepEqual(Array.from(b.rays,r=>({x:r.x,y:r.y,x2:r.x2,y2:r.y2,halfWidth:r.halfWidth})),warning.segments);
-    f.g.player.inv=0;f.astraea.step(e,.1,f.g,f.api);assert.equal(f.g.player.hp,982,'Afterglow must not repeat damage');
+    f.g.player.inv=0;f.astraea.step(e,.1,f.g,f.api);assert.equal(f.g.player.hp,978,'Afterglow must not repeat damage');
     assert.equal(f.g.ebullets.length,0,'ASTRAEA beams must not consume shared projectile capacity');
   });
 }
 test('moving outside a telegraphed laser avoids damage without retargeting the beam',()=>{
-  const {f,e,b}=hostileFixture(1),warning=JSON.parse(JSON.stringify(b.warning));
+  const {f,e,b}=hostileFixture(2),warning=JSON.parse(JSON.stringify(b.warning));
   f.g.player.x=0;f.g.player.y=1000;f.astraea.step(e,1.16,f.g,f.api);
   assert.equal(f.g.player.hp,1000);
   assert.deepEqual(Array.from(b.rays,r=>({x:r.x,y:r.y,x2:r.x2,y2:r.y2,halfWidth:r.halfWidth})),warning.segments);
   assert.equal(f.g.ebullets.length,0);
 });
 test('charge warns for 1.2 seconds, then damages only its swept path once without projectiles',()=>{
-  const {f,e,b}=hostileFixture(2),warning=JSON.parse(JSON.stringify(b.warning)),origin={x:e.x,y:e.y};
+  const {f,e,b}=hostileFixture(4),warning=JSON.parse(JSON.stringify(b.warning)),origin={x:e.x,y:e.y};
   assert.equal(b.windMax,1.2);assert.equal(warning.segments.length,1);
   f.astraea.step(e,1.19,f.g,f.api);assert.equal(f.g.player.hp,1000);assert.deepEqual({x:e.x,y:e.y},origin);
   f.astraea.step(e,.02,f.g,f.api);assert.equal(f.g.player.hp,1000);assert.ok(b.charge);
   const charge=b.charge;assert.deepEqual(JSON.parse(JSON.stringify(charge.segment)),warning.segments[0]);
   f.astraea.step(e,.1,f.g,f.api);assert.equal(f.g.player.hp,1000,'Charge must not hit the entire warned lane at release');
-  f.astraea.step(e,1,f.g,f.api);assert.equal(f.g.player.hp,982);assert.equal(charge.hit,true);
-  f.g.player.inv=0;f.astraea.step(e,.1,f.g,f.api);assert.equal(f.g.player.hp,982);
+  f.astraea.step(e,1,f.g,f.api);assert.equal(f.g.player.hp,978);assert.equal(charge.hit,true);
+  f.g.player.inv=0;f.astraea.step(e,.1,f.g,f.api);assert.equal(f.g.player.hp,978);
   assert.equal(f.g.ebullets.length,0);assert.ok(b.trails.length<=12);assert.ok(b.rays.length<=3);
 });
 test('defeat cancels hostile warnings, rays and charge, and prevents future attacks',()=>{
-  const {f,e,b}=hostileFixture(1);b.rays.push({life:.2});b.trails.push({life:.2});
+  const {f,e,b}=hostileFixture(2);b.rays.push({life:.2});b.trails.push({life:.2});
   const hp=f.g.player.hp;assert.equal(f.astraea.onDefeat(e),true);assert.equal(f.astraea.onDefeat(e),false);
   assert.equal(b.warning,null);assert.equal(b.charge,null);assert.equal(b.wind,0);
   assert.equal(b.rays.length,0);assert.equal(b.trails.length,0);
@@ -210,7 +210,7 @@ test('gravity wells preserve hostile warning and charge positions while retainin
     const f=fixture();f.loadWeapons();const e=f.astraea.spawn(f.g,f.api,24),b=e.astraeaBrain;
     if(phase!=='intro')b.intro=0;
     if(phase==='wind'||phase==='charge'){
-      b.pattern=2;b.cooldown=0;f.astraea.step(e,.01,f.g,f.api);
+      b.pattern=4;b.cooldown=0;f.astraea.step(e,.01,f.g,f.api);
       if(phase==='charge')f.astraea.step(e,1.21,f.g,f.api);
     }
     if(phase==='patrol')b.cooldown=100;
@@ -226,7 +226,7 @@ test('gravity wells preserve hostile warning and charge positions while retainin
     if(warned)assert.deepEqual(JSON.parse(JSON.stringify(warned)),geometry);
     if(phase==='charge'){
       const charge=b.charge;f.astraea.step(e,.1,f.g,f.api);
-      near(e.x,before.x+charge.dx*68);near(e.y,before.y+charge.dy*68);
+      near(e.x,before.x+charge.dx*88);near(e.y,before.y+charge.dy*88);
     }
   }
 });
