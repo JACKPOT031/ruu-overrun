@@ -129,16 +129,94 @@
       rows.appendChild(fragment);
     }catch(err){if(isCurrent())message.textContent='ランキング取得に失敗した。通信やサーバー設定を確認してね。';console.warn('Ranking load error:',err)}
   }
-  function shareToX(){
-    const r=result();if(!r)return;
+  function resultPostText(r){
     const label=nickname?safeName(nickname):'ANONYMOUS';
     const text=`RUU//OVERRUN 🎮\n${r.mode==='challenge'?'✦ CHALLENGE / '+(r.challengeName||r.challengeId)+' / '+(r.challengeSuccess?'CLEARED':'FAILED'):r.mode==='endless'?'∞ ENDLESS MODE':r.won?'MISSION COMPLETE!':'SURVIVAL RESULT'}\nPLAYER: ${label}${r.title?' / '+r.title:''}\nSCORE: ${Number(r.score).toLocaleString('ja-JP')} / KILLS: ${r.kills} / LV: ${r.level}\n#RUUOVERRUN #JACKPOTØ31`;
+    return text;
+  }
+
+  function xPostUrl(text) {
     const qs=new URLSearchParams({text});
     const u=shareUrl();if(u)qs.set('url',u);
-    window.open('https://twitter.com/intent/tweet?'+qs.toString(),'_blank','noopener,noreferrer');
+    return 'https://twitter.com/intent/tweet?'+qs.toString();
   }
-  function saveResultCard() {
+  function shareFeedback(message) {
+    const node=menu.querySelector('#ruu-public-result .ruu-public-status');
+    if(node)node.textContent=message;
+  }
+  function resultCardBlob(canvas) {
+    // A synchronous conversion preserves the click's transient user activation for native sharing.
+    const encoded=canvas.toDataURL('image/png').split(',')[1];
+    const raw=atob(encoded);
+    const bytes=new Uint8Array(raw.length);
+    for(let i=0;i<raw.length;i++)bytes[i]=raw.charCodeAt(i);
+    return new Blob([bytes],{type:'image/png'});
+  }
+  function downloadResultPng(blob) {
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url;a.download='RUU_OVERRUN_RESULT.png';
+    document.body.appendChild(a);a.click();a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),30000);
+  }
+  async function shareToX() {
     const r=result();if(!r)return;
+    const text=resultPostText(r);
+    let blob;
+    try {
+      const canvas=drawResultCard(r);
+      if(!canvas)throw new Error('Result card canvas unavailable');
+      blob=resultCardBlob(canvas);
+    } catch(err) {
+      console.warn('Result card creation failed:',err);
+      shareFeedback('画像の生成に失敗したため、文章の投稿画面を開くよ。');
+      window.open(xPostUrl(text),'_blank','noopener,noreferrer');
+      return;
+    }
+    const file=typeof File==='function'?
+      new File([blob],'RUU_OVERRUN_RESULT.png',{type:'image/png'}):null;
+    const mobile=/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)||
+      (navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+    let nativeFilesSupported=false;
+    if(file&&mobile&&typeof navigator.share==='function'&&typeof navigator.canShare==='function'){
+      try{nativeFilesSupported=navigator.canShare({files:[file]});}catch{}
+    }
+    if(nativeFilesSupported){
+      try {
+        const u=shareUrl();
+        await navigator.share({
+          files:[file],title:'RUU//OVERRUN / RESULT CARD',
+          text:text+(u?'\n'+u:'')
+        });
+        shareFeedback('画像付き共有画面へ送ったよ。投稿先で内容を確認してね。');
+        return;
+      } catch(err) {
+        if(err?.name==='AbortError'){
+          shareFeedback('共有をキャンセルした。画像保存や再共有はいつでもできるよ。');
+          return;
+        }
+        console.warn('Native result card sharing unavailable:',err);
+      }
+    }
+    // X Web Intent cannot pre-attach a local image. Copy it first, then open the composer.
+    let copyTask=null;
+    if(navigator.clipboard?.write&&typeof ClipboardItem==='function'){
+      try{copyTask=navigator.clipboard.write([new ClipboardItem({'image/png':blob})]);}
+      catch(err){console.warn('Image clipboard unavailable:',err);}
+    }
+    window.open(xPostUrl(text),'_blank','noopener,noreferrer');
+    if(copyTask){
+      try {
+        await copyTask;
+        shareFeedback('結果カードをコピーしたよ。開いたXの投稿画面で Ctrl+V（Macは⌘V）して画像を貼り付けてね。');
+        return;
+      } catch(err){console.warn('Image clipboard write failed:',err);}
+    }
+    downloadResultPng(blob);
+    shareFeedback('結果カードをPNGで保存したよ。開いたXの投稿画面に画像を添付してね。');
+  }
+  function drawResultCard(r) {
+    if(!r)return null;
     const W=1200,H=675,canvas=document.createElement('canvas');
     canvas.width=W;canvas.height=H;
     const c=canvas.getContext('2d');if(!c)return;
@@ -216,8 +294,20 @@
     const highest=bp.eclipseCleared?'SECRET CLEAR':bp.trueCleared?'TRUE DEVORA CLEARED':bp.nullEmperor?'NULL EMPEROR DEFEATED':bp.devora?'DEVORA DEFEATED':'SURVIVAL IN PROGRESS';
     text('LAST MILESTONE / '+highest,54,611,'800 14px ui-monospace,Consolas,monospace','#e4d2bd',1085);
     text('#RUUOVERRUN   #JACKPOTØ31',54,642,'800 15px ui-monospace,Consolas,monospace','#a3adb7',950);
-    const a=document.createElement('a');a.download='RUU_OVERRUN_RESULT.png';a.href=canvas.toDataURL('image/png');a.click();
-}
+    return canvas;
+  }
+
+  function saveResultCard() {
+    const canvas=drawResultCard(result());
+    if(!canvas)return;
+    try {
+      downloadResultPng(resultCardBlob(canvas));
+      shareFeedback('結果カードをPNGで保存したよ。');
+    } catch(err) {
+      console.warn('Result card download failed:',err);
+      shareFeedback('結果カードの保存に失敗した。もう一度試してね。');
+    }
+  }
     async function submit(scoreInput,status){
     if(busy)return;
     nickname=safeName(scoreInput.value);scoreInput.value=nickname;storage.set(STORE_NAME,nickname);
@@ -248,8 +338,8 @@
     const stats=menu.querySelector('.result-stats');if(!stats)return;
     const p=document.createElement('div');p.id='ruu-public-result';p.className='ruu-score-box';
     const input=inputElement();const status=document.createElement('div');status.className='ruu-public-status';const challengeMode=result()?.mode==='challenge';
-    if(challengeMode)p.append(createButton('𝕏 チャレンジ結果をポスト',shareToX),createButton('🖼 結果カード保存',saveResultCard));else p.append(input,createButton('🏆 ランキング登録',()=>submit(input,status)),createButton('🌐 みんなの順位',()=>showBoard(result()?.mode==='endless'?'endless':'normal')),createButton('𝕏 結果をポスト',shareToX),createButton('🖼 結果カード保存',saveResultCard));
-    const hint=document.createElement('div');hint.className='ruu-public-hint';hint.textContent=challengeMode?'CHALLENGEはローカル記録専用。通常・ENDLESSの世界ランキングへ送信されません。Xと結果カードは共有できるよ。':'名前とスコアは公開ランキングに表示されるよ。匿名のニックネームを使ってね。Xへの投稿は確認画面が開くだけ。画像カードは保存後、Xで手動添付してね。';
+    if(challengeMode)p.append(createButton('𝕏 結果カードを投稿',shareToX),createButton('🖼 結果カード保存',saveResultCard));else p.append(input,createButton('🏆 ランキング登録',()=>submit(input,status)),createButton('🌐 みんなの順位',()=>showBoard(result()?.mode==='endless'?'endless':'normal')),createButton('𝕏 結果カードを投稿',shareToX),createButton('🖼 結果カード保存',saveResultCard));
+    const hint=document.createElement('div');hint.className='ruu-public-hint';hint.textContent=challengeMode?'CHALLENGEはローカル記録専用。通常・ENDLESSの世界ランキングへ送信されません。結果カードはスマホで画像共有、PCで画像コピー＋X投稿画面に対応。':'名前とスコアは公開ランキングに表示されるよ。匿名のニックネームを使ってね。Xへの投稿は最終確認が必要。スマホは共有先でXを選択。PCはXの投稿画面でCtrl+V（Macは⌘V）で画像を添付できるよ。';
     p.append(hint,status);
     const help=menu.querySelector('.help');if(help)menu.insertBefore(p,help);else menu.append(p);
     if(!api&&!challengeMode)status.textContent='共通ランキングの接続待ち。X共有は今すぐ利用可能。';
