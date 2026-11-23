@@ -139,29 +139,86 @@
   }
   function saveResultCard() {
     const r=result();if(!r)return;
-    const W=1200,H=675,canvas=document.createElement('canvas');canvas.width=W;canvas.height=H;
-    const c=canvas.getContext('2d');
-    const base=c.createLinearGradient(0,0,W,H);
-    base.addColorStop(0,'#101722');base.addColorStop(.55,'#271927');base.addColorStop(1,'#080c15');
-    c.fillStyle=base;c.fillRect(0,0,W,H);
+    const W=1200,H=675,canvas=document.createElement('canvas');
+    canvas.width=W;canvas.height=H;
+    const c=canvas.getContext('2d');if(!c)return;
+    const bp=r.bossProgress||{},mode=String(r.mode||'normal'),isChallenge=mode==='challenge';
+    const completed=!!r.won,challengeCleared=!!r.challengeSuccess;
+    const outcome=isChallenge?(challengeCleared?'TRIAL CLEARED':completed?'TRIAL FAILED / ROUTE CLEARED':'TRIAL FAILED'):
+      mode==='endless'?'ENDLESS / RUN ENDED':completed?'MISSION COMPLETE':'MISSION FAILED';
+    const clearColor=completed?(isChallenge&&!challengeCleared?'#ffe1a0':'#91f0d3'):'#ffb0bb';
+    const back=c.createLinearGradient(0,0,W,H);
+    back.addColorStop(0,'#121e30');back.addColorStop(.48,'#261a29');back.addColorStop(1,'#0b0d1a');
+    c.fillStyle=back;c.fillRect(0,0,W,H);
     const game=document.getElementById('game');
-    if(game){try{c.globalAlpha=.36;c.drawImage(game,0,0,W,H)}catch{}}
+    if(game){try{c.globalAlpha=.14;c.drawImage(game,0,0,W,H)}catch{}}
     c.globalAlpha=1;
-    const shade=c.createLinearGradient(0,0,W,0);shade.addColorStop(0,'#080b16ed');shade.addColorStop(.65,'#10111bdf');shade.addColorStop(1,'#100d1b55');
+    const shade=c.createLinearGradient(0,0,W,0);
+    shade.addColorStop(0,'#0a0d1de9');shade.addColorStop(.62,'#12101eea');shade.addColorStop(1,'#090b16f6');
     c.fillStyle=shade;c.fillRect(0,0,W,H);
-    c.strokeStyle='#ddbe8f';c.lineWidth=3;c.strokeRect(26,26,W-52,H-52);
-    c.fillStyle='#c4ae92';c.font='800 21px ui-monospace,monospace';c.fillText('JACKPOTØ31 / ORIGINAL GAME',64,87);
-    c.fillStyle='#fce7bd';c.font='italic 900 76px system-ui,sans-serif';c.fillText('RUU//OVERRUN',59,174);
-    c.fillStyle=r.won?'#98fbd7':'#ffb1c6';c.font='900 31px system-ui,sans-serif';c.fillText(r.mode==='challenge'?'✦ CHALLENGE '+(r.challengeSuccess?'CLEARED':'FAILED'):r.mode==='endless'?'∞ ENDLESS MODE':r.won?'MISSION COMPLETE':'SURVIVAL RESULT',65,238);
-    c.fillStyle='#fff3dc';c.font='900 116px ui-monospace,Consolas,monospace';c.fillText(Number(r.score).toLocaleString('ja-JP'),59,385);
-    c.fillStyle='#d2bca2';c.font='800 23px system-ui,sans-serif';c.fillText('SCORE',65,281);
-    c.fillStyle='#efdfc6';c.font='900 29px ui-monospace,monospace';c.fillText(`KILLS  ${r.kills}      LV  ${r.level}      TIME  ${String(Math.floor(r.durationSeconds/60)).padStart(2,'0')}:${String(r.durationSeconds%60).padStart(2,'0')}`,65,460);
-    c.fillStyle='#f4dbad';c.font='800 29px system-ui,sans-serif';c.fillText(`PLAYER  ${safeName(nickname)||'ANONYMOUS'}`,65,520,1000);
-    if(r.title){c.fillStyle='#ffe8b9';c.font='700 22px system-ui,sans-serif';c.fillText('TITLE  '+r.title,65,558,1000);}
-    c.fillStyle='#a6a8b5';c.font='800 18px ui-monospace,monospace';c.fillText('#RUUOVERRUN     #JACKPOTØ31',65,596);
+    c.strokeStyle='#cfb68d';c.lineWidth=2;c.strokeRect(24,24,W-48,H-48);
+    const panel=(x,y,w,h,fill='#131827e8',border='#71819670')=>{
+      c.fillStyle=fill;c.fillRect(x,y,w,h);
+      c.strokeStyle=border;c.lineWidth=1;c.strokeRect(x,y,w,h);
+    };
+    const text=(str,x,y,font,color,maxWidth,align='left')=>{
+      c.font=font;c.fillStyle=color;c.textBaseline='alphabetic';c.textAlign=align;
+      c.fillText(String(str??''),x,y,maxWidth);
+    };
+    const score=Math.max(0,Number(r.score)||0);
+    const secs=Math.max(0,Math.floor(Number(r.durationSeconds)||0));
+    const duration=`${String(Math.floor(secs/60)).padStart(2,'0')}:${String(secs%60).padStart(2,'0')}`;
+    const name=safeName(nickname)||'ANONYMOUS';
+    text('JACKPOTØ31 / ORIGINAL SURVIVAL GAME',52,64,'800 16px ui-monospace,Consolas,monospace','#c1b7aa',820);
+    text('v'+String(r.version||'1.26.0'),1145,64,'800 15px ui-monospace,Consolas,monospace','#aaa4b1',200,'right');
+    text('RUU//OVERRUN',51,127,'italic 1000 64px system-ui,sans-serif','#f8e7c8',1070);
+    c.strokeStyle='#c6a48088';c.lineWidth=1;c.beginPath();c.moveTo(53,152);c.lineTo(1146,152);c.stroke();
+
+    panel(52,181,609,394,'#0d1723dc','#6b7d8d80');
+    text(outcome,72,218,'900 23px ui-monospace,Consolas,monospace',clearColor,562);
+    text('SCORE',72,256,'900 17px ui-monospace,Consolas,monospace','#dfc3a5',560);
+    text(score.toLocaleString('ja-JP'),68,355,'900 92px ui-monospace,Consolas,monospace','#fff2dc',574);
+    c.strokeStyle='#b9957a5a';c.beginPath();c.moveTo(71,378);c.lineTo(641,378);c.stroke();
+    text('KILLS',73,406,'800 12px ui-monospace,Consolas,monospace','#9fbdbe',155);
+    text('LEVEL',265,406,'800 12px ui-monospace,Consolas,monospace','#9fbdbe',155);
+    text('TIME',465,406,'800 12px ui-monospace,Consolas,monospace','#9fbdbe',155);
+    text(String(Math.max(0,Math.floor(Number(r.kills)||0))),72,448,'900 30px ui-monospace,Consolas,monospace','#f6e8d1',160);
+    text(String(Math.max(1,Math.floor(Number(r.level)||1))),265,448,'900 30px ui-monospace,Consolas,monospace','#f6e8d1',140);
+    text(duration,465,448,'900 30px ui-monospace,Consolas,monospace','#f6e8d1',170);
+    text('PLAYER  '+name,73,500,'900 20px system-ui,sans-serif','#f3dbb6',568);
+    text('TITLE  '+String(r.title||'—'),73,538,'800 17px system-ui,sans-serif','#d8c6d1',566);
+
+    const cores=Math.max(0,Math.floor(Number(bp.trueTotal)||0));
+    const killed=Math.max(0,Math.min(cores,Math.floor(Number(bp.trueKilled)||0)));
+    const milestones=[
+      {name:'01 DEVORA',status:bp.devora?'DEFEATED':bp.devoraReached?'ENGAGED':'NOT REACHED',clear:!!bp.devora},
+      {name:'02 NULL EMPEROR',status:bp.nullEmperor?'DEFEATED':bp.nullReached?'ENGAGED':'NOT REACHED',clear:!!bp.nullEmperor},
+      {name:'03 TRUE DEVORA'+(cores?' ×'+cores:''),status:bp.trueCleared?'ALL CORES CLEARED':cores?`${killed} / ${cores} CORES`:(bp.nullEmperor?'AWAKENING':'NOT REACHED'),clear:!!bp.trueCleared},
+      {name:'04 RUU : ECLIPSE',status:bp.eclipseCleared?'SECRET CLEAR':bp.eclipseSeen?'ENCOUNTERED':bp.trueCleared?'NOT TRIGGERED':'NOT REACHED',clear:!!bp.eclipseCleared}
+    ];
+    panel(680,181,468,394,'#191427ed','#94779491');
+    text('BOSS / CLEAR RECORD',697,213,'900 20px ui-monospace,Consolas,monospace','#f1d7e2',439);
+    text('CURRENT RUN  /  撃破済みのボスのみCLEAR判定',697,235,'700 10px system-ui,sans-serif','#b4abbc',430);
+    milestones.forEach((m,i)=>{
+      const y=246+i*53,col=m.clear?'#a7f0d5':m.status==='ENGAGED'||m.status==='ENCOUNTERED'?'#ffd69d':'#a6a6b2';
+      panel(696,y,435,47,m.clear?'#18312d9c':'#171b2adc',m.clear?'#729a8f8c':'#5a617457');
+      text(m.name,709,y+19,'900 14px ui-monospace,Consolas,monospace','#f1e5e2',282);
+      text(m.clear?'✓':'—',1115,y+19,'900 15px ui-monospace,Consolas,monospace',col,28,'right');
+      text(m.status,709,y+36,'800 11px ui-monospace,Consolas,monospace',col,409);
+    });
+
+    const pilot=String(r.supportPilot||'').trim(),pilotJp=String(r.supportPilotJp||'').trim();
+    panel(696,467,435,90,'#241c2ded','#c090ba91');
+    text('MASS-PRODUCED ASTRAL-SUIT / PILOT',707,489,'900 10px ui-monospace,Consolas,monospace','#e7aee2',410);
+    text(pilot||'NO SUPPORT / NOT DEPLOYED',707,517,'900 19px ui-monospace,Consolas,monospace',pilot?'#fff1db':'#b8aabc',405);
+    text(pilot?(pilotJp+(r.supportArrived?' / ALLIED REINFORCEMENT':' / INBOUND')):'No allied pilot joined this run',707,539,'800 12px system-ui,sans-serif','#c6b9c7',405);
+
+    const highest=bp.eclipseCleared?'SECRET CLEAR':bp.trueCleared?'TRUE DEVORA CLEARED':bp.nullEmperor?'NULL EMPEROR DEFEATED':bp.devora?'DEVORA DEFEATED':'SURVIVAL IN PROGRESS';
+    text('LAST MILESTONE / '+highest,54,611,'800 14px ui-monospace,Consolas,monospace','#e4d2bd',1085);
+    text('#RUUOVERRUN   #JACKPOTØ31',54,642,'800 15px ui-monospace,Consolas,monospace','#a3adb7',950);
     const a=document.createElement('a');a.download='RUU_OVERRUN_RESULT.png';a.href=canvas.toDataURL('image/png');a.click();
-  }
-  async function submit(scoreInput,status){
+}
+    async function submit(scoreInput,status){
     if(busy)return;
     nickname=safeName(scoreInput.value);scoreInput.value=nickname;storage.set(STORE_NAME,nickname);
     if(!nickname){status.textContent='まずプレイヤー名を入力してね。';scoreInput.focus();return}

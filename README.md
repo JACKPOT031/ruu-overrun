@@ -1,8 +1,18 @@
-# RUU//OVERRUN — PUBLIC BETA (v1.25.0)
+# RUU//OVERRUN — PUBLIC BETA (v1.26.0)
 
 JACKPOTØ31が制作するオリジナル・ブラウザサバイバルアクション。
 
 **[ゲームを遊ぶ](https://jackpot031.github.io/ruu-overrun/)** / **[公開開始v1.5.3からの更新履歴](./CHANGELOG.md)**
+
+## v1.26.0 — FAIR ODDS / RESULT CARD BOSS RECORD
+
+- **レベルアップの確率表記を抽選実装に合わせて整理。** 通常81%、+2候補15%、+3候補3%、+4候補1%は「1回の選択肢生成で引く強化ボーナス枠」の基本確率であり、各カードの独立出現率ではないことを明記。
+- **残りレベル不足・強化可能な候補不足の場合**は+2/+3/+4が格下げ／不成立になることを記載。+3強化の表示名を「JACKPOT +3」から「LEGENDARY +3」へ変更。**JACKPOT MODE 1%は条件を満たす場合の別抽選**と明確化。REROLLでも再抽選される。
+- **実際の乱数・ボーナス比率・JACKPOT MODE発動率は変更なし。**
+- **結果カード（PNG 1200×675）を刷新。** NORMAL / CHALLENGE / ENDLESSのクリア状況、DEVORA／NULL EMPEROR撃破、TRUE DEVORA 3・5体の撃破数／全滅、RUU : ECLIPSEの遭遇／撃破を一枚に表示。
+- **量産型ASTRAL-SUITが選ばれた場合の搭乗パイロット名**と日本語名、合流済みかINBOUNDかを表示。参戦していないプレイは NO SUPPORT と表示。
+- クリア・撃破判定は**今回のプレイ中のイベントだけ**で記録。過去の獲得実績・称号を「今回撃破した」ものとして誤表示しない。オンラインランキングの送信データ／サーバー仕様、既存セーブキー、装備内容、戦闘バランスは維持。
+- GitHub Pagesだけで反映。Cloudflare Worker / D1の追加変更は不要。
 
 ## v1.25.0 — LIVE LOADOUT & SUPPORT INTEL
 
