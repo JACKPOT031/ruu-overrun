@@ -29,3 +29,16 @@
 .ruu-mode-tabs .ruu-mini-btn:disabled{opacity:1;cursor:default;color:#fff7e8;border-color:#e5c391;background:#604c3f}
 .ruu-public-table th:nth-child(3),.ruu-public-table td:nth-child(3){max-width:125px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 @media(max-width:720px){.ruu-mode-tabs{gap:4px}.ruu-mode-tabs .ruu-mini-btn{font-size:9px;padding:7px 5px}}
+
+/* Optional help stays outside the game frame and adds no animation or polling. */
+.ruu-performance-help{margin:14px 0 0;min-width:0;max-width:100%;border:1px solid #6e5f58;border-radius:8px;background:#151b25;color:#d8d2c8;font:400 13px/1.7 system-ui,'Yu Gothic',sans-serif;overflow-wrap:anywhere}
+.ruu-performance-help>summary{min-height:44px;padding:11px 14px;color:#f0ddbf;font-weight:700;cursor:pointer;touch-action:manipulation}
+.ruu-performance-help>summary:hover{background:#242630;border-radius:8px}
+.ruu-performance-help>summary:focus-visible{outline:2px solid #f0d19c;outline-offset:3px;border-radius:8px}
+.ruu-performance-help-body{padding:0 16px 14px}
+.ruu-performance-help-body p{margin:0 0 12px}
+.ruu-performance-help-body p:last-child{margin-bottom:0}
+.ruu-performance-help-body h3{margin:14px 0 8px;color:#f0ddbf;font:700 13px/1.7 system-ui,'Yu Gothic',sans-serif}
+.ruu-performance-help-body ol{margin:8px 0 12px;padding-left:1.7em}
+.ruu-performance-help-body li+li{margin-top:6px}
+.ruu-performance-help-body code{padding:2px 4px;border-radius:3px;background:#242d3a;color:#e3f3f4;font:400 12px/1.7 ui-monospace,Consolas,monospace;white-space:normal;-webkit-user-select:text;user-select:text}

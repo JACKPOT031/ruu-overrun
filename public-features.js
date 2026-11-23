@@ -1,5 +1,28 @@
 (() => {
   'use strict';
+  function addPerformanceHelp() {
+    const controls=document.querySelector('footer.controls');
+    if(!controls||document.getElementById('ruu-performance-help'))return;
+    const help=document.createElement('details');
+    help.id='ruu-performance-help';help.className='ruu-performance-help';
+    help.innerHTML=`<summary>動作が重いとき</summary><div class="ruu-performance-help-body">
+      <p>ゲーム内の「FX LITE」「SCENE CALM」でも、演出の負荷を抑えられるよ。</p>
+      <h3>PC版Chromeの描画設定</h3>
+      <p>グラフィック（ハードウェア）アクセラレーションがオフなら、オンにすると描画が軽くなる場合がある。効果は端末や設定によって変わるよ。</p>
+      <ol>
+        <li>Chrome右上の「⋮」→「設定」→「システム」を開く。</li>
+        <li>「グラフィック アクセラレーションが使用可能な場合は使用する」を確認し、オフならオンを試す。項目名は「ハードウェア アクセラレーション」の場合もある。</li>
+        <li>設定を変えたら、<strong>プレイを終えてから</strong>Chromeを再起動する。</li>
+      </ol>
+      <p>アドレスバーに <code>chrome://settings/system</code> を入力・貼り付けても開けるよ。</p>
+      <p>再起動すると進行中のプレイは終了する。表示が乱れる場合は元の設定に戻してね。上の設定項目がない端末では、ゲーム内のFX・SCENEを試してね。</p>
+    </div>`;
+    // Keep native disclosure keys, but do not start a run or dash while reading.
+    // Let keyup reach the game so previously held movement keys still release.
+    help.addEventListener('keydown',e=>e.stopPropagation());
+    controls.after(help);
+  }
+  addPerformanceHelp();
   if (window.RUU_LOCAL_DEV_MODE) return;
   const config = window.RUU_PUBLIC_CONFIG || {};
   const api = String(config.apiUrl || '').trim().replace(/\/+$/,'');
