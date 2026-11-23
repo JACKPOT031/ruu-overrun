@@ -350,7 +350,7 @@ body{background:radial-gradient(ellipse 80% 66% at 52% 24%,#2a2934 0%,#11131d 55
 </head>
 <body>
 <div class="shell">
- <div class="upper"><div class="brand">JACKPOT<b>Ø</b>31 <span style="color:#667f95">/ ORIGINAL GAMES</span></div><div class="build">RUU//OVERRUN <b>v1.27.0</b> · 16 TRACKS / SHORT ENDING</div></div>
+ <div class="upper"><div class="brand">JACKPOT<b>Ø</b>31 <span style="color:#667f95">/ ORIGINAL GAMES</span></div><div class="build">RUU//OVERRUN <b>v1.28.0</b> · 16 TRACKS / SHORT ENDING</div></div>
  <main class="frame" id="frame">
   <canvas id="game" width="1200" height="675" aria-label="ルーのサバイバルアクションゲーム"></canvas>
   <div class="hud" id="hud">
@@ -403,6 +403,7 @@ body{background:radial-gradient(ellipse 80% 66% at 52% 24%,#2a2934 0%,#11131d 55
 <script src="astral-companion.js?v=1.24.0"></script>
  <script src="run-inspector.js?v=1.25.0"></script>
 <script src="survival-trials.js?v=1.23.1"></script>
+<script src="performance-engine.js?v=1.28.0"></script>
 <script>
 (()=>{
  'use strict';
@@ -550,7 +551,8 @@ const WALK_ATLAS=new Image();WALK_ATLAS.src='assets/ruu_walk_atlas.webp';
  // High-density canvas: retain the 1200x675 gameplay coordinate system.
  // AUTO quality adapts to GPU load instead of defaulting to blurry 72% pixels.
  let fxPreset='auto',fxMax=false,renderScale=1,renderInterval=1000/30,autoQuality=1;
- let lastPaint=0,lastPaintState='',paintCount=0,paintTotalMs=0,perfTick=performance.now(),lastFxHit=0;
+ let lastPaint=0,lastPaintState='',nextPaintDue=0,paintCount=0,paintTotalMs=0,perfTick=performance.now(),lastFxHit=0;
+ let updateCount=0,updateTotalMs=0,lastUpdateMs=0,lastRafGap=0,lastRafAt=0,perfSummary=null;
  // v1.19.3: Count completed canvas draws against actual rAF timestamps,
  // not an assumed display refresh rate or the selected FPS cap.
  const fpsSamples=[];
@@ -560,21 +562,37 @@ const WALK_ATLAS=new Image();WALK_ATLAS.src='assets/ruu_walk_atlas.webp';
    perfHud.textContent='FPS —';perfHud.classList.remove('fps-low');
  }
  function recordFpsSample(timestamp,drawMs){
-   // Foreground resumes and long browser stalls start a fresh observation window.
+   // Separate game update CPU cost, Canvas command CPU cost, and browser rAF stalls.
    if(lastFpsFrame&&timestamp-lastFpsFrame>650)fpsSamples.length=0;
    lastFpsFrame=timestamp;
-   fpsSamples.push({t:timestamp,ms:drawMs});
+   fpsSamples.push({t:timestamp,draw:drawMs,update:lastUpdateMs,raf:lastRafGap});
    while(fpsSamples.length>2&&fpsSamples[0].t<timestamp-1500)fpsSamples.shift();
    if(timestamp-lastFpsUpdate<350)return;
    lastFpsUpdate=timestamp;
    const sampleMs=fpsSamples.length>1?timestamp-fpsSamples[0].t:0;
    const actualFps=sampleMs>=450?(fpsSamples.length-1)*1000/sampleMs:0;
    if(actualFps<=0){perfHud.textContent='FPS 計測中…';perfHud.classList.remove('fps-low');return}
-   const avgDraw=fpsSamples.reduce((sum,v)=>sum+v.ms,0)/fpsSamples.length;
-   perfHud.textContent='FPS '+actualFps.toFixed(1)+' | DRAW '+avgDraw.toFixed(1)+'ms';
+   const avgDraw=fpsSamples.reduce((sum,v)=>sum+v.draw,0)/fpsSamples.length;
+   const avgUpdate=fpsSamples.reduce((sum,v)=>sum+v.update,0)/fpsSamples.length;
+   const longestRaf=fpsSamples.reduce((max,v)=>Math.max(max,v.raf),0);
+   perfHud.textContent='FPS '+actualFps.toFixed(1)+' | UPDATE '+avgUpdate.toFixed(1)+'ms | DRAW '+avgDraw.toFixed(1)+'ms';
    perfHud.classList.toggle('fps-low',actualFps<22);
-   perfHud.title='実測Canvas描画FPS（直近約1.5秒の描画間隔）/ DRAW: 1フレームの平均CPU描画時間。FX '+fxPreset.toUpperCase()+' / '+c.width+'×'+c.height+'px';
+   perfSummary={
+     fps:+actualFps.toFixed(1),updateMs:+avgUpdate.toFixed(2),drawMs:+avgDraw.toFixed(2),
+     maxRafGapMs:+longestRaf.toFixed(1),targetFps:Math.round(1000/renderInterval),
+     fxPreset,renderScale:+renderScale.toFixed(2),canvasPixels:c.width*c.height,
+     enemies:g?.enemies?.length||0,playerBullets:g?.bullets?.length||0,
+     enemyBullets:g?.ebullets?.length||0,gems:g?.gems?.length||0,
+     collisionCandidates:window.RUU_PERF_ENGINE?.enemyGrid?.testCount||0,
+     spriteCache:window.RUU_PERF_ENGINE?.spriteStats?.()||null
+   };
+   perfHud.title='実測Canvas FPS（直近約1.5秒）/ UPDATE: 更新CPU / DRAW: Canvas命令CPU（GPU合成・録画負荷は含まない）'
+     +'\n最大rAF間隔 '+longestRaf.toFixed(1)+'ms / 目標 '+perfSummary.targetFps+'FPS'
+     +'\n敵 '+perfSummary.enemies+' / 自弾 '+perfSummary.playerBullets+' / 敵弾 '+perfSummary.enemyBullets
+     +' / XP '+perfSummary.gems+' / FX '+fxPreset.toUpperCase()
+     +' / '+c.width+'×'+c.height+'px';
  }
+ window.RUU_PERF_SNAPSHOT=()=>perfSummary?{...perfSummary}:{fps:0,reason:'計測中'};
  function syncCanvasResolution(){
    const rect=c.getBoundingClientRect();
    const cssScale=Math.max((rect.width||W)/W,(rect.height||H)/H);
@@ -786,7 +804,7 @@ const WALK_ATLAS=new Image();WALK_ATLAS.src='assets/ruu_walk_atlas.webp';
    if(preview){showStart();return}
    state='won';
    const t=formatTime(g.time);
-   setOverlay(`<div class="eyebrow">MISSION COMPLETE // EPILOGUE</div><h2 class="result-title">${g.mode==='challenge'?(g.challengeOutcome?.success?'TRIAL CLEARED':'TRIAL FAILED'):'SURVIVED'}</h2>${g.mode==='challenge'?'<div class="challenge-result-stamp">'+(g.challengeOutcome?.success?'CHALLENGE TITLE UNLOCKED':g.challengeOutcome?.reason||'条件未達成')+'</div>':''}<p class="intro">旅は、まだ続いている。<br><span style="color:#e9c695">エンディングテーマ：さすらえば / JACKPOTØ31</span></p>${equippedTitle()?'<div class="equipped-title">✧ EQUIPPED TITLE / '+equippedTitle()+'</div>':''}${window.RUU_PILOTS?.status()?.name?'<div class="equipped-title">SUPPORT PILOT / '+window.RUU_PILOTS.status().name+'</div>':''}<div class="result-stats"><div>TIME<strong>${t}</strong></div><div>KILLS<strong>${g.kills}</strong></div><div>LEVEL<strong>${g.level}</strong></div><div>SCORE<strong>${Math.floor(g.score).toLocaleString('ja-JP')}</strong></div><div>RARE<strong>${g.rareFinds}</strong></div><div>RELICS<strong>${g.crates}</strong></div><div>MYTHIC<strong>${g.mythicFinds}</strong></div><div>MAX CHAIN<strong>${g.maxCombo||0}</strong></div></div><button class="primary" id="retryBtn">↻ もう一度</button><button class="primary" id="endingReplay" style="margin-left:12px">♫ EDをもう一度</button><div class="help">RUU//OVERRUN v1.27.0 PUBLIC BETA · © JACKPOTØ31</div>`);
+   setOverlay(`<div class="eyebrow">MISSION COMPLETE // EPILOGUE</div><h2 class="result-title">${g.mode==='challenge'?(g.challengeOutcome?.success?'TRIAL CLEARED':'TRIAL FAILED'):'SURVIVED'}</h2>${g.mode==='challenge'?'<div class="challenge-result-stamp">'+(g.challengeOutcome?.success?'CHALLENGE TITLE UNLOCKED':g.challengeOutcome?.reason||'条件未達成')+'</div>':''}<p class="intro">旅は、まだ続いている。<br><span style="color:#e9c695">エンディングテーマ：さすらえば / JACKPOTØ31</span></p>${equippedTitle()?'<div class="equipped-title">✧ EQUIPPED TITLE / '+equippedTitle()+'</div>':''}${window.RUU_PILOTS?.status()?.name?'<div class="equipped-title">SUPPORT PILOT / '+window.RUU_PILOTS.status().name+'</div>':''}<div class="result-stats"><div>TIME<strong>${t}</strong></div><div>KILLS<strong>${g.kills}</strong></div><div>LEVEL<strong>${g.level}</strong></div><div>SCORE<strong>${Math.floor(g.score).toLocaleString('ja-JP')}</strong></div><div>RARE<strong>${g.rareFinds}</strong></div><div>RELICS<strong>${g.crates}</strong></div><div>MYTHIC<strong>${g.mythicFinds}</strong></div><div>MAX CHAIN<strong>${g.maxCombo||0}</strong></div></div><button class="primary" id="retryBtn">↻ もう一度</button><button class="primary" id="endingReplay" style="margin-left:12px">♫ EDをもう一度</button><div class="help">RUU//OVERRUN v1.28.0 PUBLIC BETA · © JACKPOTØ31</div>`);
    document.getElementById('retryBtn').onclick=()=>startGame(g?.mode||'normal',g?.challengeId||'');
    document.getElementById('endingReplay').onclick=()=>startEndingCinema(true);
  }
@@ -810,7 +828,7 @@ const WALK_ATLAS=new Image();WALK_ATLAS.src='assets/ruu_walk_atlas.webp';
  endingDom.progress.addEventListener('keydown',ev=>{if(ev.key==='ArrowRight'){ev.preventDefault();seekEnding(endingClock()+5)}else if(ev.key==='ArrowLeft'){ev.preventDefault();seekEnding(endingClock()-5)}});
  musicEls[ENDING_TRACK_INDEX].addEventListener('ended',()=>{if(state==='ending')finishEndingCinema()});
 
- function showStart(){state='start';ui.hud.style.display='none';ui.pause.disabled=true;loadoutButton.disabled=true;quickLoadoutButton.hidden=true;musicIndicator.classList.remove('visible');musicMeter.classList.remove('visible');showMusicRetry(false);bossAlert.classList.remove('active');const best=getBest();const endlessBest=getBest('endless');setOverlay(`<div class="menu-grid"><div class="menu-copy"><div class="menu-tick">JACKPOT<strong>Ø</strong>31 / ORIGINAL GAME <span style="color:#dcc2a2">— v1.27.0 PUBLIC BETA</span></div><h1 class="menu-logo"><span class="ruu">RUU</span><span class="slashes">//</span>OVERRUN</h1><div class="menu-nameplate">SURVIVE THE SWARM. BREAK THE THREAT.</div><div class="menu-separator"></div><p class="menu-intro">攻撃は自動。敵を倒して、武器を強化。<br><strong>押し寄せる侵食を生き抜き、最後の脅威を撃ち砕け。</strong><br><span style="color:#ddb2cc;font-size:.79em">一定確率で『星屑の鎧 -Guardian Genome-』のキャラクターが参戦。</span></p><div class="start-row"><button class="primary" id="startBtn" type="button">▶ START // DEPLOY  ·  ENTER</button><button class="enemy-archive-btn" id="enemyArchive" type="button">☷ DEVORA FILES</button><button class="enemy-archive-btn" id="achievementsBtn" type="button">✧ ACHIEVEMENTS</button>${endingUnlocked()?`<button class="enemy-archive-btn" id="challengeBtn" type="button">✦ CHALLENGE MISSIONS</button><button class="enemy-archive-btn" id="endlessBtn" type="button" title="クリア後解放 / 自己ベスト ${endlessBest?.score||0}">∞ ENDLESS MODE</button>`:``}${endingUnlocked()?`<button class="enemy-archive-btn" id="endingTheater" type="button">♫ ENDING THEATER</button>`:``}<div class="run-record">PERSONAL BEST<strong>${best?best.score.toLocaleString('ja-JP'):'— — —'}</strong></div></div><div class="menu-controls"><span class="key">WASD / ↑↓←→</span> MOVE　<span class="key">SPACE</span> DASH　<span class="key">1–3</span> UPGRADE　<span class="key">ESC</span> PAUSE</div></div><div class="hero-figure" id="heroArt"><div class="hero-hint">RUU / CHARACTER DATA</div></div></div>`);setupTitleGallery();const unlockBtn=document.getElementById('endingTheater');if(unlockBtn)unlockBtn.onclick=()=>startEndingCinema(true);document.getElementById('startBtn').addEventListener('click',()=>{try{startGame()}catch(e){console.error(e);const btn=document.getElementById('startBtn');if(btn){btn.textContent='START エラー — ENTER / 再読込';btn.title=String(e)}}});document.getElementById('enemyArchive').addEventListener('click',showDevoraFiles);document.getElementById('achievementsBtn').onclick=showAchievementArchive;const challengeBtn=document.getElementById('challengeBtn');if(challengeBtn)challengeBtn.onclick=showChallengeArchive;const endlessBtn=document.getElementById('endlessBtn');if(endlessBtn)endlessBtn.onclick=()=>startGame('endless')}
+ function showStart(){state='start';ui.hud.style.display='none';ui.pause.disabled=true;loadoutButton.disabled=true;quickLoadoutButton.hidden=true;musicIndicator.classList.remove('visible');musicMeter.classList.remove('visible');showMusicRetry(false);bossAlert.classList.remove('active');const best=getBest();const endlessBest=getBest('endless');setOverlay(`<div class="menu-grid"><div class="menu-copy"><div class="menu-tick">JACKPOT<strong>Ø</strong>31 / ORIGINAL GAME <span style="color:#dcc2a2">— v1.28.0 PUBLIC BETA</span></div><h1 class="menu-logo"><span class="ruu">RUU</span><span class="slashes">//</span>OVERRUN</h1><div class="menu-nameplate">SURVIVE THE SWARM. BREAK THE THREAT.</div><div class="menu-separator"></div><p class="menu-intro">攻撃は自動。敵を倒して、武器を強化。<br><strong>押し寄せる侵食を生き抜き、最後の脅威を撃ち砕け。</strong><br><span style="color:#ddb2cc;font-size:.79em">一定確率で『星屑の鎧 -Guardian Genome-』のキャラクターが参戦。</span></p><div class="start-row"><button class="primary" id="startBtn" type="button">▶ START // DEPLOY  ·  ENTER</button><button class="enemy-archive-btn" id="enemyArchive" type="button">☷ DEVORA FILES</button><button class="enemy-archive-btn" id="achievementsBtn" type="button">✧ ACHIEVEMENTS</button>${endingUnlocked()?`<button class="enemy-archive-btn" id="challengeBtn" type="button">✦ CHALLENGE MISSIONS</button><button class="enemy-archive-btn" id="endlessBtn" type="button" title="クリア後解放 / 自己ベスト ${endlessBest?.score||0}">∞ ENDLESS MODE</button>`:``}${endingUnlocked()?`<button class="enemy-archive-btn" id="endingTheater" type="button">♫ ENDING THEATER</button>`:``}<div class="run-record">PERSONAL BEST<strong>${best?best.score.toLocaleString('ja-JP'):'— — —'}</strong></div></div><div class="menu-controls"><span class="key">WASD / ↑↓←→</span> MOVE　<span class="key">SPACE</span> DASH　<span class="key">1–3</span> UPGRADE　<span class="key">ESC</span> PAUSE</div></div><div class="hero-figure" id="heroArt"><div class="hero-hint">RUU / CHARACTER DATA</div></div></div>`);setupTitleGallery();const unlockBtn=document.getElementById('endingTheater');if(unlockBtn)unlockBtn.onclick=()=>startEndingCinema(true);document.getElementById('startBtn').addEventListener('click',()=>{try{startGame()}catch(e){console.error(e);const btn=document.getElementById('startBtn');if(btn){btn.textContent='START エラー — ENTER / 再読込';btn.title=String(e)}}});document.getElementById('enemyArchive').addEventListener('click',showDevoraFiles);document.getElementById('achievementsBtn').onclick=showAchievementArchive;const challengeBtn=document.getElementById('challengeBtn');if(challengeBtn)challengeBtn.onclick=showChallengeArchive;const endlessBtn=document.getElementById('endlessBtn');if(endlessBtn)endlessBtn.onclick=()=>startGame('endless')}
  function resetGame(){g={time:0,kills:0,level:1,rareFinds:0,combo:0,comboTimer:0,comboMilestones:0,stageBlend:0,stageReveal:0,scenePulse:0,sceneUlt:0,sceneBoss:0,sceneShift:0,crates:0,rerolls:2,mythicFinds:0,driveGauge:0,driveTime:0,finisherGauge:0,finisherTime:0,finisherPulse:0,finisherCooldown:0,finisherType:0,finisherCursor:0,finisherCount:0,finisherHits:0,finisherChain:0,signatureFx:[],jackpotTime:0,jackpotIntro:0,jackpotPulse:0,jackpotType:-1,jackpotCount:0,jackpotFx:[],jackpotResumeIndex:0,cutin:0,elites:0,elite1:false,elite2:false,xp:0,need:26,spawnT:0,shotT:.1,novaT:0,lightT:0,meteorT:1.4,railT:1.7,frostT:1.1,wellT:2.4,missileT:1.3,sonicT:1.6,prismT:2.3,shardT:1.3,satelliteT:2.0,riftT:2.2,fireworksT:1.7,crossT:2.6,beat:0,flash:0,shake:0,boss1:false,boss2:false,evolved:false,finalBossDead:false,trueEndPending:false,trueEndCleared:false,trueEndCount:0,trueEndRemaining:0,secretBossPending:false,secretBossCleared:false,trueEndRewardGranted:false,secretRewardClear:false,bossRewardCinematic:0,bossProgress:{devora:false,nullEmperor:false,trueKilled:0,trueTotal:0,trueCleared:false,eclipseSeen:false,eclipseCleared:false},supportPilot:null,phase:1,score:0,levelChoices:[],enemies:[],bullets:[],ebullets:[],gems:[],particles:[],texts:[],waves:[],lightningFx:[],shards:[],impacts:[],ghosts:[],muzzle:[],meteors:[],wells:[],missiles:[],weaponFx:[],chests:[],crystals:[],evoGravity:false,evoPrism:false,evoSat:false,evoRift:false,evoBloom:false,hexAnnounced:false,fxPulse:0,fxBeat:0,ghostClock:0,player:{x:0,y:0,px:0,py:0,r:20,hp:115,maxHp:115,shield:0,maxShield:0,inv:0,speed:208,damage:13,haste:1,magnet:110,crit:0,dash:0,dashRemain:0,dashX:0,dashY:0,face:1,dir:'down',isMoving:false,hexSlow:0,animPhase:0,wasMoving:false,mods:{pulse:1,orbit:0,nova:0,lightning:0,meteor:0,rail:0,frost:0,well:0,missile:0,sonic:0,prism:0,shard:0,satellite:0,rift:0,fireworks:0,cross:0,echo:0,crit:0,damage:0,haste:0,speed:0,magnet:0,vital:0,shield:0}}};window.RUU_SPECTACLE?.reset();window.RUU_PREMIUM?.reset();window.RUU_MUTATION?.reset();window.RUU_PHASE3?.reset();window.RUU_SWARM?.reset();window.RUU_TRUE_END?.reset();window.RUU_SECRET_BOSS?.reset();window.RUU_BOSS_REWARDS?.reset();window.RUU_COMPANION?.reset();keys.clear();joy.active=false}
  function startGame(mode='normal',challengeId=''){
    if(endingState){endingState=null;endingDom.pane.hidden=true;}
@@ -937,7 +955,7 @@ const WALK_ATLAS=new Image();WALK_ATLAS.src='assets/ruu_walk_atlas.webp';
     if(win){sfx('victory');if(g.mode==='normal'){awardAchievement('clear');if(g.damageTaken===0)awardAchievement('flawless');}}else if(!deathSequenceDone)sfx('defeat');saveBest();pauseAllMusic();ui.pause.disabled=true;ui.bossbar.style.display='none';
    if(win){startEndingCinema(false);return;}
    state='lost';musicIndicator.classList.remove('visible');musicMeter.classList.remove('visible');
-   setOverlay(`<div class="eyebrow">${g.mode==='endless'?'∞ ENDLESS // SURVIVAL RECORD':'SIGNAL LOST // MISSION FAILED'}</div><h2 class="result-title defeat">${g.mode==='endless'?'ENDLESS OVER':g.mode==='challenge'?'TRIAL FAILED':'GAME OVER'}</h2>${g.mode==='challenge'?'<div class="challenge-result-stamp">'+(g.challengeOutcome?.reason||'未達成')+'</div>':''}<p class="intro">終わりじゃない。次は、もう少し遠くまで。</p>${equippedTitle()?'<div class="equipped-title">✧ EQUIPPED TITLE / '+equippedTitle()+'</div>':''}${window.RUU_PILOTS?.status()?.name?'<div class="equipped-title">SUPPORT PILOT / '+window.RUU_PILOTS.status().name+'</div>':''}<div class="result-stats"><div>TIME<strong>${formatTime(g.time)}</strong></div><div>KILLS<strong>${g.kills}</strong></div><div>LEVEL<strong>${g.level}</strong></div><div>SCORE<strong>${Math.floor(g.score).toLocaleString('ja-JP')}</strong></div><div>RARE<strong>${g.rareFinds}</strong></div><div>RELICS<strong>${g.crates}</strong></div><div>MYTHIC<strong>${g.mythicFinds}</strong></div><div>MAX CHAIN<strong>${g.maxCombo||0}</strong></div></div><button class="primary" id="retryBtn">↻ もう一度</button><div class="help">RUU//OVERRUN v1.27.0 PUBLIC BETA · © JACKPOTØ31</div>`);
+   setOverlay(`<div class="eyebrow">${g.mode==='endless'?'∞ ENDLESS // SURVIVAL RECORD':'SIGNAL LOST // MISSION FAILED'}</div><h2 class="result-title defeat">${g.mode==='endless'?'ENDLESS OVER':g.mode==='challenge'?'TRIAL FAILED':'GAME OVER'}</h2>${g.mode==='challenge'?'<div class="challenge-result-stamp">'+(g.challengeOutcome?.reason||'未達成')+'</div>':''}<p class="intro">終わりじゃない。次は、もう少し遠くまで。</p>${equippedTitle()?'<div class="equipped-title">✧ EQUIPPED TITLE / '+equippedTitle()+'</div>':''}${window.RUU_PILOTS?.status()?.name?'<div class="equipped-title">SUPPORT PILOT / '+window.RUU_PILOTS.status().name+'</div>':''}<div class="result-stats"><div>TIME<strong>${formatTime(g.time)}</strong></div><div>KILLS<strong>${g.kills}</strong></div><div>LEVEL<strong>${g.level}</strong></div><div>SCORE<strong>${Math.floor(g.score).toLocaleString('ja-JP')}</strong></div><div>RARE<strong>${g.rareFinds}</strong></div><div>RELICS<strong>${g.crates}</strong></div><div>MYTHIC<strong>${g.mythicFinds}</strong></div><div>MAX CHAIN<strong>${g.maxCombo||0}</strong></div></div><button class="primary" id="retryBtn">↻ もう一度</button><div class="help">RUU//OVERRUN v1.28.0 PUBLIC BETA · © JACKPOTØ31</div>`);
    document.getElementById('retryBtn').onclick=()=>startGame(g?.mode||'normal',g?.challengeId||'');
  }
 
@@ -2717,9 +2735,9 @@ ui.healthFill.style.width=`${100*p.hp/p.maxHp}%`;ui.healthText.textContent=`${Ma
  function setFxPreset(next){
    fxPreset=next;fxMax=next==='high';
    autoQuality=1;resetFpsMeter();
-   renderInterval=1000/(next==='high'?40:next==='lite'?26:30);
+   renderInterval=1000/(next==='high'?40:30);
    fxMode.textContent=next==='auto'?'✦ FX AUTO':next==='high'?'✦ FX HIGH':'✧ FX LITE';
-   syncCanvasResolution();lastPaint=0;
+   syncCanvasResolution();lastPaint=0;nextPaintDue=0;
    if(g){const c1=next==='high'?180:next==='lite'?24:65,c2=next==='high'?35:next==='lite'?8:16;g.shards.splice(0,Math.max(0,g.shards.length-c1));g.impacts.splice(0,Math.max(0,g.impacts.length-c2))}
  }
  fxMode.onclick=()=>{const next=fxPreset==='auto'?'high':fxPreset==='high'?'lite':'auto';setFxPreset(next);if(g)toast('VISUAL FX // '+next.toUpperCase())};
@@ -2872,7 +2890,7 @@ ui.healthFill.style.width=`${100*p.hp/p.maxHp}%`;ui.healthText.textContent=`${Ma
    level: Math.max(1, Math.floor(g?.level || 1)),
    durationSeconds: Math.max(0, Math.floor(g?.time || 0)),
    won: state === 'won',
-   version: '1.27.0',
+   version: '1.28.0',
     mode: g?.mode==='challenge'?'challenge':g?.mode==='endless'?'endless':'normal',
      challengeId:g?.challengeId||'',
      challengeName:window.RUU_OPERATIONS?.currentInfo(g)?.name||'',
@@ -2899,7 +2917,7 @@ ui.healthFill.style.width=`${100*p.hp/p.maxHp}%`;ui.healthText.textContent=`${Ma
  showStart();syncCanvasResolution();requestAnimationFrame(loop);
 })();
 </script>
-<script src="public-features.js?v=1.27.0"></script>
+<script src="public-features.js?v=1.28.0"></script>
 </body>
 </html>
 
