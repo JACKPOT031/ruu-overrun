@@ -279,6 +279,20 @@ body{background:radial-gradient(ellipse 80% 66% at 52% 24%,#2a2934 0%,#11131d 55
 .ending-cinema.is-muted .ending-time:after{content:'  /  SILENT';color:#ffbbb4}
 @media(max-width:700px){.ending-head{top:4%;left:4%;right:4%}.ending-captions{left:4%;right:4%;bottom:21%}.ending-progress{left:4%;right:4%;bottom:16%}.ending-controls{left:4%;right:4%;bottom:4%;flex-wrap:wrap;justify-content:flex-start;gap:5px}.ending-control{padding:5px 7px;font-size:8px}.ending-head .ending-title{font-size:10px}.ending-credits{padding:6%}.ending-credits .credit-artist{margin-top:10px}.ending-wordmark b{font-size:35px}}
 @media(prefers-reduced-motion:reduce){.ending-photo,.ending-wordmark{transition:none}}
+/* Complete-clear art already contains its own titles and message. */
+.ending-cinema.is-complete{display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr) 4px auto;gap:0;background:#0b0a10}
+.ending-cinema.is-complete .ending-photo{position:relative;inset:auto;grid-area:1/1;min-width:0;min-height:0;width:100%;height:100%;object-fit:contain;filter:none;transition:none;will-change:auto}
+.ending-cinema.is-complete .ending-sparkles,.ending-cinema.is-complete .ending-vignette,.ending-cinema.is-complete .ending-line,.ending-cinema.is-complete .ending-head,.ending-cinema.is-complete .ending-wordmark,.ending-cinema.is-complete .ending-captions,.ending-cinema.is-complete .ending-credits{display:none!important}
+.ending-cinema.is-complete .ending-progress{position:relative;inset:auto;grid-area:2/1;margin:0 12px;height:4px}
+.ending-cinema.is-complete .ending-controls{position:relative;inset:auto;grid-area:3/1;gap:8px;padding:10px 12px;background:#15121b;flex-wrap:wrap;justify-content:space-between}
+.ending-cinema.is-complete .ending-control{font-size:11px;padding:8px 10px}
+.ending-control[hidden],.ending-art-status[hidden]{display:none!important}
+a.ending-control,a.ending-art-link{text-decoration:none;display:inline-flex;align-items:center;justify-content:center}
+.ending-art-status{grid-area:1/1;align-self:center;justify-self:center;z-index:6;max-width:85%;padding:14px 18px;background:#17121fe8;color:#f3dfc8;font:600 13px/1.7 system-ui,sans-serif;text-align:center;border:1px solid #8f7763;border-radius:6px}
+.ending-art-link{margin:12px 8px 0}
+.ending-complete-note{display:none}
+.ending-cinema.is-complete .ending-complete-note{display:block;flex-basis:100%;margin:0;font:500 11px/1.5 system-ui,sans-serif;color:#dacbbd}
+@media(max-width:700px),(max-height:500px){.ending-cinema.is-complete{position:fixed;inset:0;z-index:120;height:100vh;height:100dvh;padding-top:env(safe-area-inset-top,0px)}.ending-cinema.is-complete .ending-controls{padding:8px 10px max(8px,env(safe-area-inset-bottom,0px));gap:6px}.ending-cinema.is-complete .ending-control{min-height:44px;font-size:11px;padding:8px 10px}.ending-cinema.is-complete .ending-time{font-size:10px}.ending-cinema.is-complete .ending-buttons{gap:5px}.ending-cinema.is-complete .ending-complete-note{font-size:12px}.ending-art-status{font-size:12px;padding:10px}}
 /* v1.11.0 archive & mode refinements */
 .ach-panel{width:min(870px,100%);max-height:95%;overflow:auto;padding:13px 3px;text-align:center}
 .ach-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;text-align:left;margin:17px 0}
@@ -345,12 +359,12 @@ body{background:radial-gradient(ellipse 80% 66% at 52% 24%,#2a2934 0%,#11131d 55
 @media(max-width:720px){.astral-deploy{right:4%;bottom:28%;padding:8px 10px;max-width:145px;letter-spacing:0;font-size:10px}.astral-status{font-size:7px}.astral-label{font-size:7px}}
 @media(prefers-reduced-motion:reduce){.astral-deploy{animation:none}}
 </style>
-<link rel="stylesheet" href="public-features.css">
+<link rel="stylesheet" href="public-features.css?v=1.29.0">
 <link rel="stylesheet" href="run-inspector.css?v=1.25.0">
 </head>
 <body>
 <div class="shell">
- <div class="upper"><div class="brand">JACKPOT<b>Ø</b>31 <span style="color:#667f95">/ ORIGINAL GAMES</span></div><div class="build">RUU//OVERRUN <b>v1.28.1</b> · 16 TRACKS / SHORT ENDING</div></div>
+ <div class="upper"><div class="brand">JACKPOT<b>Ø</b>31 <span style="color:#667f95">/ ORIGINAL GAMES</span></div><div class="build">RUU//OVERRUN <b>v1.29.0</b> · 16 TRACKS / SHORT ENDING</div></div>
  <main class="frame" id="frame">
   <canvas id="game" width="1200" height="675" aria-label="ルーのサバイバルアクションゲーム"></canvas>
   <div class="hud" id="hud">
@@ -374,7 +388,8 @@ body{background:radial-gradient(ellipse 80% 66% at 52% 24%,#2a2934 0%,#11131d 55
 
   <section class="ending-cinema" id="endingCinema" hidden aria-label="クリア後のエンディング映像">
     <img class="ending-photo active" id="endingPhotoA" alt="エンディングのイラスト" draggable="false">
-    <img class="ending-photo" id="endingPhotoB" alt="エンディングのイラスト" draggable="false">
+    <img class="ending-photo" id="endingPhotoB" alt="" aria-hidden="true" draggable="false">
+    <div class="ending-art-status" id="endingArtStatus" role="status" hidden></div>
     <div class="ending-sparkles" id="endingSparkles" aria-hidden="true"></div>
     <div class="ending-vignette"></div><div class="ending-line"></div>
     <div class="ending-head"><span class="ending-title">RUU//OVERRUN <span style="color:#d9af7d">/ EPILOGUE</span></span><span class="ending-tag">JACKPOTØ31<br>ENDING THEME さすらえば</span></div>
@@ -382,7 +397,7 @@ body{background:radial-gradient(ellipse 80% 66% at 52% 24%,#2a2934 0%,#11131d 55
     <div class="ending-captions" id="endingCaption"><div class="ep-index" id="endingIndex">01 / 01 — EPILOGUE</div><div class="ep-caption" id="endingCaptionMain">また会いましょう。</div><div class="ep-sub" id="endingCaptionSub">ENDING THEME // さすらえば</div></div>
     <div class="ending-credits" id="endingCredits" hidden><div class="credit-body"><div class="credit-eyebrow">MISSION COMPLETE // EPILOGUE</div><h2>RUU//OVERRUN</h2><div class="credit-sub">また会いましょう。</div><div class="credit-artist">ENDING THEME // さすらえば<br>MUSIC & VISUAL ART // JACKPOTØ31<br>THANK YOU FOR PLAYING.</div></div></div>
     <div class="ending-progress" id="endingProgress" role="slider" tabindex="0" aria-label="エンディング再生位置" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div id="endingProgressFill"></div></div>
-    <div class="ending-controls"><div class="ending-buttons"><button type="button" class="ending-control" id="endingPrev" title="10秒戻る">◀ 10s</button><button type="button" class="ending-control" id="endingPause">Ⅱ PAUSE</button><button type="button" class="ending-control" id="endingNext" title="10秒進む">10s ▶</button><button type="button" class="ending-control" id="endingSound">♫ MUSIC ON</button><button type="button" class="ending-control primary-ed" id="endingSkip">RESULTS / 結果へ</button></div><span class="ending-time" id="endingTime">00:00 / 00:53</span></div>
+    <div class="ending-controls"><p class="ending-complete-note" id="endingCompleteNote">メッセージは「イラストを拡大」で読めます。結果カードは「結果へ」から保存できます。</p><div class="ending-buttons"><button type="button" class="ending-control" id="endingPrev" title="10秒戻る">◀ 10s</button><button type="button" class="ending-control" id="endingPause">Ⅱ PAUSE</button><button type="button" class="ending-control" id="endingNext" title="10秒進む">10s ▶</button><button type="button" class="ending-control" id="endingSound">♫ MUSIC ON</button><a class="ending-control" id="endingArtOpen" target="_blank" rel="noopener" hidden>イラストを拡大 ↗</a><button type="button" class="ending-control primary-ed" id="endingSkip">RESULTS / 結果へ</button></div><span class="ending-time" id="endingTime">00:00 / 00:53</span></div>
   </section>
  </main>
  <audio id="bossTrack" preload="none" playsinline></audio>
@@ -403,7 +418,7 @@ body{background:radial-gradient(ellipse 80% 66% at 52% 24%,#2a2934 0%,#11131d 55
 <script src="astral-companion.js?v=1.24.0"></script>
  <script src="run-inspector.js?v=1.25.0"></script>
 <script src="survival-trials.js?v=1.23.1"></script>
-<script src="performance-engine.js?v=1.28.1"></script>
+<script src="performance-engine.js?v=1.29.0"></script>
 <script>
 (()=>{
  'use strict';
@@ -718,13 +733,24 @@ const WALK_ATLAS=new Image();WALK_ATLAS.src='assets/ruu_walk_atlas.webp';
  const ENDING_AUDIO_CUE=151.687;
  const ENDING_SCENES=[{src:'assets/ending_11.webp',name:'また会いましょう',sub:'ENDING THEME // さすらえば'}];
   const ENDING_POSTER='assets/ending_11.webp';
+ const COMPLETE_ENDING_POSTER='assets/ending_complete_clear.png';
  const endingDom={pane:document.getElementById('endingCinema'),a:document.getElementById('endingPhotoA'),b:document.getElementById('endingPhotoB'),sparkles:document.getElementById('endingSparkles'),
   credits:document.getElementById('endingCredits'),opening:document.getElementById('endingOpening'),index:document.getElementById('endingIndex'),
   caption:document.getElementById('endingCaptionMain'),sub:document.getElementById('endingCaptionSub'),captionBox:document.getElementById('endingCaption'),
   progress:document.getElementById('endingProgress'),fill:document.getElementById('endingProgressFill'),time:document.getElementById('endingTime'),
   prev:document.getElementById('endingPrev'),next:document.getElementById('endingNext'),pause:document.getElementById('endingPause'),
-  sound:document.getElementById('endingSound'),skip:document.getElementById('endingSkip')};
- let endingState=null,endingSparklesBuilt=false;
+   sound:document.getElementById('endingSound'),skip:document.getElementById('endingSkip'),
+   artOpen:document.getElementById('endingArtOpen'),artStatus:document.getElementById('endingArtStatus'),note:document.getElementById('endingCompleteNote')};
+ let endingState=null,endingSparklesBuilt=false,completeEndingSessionUnlocked=false,completeEndingArt=null;
+ function preloadCompleteEndingArt(){
+   if(completeEndingArt)return;
+   completeEndingArt=new Image();completeEndingArt.decoding='async';completeEndingArt.src=COMPLETE_ENDING_POSTER;
+ }
+ function completeEndingUnlocked(){
+   if(completeEndingSessionUnlocked)return true;
+   if(window.RUU_LOCAL_DEV_MODE)return false;
+   try{return !!window.RUU_EXPANSION?.status?.().some(a=>a.id==='eclipse_clear'&&a.unlocked)}catch(e){return false}
+ }
  function buildEndingSparkles(){
    if(endingSparklesBuilt||!endingDom.sparkles)return;
    endingSparklesBuilt=true;
@@ -760,12 +786,17 @@ const WALK_ATLAS=new Image();WALK_ATLAS.src='assets/ruu_walk_atlas.webp';
    i=Math.max(0,Math.min(ENDING_SCENES.length,i));
    if(i===endingState.scene&&!immediate)return;
    endingState.scene=i;
-   if(endingDom.a.getAttribute('src')!==ENDING_POSTER)endingDom.a.src=ENDING_POSTER;
+    const complete=endingState.completeClear,poster=complete?COMPLETE_ENDING_POSTER:ENDING_POSTER;
+    if(endingDom.a.getAttribute('src')!==poster){
+      endingDom.artStatus.textContent='イラストを読み込み中…';endingDom.artStatus.hidden=!complete;
+      endingDom.a.src=poster;
+    }
+    if(complete&&endingDom.a.complete&&endingDom.a.naturalWidth>0)endingDom.artStatus.hidden=true;
    endingDom.a.classList.add('active');endingDom.b.classList.remove('active');
    const credit=i===ENDING_SCENES.length;
-   endingDom.credits.hidden=!credit;
-   endingDom.captionBox.style.display=credit?'none':'';
-   if(!credit){endingDom.index.textContent='01 / 01 — EPILOGUE';endingDom.caption.textContent='また会いましょう。';endingDom.sub.textContent='ENDING THEME // さすらえば';}
+    endingDom.credits.hidden=complete||!credit;
+    endingDom.captionBox.style.display=complete||credit?'none':'';
+    if(!complete&&!credit){endingDom.index.textContent='01 / 01 — EPILOGUE';endingDom.caption.textContent='また会いましょう。';endingDom.sub.textContent='ENDING THEME // さすらえば';}
  }
  function updateEndingCinema(now){
    if(state!=='ending'||!endingState)return;
@@ -790,14 +821,25 @@ const WALK_ATLAS=new Image();WALK_ATLAS.src='assets/ruu_walk_atlas.webp';
    if(endingState.paused)endingState.heldTime=target;
    endingState.scene=-1;updateEndingCinema(performance.now());
  }
- function startEndingCinema(preview=false){
-   if(!preview&&(!g||state==='ending'))return;
+ function startEndingCinema(preview=false,completePreview=false){
+    if(state==='ending'||(!preview&&!g))return;
+    const fromResult=preview&&state==='won'&&!!g;
+    const completeClear=preview&&!fromResult?!!completePreview:!!g?.secretBossCleared;
+    if(preview&&!fromResult&&(completeClear?!completeEndingUnlocked():!endingUnlocked()))return;
+    const returnTo=preview&&!fromResult?'title':'result';
+    if(!preview&&completeClear)completeEndingSessionUnlocked=true;
    pauseAllMusic();
-   endingState={preview,wallStart:performance.now(),pauseAccum:0,paused:false,heldTime:0,scene:-1,top:'b',lastTickHadAudio:false};
+    endingState={preview,completeClear,returnTo,wallStart:performance.now(),pauseAccum:0,paused:false,heldTime:0,scene:-1,top:'b',lastTickHadAudio:false};
    state='ending';
    ui.pause.disabled=true;ui.hud.style.display='none';ui.bossbar.style.display='none';
    ui.toasts.innerHTML='';bossAlert.classList.remove('active');hideOverlay();
-   endingDom.pane.hidden=false;endingDom.pane.classList.remove('is-paused');buildEndingSparkles();endingDom.pause.textContent='Ⅱ PAUSE';endingDom.sound.textContent=soundOn?'♫ MUSIC ON':'♫ MUSIC OFF';
+    endingDom.pane.hidden=false;endingDom.pane.classList.remove('is-paused');endingDom.pane.classList.toggle('is-complete',completeClear);
+    if(!completeClear)buildEndingSparkles();
+    endingDom.a.alt=completeClear?'完全クリアおめでとうございます。プレイしていただきありがとうございます。地元北海道より、北海道らしい賞味期限の長い食品を贈る案内。結果カードをJACKPOTØ31のDMへお送りください。':'エンディングのイラスト';
+    endingDom.artOpen.hidden=!completeClear;if(completeClear)endingDom.artOpen.href=COMPLETE_ENDING_POSTER;else endingDom.artOpen.removeAttribute('href');
+    endingDom.skip.textContent=returnTo==='title'?'TITLE / タイトルへ':'RESULTS / 結果へ';
+    endingDom.note.textContent=returnTo==='title'?'メッセージは「イラストを拡大」で読めます。閉じるとタイトル画面に戻ります。':'メッセージは「イラストを拡大」で読めます。結果カードは「結果へ」から保存できます。';
+    endingDom.pause.textContent='Ⅱ PAUSE';endingDom.sound.textContent=soundOn?'♫ MUSIC ON':'♫ MUSIC OFF';
    endingDom.credits.hidden=true;endingDom.opening.classList.remove('show');
    endingDom.a.classList.remove('active');endingDom.b.classList.remove('active');
    setEndingScene(0,true);
@@ -808,17 +850,27 @@ const WALK_ATLAS=new Image();WALK_ATLAS.src='assets/ruu_walk_atlas.webp';
  }
  function finishEndingCinema(){
    if(state!=='ending'||!endingState)return;
-   const preview=endingState.preview;
-   endingState=null;endingDom.pane.hidden=true;endingDom.a.src='';endingDom.b.src='';
+    const returnTo=endingState.returnTo;
+    endingState=null;endingDom.pane.hidden=true;endingDom.pane.classList.remove('is-complete');endingDom.artStatus.hidden=true;
+    endingDom.a.removeAttribute('src');endingDom.b.removeAttribute('src');endingDom.artOpen.removeAttribute('href');endingDom.artOpen.hidden=true;
    pauseAllMusic();musicIndicator.classList.remove('visible');musicMeter.classList.remove('visible');
-   if(preview){showStart();return}
+    if(returnTo==='title'){showStart();return}
+    showWinResult();
+ }
+ function showWinResult(){
    state='won';
+   const completeClear=!!g?.secretBossCleared;
    const t=formatTime(g.time);
-   setOverlay(`<div class="eyebrow">MISSION COMPLETE // EPILOGUE</div><h2 class="result-title">${g.mode==='challenge'?(g.challengeOutcome?.success?'TRIAL CLEARED':'TRIAL FAILED'):'SURVIVED'}</h2>${g.mode==='challenge'?'<div class="challenge-result-stamp">'+(g.challengeOutcome?.success?'CHALLENGE TITLE UNLOCKED':g.challengeOutcome?.reason||'条件未達成')+'</div>':''}<p class="intro">旅は、まだ続いている。<br><span style="color:#e9c695">エンディングテーマ：さすらえば / JACKPOTØ31</span></p>${equippedTitle()?'<div class="equipped-title">✧ EQUIPPED TITLE / '+equippedTitle()+'</div>':''}${window.RUU_PILOTS?.status()?.name?'<div class="equipped-title">SUPPORT PILOT / '+window.RUU_PILOTS.status().name+'</div>':''}<div class="result-stats"><div>TIME<strong>${t}</strong></div><div>KILLS<strong>${g.kills}</strong></div><div>LEVEL<strong>${g.level}</strong></div><div>SCORE<strong>${Math.floor(g.score).toLocaleString('ja-JP')}</strong></div><div>RARE<strong>${g.rareFinds}</strong></div><div>RELICS<strong>${g.crates}</strong></div><div>MYTHIC<strong>${g.mythicFinds}</strong></div><div>MAX CHAIN<strong>${g.maxCombo||0}</strong></div></div><button class="primary" id="retryBtn">↻ もう一度</button><button class="primary" id="endingReplay" style="margin-left:12px">♫ EDをもう一度</button><div class="help">RUU//OVERRUN v1.28.1 PUBLIC BETA · © JACKPOTØ31</div>`);
+   setOverlay(`<div class="eyebrow">MISSION COMPLETE // EPILOGUE</div><h2 class="result-title">${g.mode==='challenge'?(g.challengeOutcome?.success?'TRIAL CLEARED':'TRIAL FAILED'):completeClear?'COMPLETE CLEAR':'SURVIVED'}</h2>${g.mode==='challenge'?'<div class="challenge-result-stamp">'+(g.challengeOutcome?.success?'CHALLENGE TITLE UNLOCKED':g.challengeOutcome?.reason||'条件未達成')+'</div>':''}<p class="intro">${completeClear?'完全クリアおめでとうございます。<br>結果カードを保存して、JACKPOTØ31のDMへ送ってね。':'旅は、まだ続いている。'}<br><span style="color:#e9c695">エンディングテーマ：さすらえば / JACKPOTØ31</span></p>${equippedTitle()?'<div class="equipped-title">✧ EQUIPPED TITLE / '+equippedTitle()+'</div>':''}${window.RUU_PILOTS?.status()?.name?'<div class="equipped-title">SUPPORT PILOT / '+window.RUU_PILOTS.status().name+'</div>':''}<div class="result-stats"><div>TIME<strong>${t}</strong></div><div>KILLS<strong>${g.kills}</strong></div><div>LEVEL<strong>${g.level}</strong></div><div>SCORE<strong>${Math.floor(g.score).toLocaleString('ja-JP')}</strong></div><div>RARE<strong>${g.rareFinds}</strong></div><div>RELICS<strong>${g.crates}</strong></div><div>MYTHIC<strong>${g.mythicFinds}</strong></div><div>MAX CHAIN<strong>${g.maxCombo||0}</strong></div></div><button class="primary" id="retryBtn">↻ もう一度</button><button class="primary" id="endingReplay" style="margin-left:12px">♫ EDをもう一度</button>${completeClear?`<a class="enemy-archive-btn ending-art-link" href="${COMPLETE_ENDING_POSTER}" target="_blank" rel="noopener">完全クリアイラストを拡大 ↗</a>`:''}<div class="help">RUU//OVERRUN v1.29.0 PUBLIC BETA · © JACKPOTØ31</div>`);
    document.getElementById('retryBtn').onclick=()=>startGame(g?.mode||'normal',g?.challengeId||'');
    document.getElementById('endingReplay').onclick=()=>startEndingCinema(true);
  }
  // Short 53-second ending can always be skipped.
+ endingDom.a.addEventListener('load',()=>{if(endingState?.completeClear)endingDom.artStatus.hidden=true});
+ endingDom.a.addEventListener('error',()=>{
+   if(!endingState?.completeClear)return;
+   endingDom.artStatus.textContent='イラストを読み込めませんでした。通信を確認し、一度閉じてからEDを再生し直してください。';endingDom.artStatus.hidden=false;
+ });
  endingDom.skip.onclick=()=>finishEndingCinema();
  endingDom.pause.onclick=()=>{
    if(!endingState)return;
@@ -838,7 +890,7 @@ const WALK_ATLAS=new Image();WALK_ATLAS.src='assets/ruu_walk_atlas.webp';
  endingDom.progress.addEventListener('keydown',ev=>{if(ev.key==='ArrowRight'){ev.preventDefault();seekEnding(endingClock()+5)}else if(ev.key==='ArrowLeft'){ev.preventDefault();seekEnding(endingClock()-5)}});
  musicEls[ENDING_TRACK_INDEX].addEventListener('ended',()=>{if(state==='ending')finishEndingCinema()});
 
- function showStart(){state='start';ui.hud.style.display='none';ui.pause.disabled=true;loadoutButton.disabled=true;quickLoadoutButton.hidden=true;musicIndicator.classList.remove('visible');musicMeter.classList.remove('visible');showMusicRetry(false);bossAlert.classList.remove('active');const best=getBest();const endlessBest=getBest('endless');setOverlay(`<div class="menu-grid"><div class="menu-copy"><div class="menu-tick">JACKPOT<strong>Ø</strong>31 / ORIGINAL GAME <span style="color:#dcc2a2">— v1.28.1 PUBLIC BETA</span></div><h1 class="menu-logo"><span class="ruu">RUU</span><span class="slashes">//</span>OVERRUN</h1><div class="menu-nameplate">SURVIVE THE SWARM. BREAK THE THREAT.</div><div class="menu-separator"></div><p class="menu-intro">攻撃は自動。敵を倒して、武器を強化。<br><strong>押し寄せる侵食を生き抜き、最後の脅威を撃ち砕け。</strong><br><span style="color:#ddb2cc;font-size:.79em">一定確率で『星屑の鎧 -Guardian Genome-』のキャラクターが参戦。</span></p><div class="start-row"><button class="primary" id="startBtn" type="button">▶ START // DEPLOY  ·  ENTER</button><button class="enemy-archive-btn" id="enemyArchive" type="button">☷ DEVORA FILES</button><button class="enemy-archive-btn" id="achievementsBtn" type="button">✧ ACHIEVEMENTS</button>${endingUnlocked()?`<button class="enemy-archive-btn" id="challengeBtn" type="button">✦ CHALLENGE MISSIONS</button><button class="enemy-archive-btn" id="endlessBtn" type="button" title="クリア後解放 / 自己ベスト ${endlessBest?.score||0}">∞ ENDLESS MODE</button>`:``}${endingUnlocked()?`<button class="enemy-archive-btn" id="endingTheater" type="button">♫ ENDING THEATER</button>`:``}<div class="run-record">PERSONAL BEST<strong>${best?best.score.toLocaleString('ja-JP'):'— — —'}</strong></div></div><div class="menu-controls"><span class="key">WASD / ↑↓←→</span> MOVE　<span class="key">SPACE</span> DASH　<span class="key">1–3</span> UPGRADE　<span class="key">ESC</span> PAUSE</div></div><div class="hero-figure" id="heroArt"><div class="hero-hint">RUU / CHARACTER DATA</div></div></div>`);setupTitleGallery();const unlockBtn=document.getElementById('endingTheater');if(unlockBtn)unlockBtn.onclick=()=>startEndingCinema(true);document.getElementById('startBtn').addEventListener('click',()=>{try{startGame()}catch(e){console.error(e);const btn=document.getElementById('startBtn');if(btn){btn.textContent='START エラー — ENTER / 再読込';btn.title=String(e)}}});document.getElementById('enemyArchive').addEventListener('click',showDevoraFiles);document.getElementById('achievementsBtn').onclick=showAchievementArchive;const challengeBtn=document.getElementById('challengeBtn');if(challengeBtn)challengeBtn.onclick=showChallengeArchive;const endlessBtn=document.getElementById('endlessBtn');if(endlessBtn)endlessBtn.onclick=()=>startGame('endless')}
+ function showStart(){state='start';ui.hud.style.display='none';ui.pause.disabled=true;loadoutButton.disabled=true;quickLoadoutButton.hidden=true;musicIndicator.classList.remove('visible');musicMeter.classList.remove('visible');showMusicRetry(false);bossAlert.classList.remove('active');const best=getBest();const endlessBest=getBest('endless');setOverlay(`<div class="menu-grid"><div class="menu-copy"><div class="menu-tick">JACKPOT<strong>Ø</strong>31 / ORIGINAL GAME <span style="color:#dcc2a2">— v1.29.0 PUBLIC BETA</span></div><h1 class="menu-logo"><span class="ruu">RUU</span><span class="slashes">//</span>OVERRUN</h1><div class="menu-nameplate">SURVIVE THE SWARM. BREAK THE THREAT.</div><div class="menu-separator"></div><p class="menu-intro">攻撃は自動。敵を倒して、武器を強化。<br><strong>押し寄せる侵食を生き抜き、最後の脅威を撃ち砕け。</strong><br><span style="color:#ddb2cc;font-size:.79em">一定確率で『星屑の鎧 -Guardian Genome-』のキャラクターが参戦。</span></p><div class="start-row"><button class="primary" id="startBtn" type="button">▶ START // DEPLOY  ·  ENTER</button><button class="enemy-archive-btn" id="enemyArchive" type="button">☷ DEVORA FILES</button><button class="enemy-archive-btn" id="achievementsBtn" type="button">✧ ACHIEVEMENTS</button>${endingUnlocked()?`<button class="enemy-archive-btn" id="challengeBtn" type="button">✦ CHALLENGE MISSIONS</button><button class="enemy-archive-btn" id="endlessBtn" type="button" title="クリア後解放 / 自己ベスト ${endlessBest?.score||0}">∞ ENDLESS MODE</button>`:``}${endingUnlocked()?`<button class="enemy-archive-btn" id="endingTheater" type="button">♫ ENDING THEATER</button>`:``}${completeEndingUnlocked()?`<button class="enemy-archive-btn" id="completeEndingTheater" type="button">✦ COMPLETE ENDING</button>`:``}<div class="run-record">PERSONAL BEST<strong>${best?best.score.toLocaleString('ja-JP'):'— — —'}</strong></div></div><div class="menu-controls"><span class="key">WASD / ↑↓←→</span> MOVE　<span class="key">SPACE</span> DASH　<span class="key">1–3</span> UPGRADE　<span class="key">ESC</span> PAUSE</div></div><div class="hero-figure" id="heroArt"><div class="hero-hint">RUU / CHARACTER DATA</div></div></div>`);setupTitleGallery();const unlockBtn=document.getElementById('endingTheater');if(unlockBtn)unlockBtn.onclick=()=>startEndingCinema(true);const completeBtn=document.getElementById('completeEndingTheater');if(completeBtn)completeBtn.onclick=()=>startEndingCinema(true,true);document.getElementById('startBtn').addEventListener('click',()=>{try{startGame()}catch(e){console.error(e);const btn=document.getElementById('startBtn');if(btn){btn.textContent='START エラー — ENTER / 再読込';btn.title=String(e)}}});document.getElementById('enemyArchive').addEventListener('click',showDevoraFiles);document.getElementById('achievementsBtn').onclick=showAchievementArchive;const challengeBtn=document.getElementById('challengeBtn');if(challengeBtn)challengeBtn.onclick=showChallengeArchive;const endlessBtn=document.getElementById('endlessBtn');if(endlessBtn)endlessBtn.onclick=()=>startGame('endless')}
  function resetGame(){g={time:0,kills:0,level:1,rareFinds:0,combo:0,comboTimer:0,comboMilestones:0,stageBlend:0,stageReveal:0,scenePulse:0,sceneUlt:0,sceneBoss:0,sceneShift:0,crates:0,rerolls:2,mythicFinds:0,driveGauge:0,driveTime:0,finisherGauge:0,finisherTime:0,finisherPulse:0,finisherCooldown:0,finisherType:0,finisherCursor:0,finisherCount:0,finisherHits:0,finisherChain:0,signatureFx:[],jackpotTime:0,jackpotIntro:0,jackpotPulse:0,jackpotType:-1,jackpotCount:0,jackpotFx:[],jackpotResumeIndex:0,cutin:0,elites:0,elite1:false,elite2:false,xp:0,need:26,spawnT:0,shotT:.1,novaT:0,lightT:0,meteorT:1.4,railT:1.7,frostT:1.1,wellT:2.4,missileT:1.3,sonicT:1.6,prismT:2.3,shardT:1.3,satelliteT:2.0,riftT:2.2,fireworksT:1.7,crossT:2.6,beat:0,flash:0,shake:0,boss1:false,boss2:false,evolved:false,finalBossDead:false,trueEndPending:false,trueEndCleared:false,trueEndCount:0,trueEndRemaining:0,secretBossPending:false,secretBossCleared:false,trueEndRewardGranted:false,secretRewardClear:false,bossRewardCinematic:0,bossProgress:{devora:false,nullEmperor:false,trueKilled:0,trueTotal:0,trueCleared:false,eclipseSeen:false,eclipseCleared:false},supportPilot:null,phase:1,score:0,levelChoices:[],enemies:[],bullets:[],ebullets:[],gems:[],particles:[],texts:[],waves:[],lightningFx:[],shards:[],impacts:[],ghosts:[],muzzle:[],meteors:[],wells:[],missiles:[],weaponFx:[],chests:[],crystals:[],evoGravity:false,evoPrism:false,evoSat:false,evoRift:false,evoBloom:false,hexAnnounced:false,fxPulse:0,fxBeat:0,ghostClock:0,player:{x:0,y:0,px:0,py:0,r:20,hp:115,maxHp:115,shield:0,maxShield:0,inv:0,speed:208,damage:13,haste:1,magnet:110,crit:0,dash:0,dashRemain:0,dashX:0,dashY:0,face:1,dir:'down',isMoving:false,hexSlow:0,animPhase:0,wasMoving:false,mods:{pulse:1,orbit:0,nova:0,lightning:0,meteor:0,rail:0,frost:0,well:0,missile:0,sonic:0,prism:0,shard:0,satellite:0,rift:0,fireworks:0,cross:0,echo:0,crit:0,damage:0,haste:0,speed:0,magnet:0,vital:0,shield:0}}};window.RUU_SPECTACLE?.reset();window.RUU_PREMIUM?.reset();window.RUU_MUTATION?.reset();window.RUU_PHASE3?.reset();window.RUU_SWARM?.reset();window.RUU_TRUE_END?.reset();window.RUU_SECRET_BOSS?.reset();window.RUU_BOSS_REWARDS?.reset();window.RUU_COMPANION?.reset();keys.clear();joy.active=false}
  function startGame(mode='normal',challengeId=''){
    if(endingState){endingState=null;endingDom.pane.hidden=true;}
@@ -965,7 +1017,7 @@ const WALK_ATLAS=new Image();WALK_ATLAS.src='assets/ruu_walk_atlas.webp';
     if(win){sfx('victory');if(g.mode==='normal'){awardAchievement('clear');if(g.damageTaken===0)awardAchievement('flawless');}}else if(!deathSequenceDone)sfx('defeat');saveBest();pauseAllMusic();ui.pause.disabled=true;ui.bossbar.style.display='none';
    if(win){startEndingCinema(false);return;}
    state='lost';musicIndicator.classList.remove('visible');musicMeter.classList.remove('visible');
-   setOverlay(`<div class="eyebrow">${g.mode==='endless'?'∞ ENDLESS // SURVIVAL RECORD':'SIGNAL LOST // MISSION FAILED'}</div><h2 class="result-title defeat">${g.mode==='endless'?'ENDLESS OVER':g.mode==='challenge'?'TRIAL FAILED':'GAME OVER'}</h2>${g.mode==='challenge'?'<div class="challenge-result-stamp">'+(g.challengeOutcome?.reason||'未達成')+'</div>':''}<p class="intro">終わりじゃない。次は、もう少し遠くまで。</p>${equippedTitle()?'<div class="equipped-title">✧ EQUIPPED TITLE / '+equippedTitle()+'</div>':''}${window.RUU_PILOTS?.status()?.name?'<div class="equipped-title">SUPPORT PILOT / '+window.RUU_PILOTS.status().name+'</div>':''}<div class="result-stats"><div>TIME<strong>${formatTime(g.time)}</strong></div><div>KILLS<strong>${g.kills}</strong></div><div>LEVEL<strong>${g.level}</strong></div><div>SCORE<strong>${Math.floor(g.score).toLocaleString('ja-JP')}</strong></div><div>RARE<strong>${g.rareFinds}</strong></div><div>RELICS<strong>${g.crates}</strong></div><div>MYTHIC<strong>${g.mythicFinds}</strong></div><div>MAX CHAIN<strong>${g.maxCombo||0}</strong></div></div><button class="primary" id="retryBtn">↻ もう一度</button><div class="help">RUU//OVERRUN v1.28.1 PUBLIC BETA · © JACKPOTØ31</div>`);
+   setOverlay(`<div class="eyebrow">${g.mode==='endless'?'∞ ENDLESS // SURVIVAL RECORD':'SIGNAL LOST // MISSION FAILED'}</div><h2 class="result-title defeat">${g.mode==='endless'?'ENDLESS OVER':g.mode==='challenge'?'TRIAL FAILED':'GAME OVER'}</h2>${g.mode==='challenge'?'<div class="challenge-result-stamp">'+(g.challengeOutcome?.reason||'未達成')+'</div>':''}<p class="intro">終わりじゃない。次は、もう少し遠くまで。</p>${equippedTitle()?'<div class="equipped-title">✧ EQUIPPED TITLE / '+equippedTitle()+'</div>':''}${window.RUU_PILOTS?.status()?.name?'<div class="equipped-title">SUPPORT PILOT / '+window.RUU_PILOTS.status().name+'</div>':''}<div class="result-stats"><div>TIME<strong>${formatTime(g.time)}</strong></div><div>KILLS<strong>${g.kills}</strong></div><div>LEVEL<strong>${g.level}</strong></div><div>SCORE<strong>${Math.floor(g.score).toLocaleString('ja-JP')}</strong></div><div>RARE<strong>${g.rareFinds}</strong></div><div>RELICS<strong>${g.crates}</strong></div><div>MYTHIC<strong>${g.mythicFinds}</strong></div><div>MAX CHAIN<strong>${g.maxCombo||0}</strong></div></div><button class="primary" id="retryBtn">↻ もう一度</button><div class="help">RUU//OVERRUN v1.29.0 PUBLIC BETA · © JACKPOTØ31</div>`);
    document.getElementById('retryBtn').onclick=()=>startGame(g?.mode||'normal',g?.challengeId||'');
  }
 
@@ -1365,7 +1417,7 @@ const WALK_ATLAS=new Image();WALK_ATLAS.src='assets/ruu_walk_atlas.webp';
      if(appeared){g.bossProgress.eclipseSeen=true;awardAchievement('eclipse_found');}
    }
  }
- if(e.secretRuu&&window.RUU_SECRET_BOSS?.onKill(e,g,{wave:shockwave,burst,sound:sfx,toast})){g.bossProgress.eclipseSeen=true;g.bossProgress.eclipseCleared=true;awardAchievement('eclipse_clear');}
+ if(e.secretRuu&&window.RUU_SECRET_BOSS?.onKill(e,g,{wave:shockwave,burst,sound:sfx,toast})){g.bossProgress.eclipseSeen=true;g.bossProgress.eclipseCleared=true;awardAchievement('eclipse_clear');preloadCompleteEndingArt();}
  // Rewards come AFTER the true-core HP check; bonus healing cannot change ECLIPSE eligibility.
  window.RUU_BOSS_REWARDS?.onKill(e,g,{wave:shockwave,burst,sound:sfx,toast,text:floatText});
  if(g.kills===1)awardAchievement('first');if(g.kills===300)awardAchievement('kills300');if(g.kills===500)awardAchievement('kills500');if(g.kills%12===0||e.elite||e.kind==='boss'||e.kind==='final')g.scenePulse=Math.max(g.scenePulse,e.elite?.85:.55);g.combo++;g.maxCombo=Math.max(g.maxCombo||0,g.combo);g.comboTimer=4.5;if(window.RUU_EXPANSION?.comboMilestone(g.combo)){if(g.combo===50)awardAchievement('combo50');if(g.combo===100)awardAchievement('combo100');if(g.combo===200)awardAchievement('combo200');sfx('comboBig');}gainDrive(e.kind==='final'?35:e.kind==='boss'?25:e.elite?16:2.1);gainFinisher(e.kind==='final'?100:e.kind==='boss'?40:e.elite?18:4.5);if(g.combo>0&&g.combo%20===0){g.comboMilestones++;g.score+=g.combo*40;gainDrive(7);floatText(e.x,e.y-43,`CHAIN BONUS ×${g.combo}`,'#ffe4ab',19);sfx('combo')}if(e.elite){g.chests.push({x:e.x,y:e.y,t:0});if(g.chests.length>6)g.chests.shift();sfx('chest')} sfx(e.kind==='boss'||e.kind==='final'?'bossDown':'kill');hitImpact(e.x,e.y,e.col,e.kind==='boss'||e.kind==='final'?80:20);if(fxMax&&g.shards.length<125)sparkBurst(e.x,e.y,e.col,e.kind==='boss'||e.kind==='final'?30:5,e.kind==='boss'||e.kind==='final'?260:150);g.score+=(e.kind==='boss'?1800:e.kind==='final'?4200:100)*Math.min(4,1+Math.floor(g.combo/15)*.5);burst(e.x,e.y,e.col,e.kind==='boss'||e.kind==='final'?50:ri(5,10),e.r*4);spawnGem(e.x,e.y,e.xp);if(e.kind==='boss'||e.kind==='final'){shockwave(e.x,e.y,260,e.col);g.shake=27;g.flash=.5;for(let i=0;i<18;i++)spawnGem(e.x+rand(-70,70),e.y+rand(-70,70),8);if(e.kind==='final'){g.finalBossDead=true;awardAchievement('final');window.RUU_TRUE_END?.queue(g,e)}else awardAchievement('boss');toast(e.kind==='final'?'NULL EMPEROR DEFEATED':'DEVORA DEFEATED',true);startBossBreak(e)}}
@@ -2962,7 +3014,7 @@ ui.healthFill.style.width=`${100*p.hp/p.maxHp}%`;ui.healthText.textContent=`${Ma
    level: Math.max(1, Math.floor(g?.level || 1)),
    durationSeconds: Math.max(0, Math.floor(g?.time || 0)),
    won: state === 'won',
-   version: '1.28.1',
+   version: '1.29.0',
     mode: g?.mode==='challenge'?'challenge':g?.mode==='endless'?'endless':'normal',
      challengeId:g?.challengeId||'',
      challengeName:window.RUU_OPERATIONS?.currentInfo(g)?.name||'',
@@ -2989,7 +3041,7 @@ ui.healthFill.style.width=`${100*p.hp/p.maxHp}%`;ui.healthText.textContent=`${Ma
  showStart();syncCanvasResolution();requestAnimationFrame(loop);
 })();
 </script>
-<script src="public-features.js?v=1.28.1"></script>
+<script src="public-features.js?v=1.29.0"></script>
 </body>
 </html>
 
