@@ -43,7 +43,7 @@ test('three independent full-health ECLIPSE units spawn once and reinforcements 
   const f=fixture();assert.equal(f.reveal(),true);
   const bosses=f.eclipses();assert.equal(bosses.length,3);assert.equal(new Set(bosses).size,3);
   assert.equal(new Set(bosses.map(e=>e.secretBrain)).size,3,'Each boss needs its own brain');
-  for(const e of bosses){assert.equal(e.maxHp,2350+24*33);assert.equal(e.hp,e.maxHp);}
+  for(const e of bosses){assert.equal(e.maxHp,Math.ceil((2350+24*33)*1.25));assert.equal(e.hp,e.maxHp);}
   assert.equal(f.status().eclipseTotal,3);assert.equal(f.status().eclipseRemaining,3);
   assert.equal(f.status().reinforcementTotal,3);assert.equal(f.status().reinforcementsSpawned,false);
   assert.equal(f.reveal(),false);assert.equal(f.eclipses().length,3);
@@ -194,23 +194,23 @@ const phases=[
   {name:'LAST LIGHT',hot:true,frenzy:true,fan:19,wide:22,ring:42,hazard:14,curtain:24,halo:38}
 ];
 for(const phase of phases){
-  test(`every actual barrage pattern delivers 150-percent counts with safe lanes in ${phase.name}`,()=>{
+  test(`every actual barrage pattern delivers 200-percent counts with safe lanes in ${phase.name}`,()=>{
     const safe=.17,rotation=.09,haloLayer=1;
     const originalRing=permittedAngles(phase.ring,safe,.42,rotation);
     const originalHalo=permittedAngles(phase.halo,safe+haloLayer*.13,.39,haloLayer*.10);
     const cases=[
-      {name:'fan',base:phase.fan,fire:(p,e,g)=>p.fan(e,g,0)},
-      {name:'wide fan',base:phase.wide,fire:(p,e,g)=>p.fan(e,g,0,0,true)},
-      {name:'ring',base:originalRing.length,fire:(p,e,g)=>p.ring(e,g,safe,rotation),
+      {name:'fan',base:phase.fan,damage:phase.hot?13:11,fire:(p,e,g)=>p.fan(e,g,0)},
+      {name:'wide fan',base:phase.wide,damage:phase.hot?13:11,fire:(p,e,g)=>p.fan(e,g,0,0,true)},
+      {name:'ring',base:originalRing.length,damage:phase.hot?12:10,fire:(p,e,g)=>p.ring(e,g,safe,rotation),
         verify:bullets=>{const angles=bullets.map(b=>Math.atan2(b.vy,b.vx));assertOutsideGaps(angles,safe,.42);assertOriginalRays(angles,originalRing);}},
-      {name:'rush',base:7,fire:(p,e,g)=>p.rushShards(e,g)},
-      {name:'cross',base:36,fire:(p,e,g)=>p.crossCage(e,g,0,0),verify:bullets=>{
+      {name:'rush',base:7,damage:phase.hot?11:9,fire:(p,e,g)=>p.rushShards(e,g)},
+      {name:'cross',base:36,damage:phase.hot?12:10,fire:(p,e,g)=>p.crossCage(e,g,0,0),verify:bullets=>{
         for(const b of bullets){if(Math.abs(b.vx)>Math.abs(b.vy))assert.ok(Math.abs(b.y)>=43-1e-8);
           else assert.ok(Math.abs(b.x)>=54-1e-8);}}},
-      {name:'slash',base:5,fire:(p,e,g)=>p.slash(e,g,0,0)},
-      {name:'hazard',base:phase.hazard,fire:(p,e,g,api)=>p.explodeHazard(e,{x:100,y:100,r:90},g,api)},
-      {name:'curtain',base:phase.curtain,fire:(p,e,g)=>p.eclipseCurtain(e,g,0)},
-      {name:'halo',base:originalHalo.length,fire:(p,e,g)=>p.collapsingHalo(e,g,0,0,haloLayer),
+      {name:'slash',base:5,damage:phase.hot?14:12,fire:(p,e,g)=>p.slash(e,g,0,0)},
+      {name:'hazard',base:phase.hazard,damage:phase.hot?11:9,fire:(p,e,g,api)=>p.explodeHazard(e,{x:100,y:100,r:90},g,api)},
+      {name:'curtain',base:phase.curtain,damage:phase.hot?12:10,fire:(p,e,g)=>p.eclipseCurtain(e,g,0)},
+      {name:'halo',base:originalHalo.length,damage:phase.hot?12:10,fire:(p,e,g)=>p.collapsingHalo(e,g,0,0,haloLayer),
         verify:bullets=>{const angles=bullets.map(b=>Math.atan2(b.y,b.x));
           assertOutsideGaps(angles,safe+haloLayer*.13,.39);assertOriginalRays(angles,originalHalo);}}
     ];
@@ -222,37 +222,38 @@ for(const phase of phases){
         f.g.ebullets.length=0;pattern.fire(f.patterns,e,f.g,f.api);counts.push(f.g.ebullets.length);
         pattern.verify?.(f.g.ebullets);
         assert.ok(f.g.ebullets.every(b=>[b.x,b.y,b.vx,b.vy,b.ttl].every(Number.isFinite)),pattern.name+' emitted invalid geometry');
+        assert.ok(f.g.ebullets.every(b=>b.damage===Math.ceil(pattern.damage*1.15)),pattern.name+' lost the stronger projectile damage');
       }
-      assert.deepEqual(counts,[Math.floor(pattern.base*1.5),Math.ceil(pattern.base*1.5)],`${pattern.name} (${quality})`);
-      assert.equal(counts[0]+counts[1],pattern.base*3);
+      assert.deepEqual(counts,[pattern.base*2,pattern.base*2],`${pattern.name} (${quality})`);
+      assert.equal(counts[0]+counts[1],pattern.base*4);
     }
   });
 }
-test('odd half-shot remainders are independent for each ECLIPSE and each pattern',()=>{
+test('each ECLIPSE doubles odd-sized patterns without a leftover half-shot carry',()=>{
   const f=fixture();f.reveal();const [a,b]=f.eclipses();
   const fire=(e,name)=>{f.g.ebullets.length=0;
     if(name==='rush')f.patterns.rushShards(e,f.g);else f.patterns.slash(e,f.g,0,0);
     return f.g.ebullets.length;};
-  assert.deepEqual([fire(a,'rush'),fire(b,'rush'),fire(a,'slash'),fire(b,'slash')],[10,10,7,7]);
-  assert.deepEqual([fire(a,'rush'),fire(b,'rush'),fire(a,'slash'),fire(b,'slash')],[11,11,8,8]);
+  assert.deepEqual([fire(a,'rush'),fire(b,'rush'),fire(a,'slash'),fire(b,'slash')],[14,14,10,10]);
+  assert.deepEqual([fire(a,'rush'),fire(b,'rush'),fire(a,'slash'),fire(b,'slash')],[14,14,10,10]);
 });
-test('the shared 846-projectile ceiling reserves 96 shots for DEVORA and recovers freed capacity',()=>{
+test('ECLIPSE and DEVORA respect their 660/180 quotas and leave ASTRAEA its 120-shot reserve',()=>{
   const f=fixture();readySix(f);const bosses=f.eclipses(),escorts=f.escorts();f.g.ebullets.length=0;
   for(let i=0;i<70;i++)f.patterns.fan(bosses[i%3],f.g,0);
-  assert.equal(f.g.ebullets.length,750,'ECLIPSE must leave the agreed 96-shot reinforcement reserve');
+  assert.equal(f.g.ebullets.length,660,'ECLIPSE must leave both reinforcement reserves');
   for(const e of escorts)e.trueIntro=0;
   for(let i=0;i<100;i++){
     const e=escorts[i%3];Object.assign(e.trueBrain,{wind:.001,windMax:.88,targetX:0,targetY:0,angle:0});
     f.trueEnd.step(e,.01,f.g,f.api);
   }
-  assert.equal(f.g.ebullets.filter(b=>b.secretReinforcement).length,96);
-  assert.equal(f.g.ebullets.length,846);assert.equal(f.secret.canEmitReinforcement(f.g),false);
-  f.patterns.fan(bosses[0],f.g,0);assert.equal(f.g.ebullets.length,846);
+  assert.equal(f.g.ebullets.filter(b=>b.secretReinforcement).length,180);
+  assert.equal(f.g.ebullets.length,840);assert.equal(f.secret.canEmitReinforcement(f.g),false);
+  f.patterns.fan(bosses[0],f.g,0);assert.equal(f.g.ebullets.length,840);
   const removed=f.g.ebullets.findIndex(b=>b.secretReinforcement);f.g.ebullets.splice(removed,1);
   assert.equal(f.secret.canEmitReinforcement(f.g),true);
   Object.assign(escorts[0].trueBrain,{wind:.001});f.trueEnd.step(escorts[0],.01,f.g,f.api);
-  assert.equal(f.g.ebullets.length,846);assert.equal(f.g.ebullets.filter(b=>b.secretReinforcement).length,96);
-  assert.equal(f.status().projectilesCap,846);
+  assert.equal(f.g.ebullets.length,840);assert.equal(f.g.ebullets.filter(b=>b.secretReinforcement).length,180);
+  assert.equal(f.status().projectilesCap,960);assert.equal(f.secret.canEmitAstraea(f.g),true);
 });
 
 test('all three bosses render with atlas, static-art fallback and missing art in every quality mode',()=>{

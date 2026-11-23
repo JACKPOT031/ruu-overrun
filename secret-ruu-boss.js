@@ -1,16 +1,16 @@
-/* RUU//OVERRUN v1.31.0 — OPERATION: TAKAMIYA / ASTRAEA SIEGE
+/* RUU//OVERRUN v1.32.0 — OPERATION: TAKAMIYA / PRESSURE
    Three ECLIPSE, three DEVORA and one hostile ASTRAEA form the seven-boss gate.
    Two finite melee screens protect them; screen cleanup never grants rewards.
 */
 (()=>{
 'use strict';
 const TAU=Math.PI*2;
-const BARRAGE_RATE=1.20; // All phases incl. LAST LIGHT; same telegraph/safe patterns and projectile cap.
+const BARRAGE_RATE=1.20,COOLDOWN_SCALE=.85; // Faster recovery, unchanged telegraph durations.
 const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
 const ART=new Image();ART.decoding='async';ART.src='assets/secret_ruu.webp';
 const ATLAS=new Image();ATLAS.decoding='async';ATLAS.src='assets/secret_ruu_animation_atlas.webp';
 const ATLAS_CELL=320,ATLAS_COLS=4,ECLIPSE_TOTAL=3,REINFORCEMENT_TOTAL=3;
-const PROJECTILE_CAP=846,REINFORCEMENT_RESERVE=96,ECLIPSE_PROJECTILE_CAP=PROJECTILE_CAP-REINFORCEMENT_RESERVE;
+const PROJECTILE_CAP=960,REINFORCEMENT_RESERVE=180,ASTRAEA_RESERVE=120,ECLIPSE_PROJECTILE_CAP=660;
 const REINFORCEMENT_DELAY=12;
 const ASTRAEA_TOTAL=1,ASTRAEA_DELAY=20,SCREEN_WAVE_TOTAL=2,SCREEN_WAVE_SIZE=12,SCREEN_ARRIVAL=.7;
 // Pre-render 7 premium projectile glyphs only once. Each live bullet is one
@@ -77,7 +77,7 @@ function bulletGlyph(type){
  return GLYPH_CACHE.get(key);
 }
 function drawBullet(ctx,b,cam,q='auto'){
- if(!b?.secretRuu)return false;
+ if(!b?.secretRuu&&!b?.enemyAstraeaShot)return false;
  const x=b.x-cam.x,y=b.y-cam.y;if(x<-55||x>1255||y<-55||y>730)return true;
  const glyph=bulletGlyph(b.fxType),a=Math.atan2(b.vy,b.vx),speed=Math.hypot(b.vx,b.vy),size=Math.max(25,(b.r||7)*3.5);
  ctx.save();ctx.translate(x,y);ctx.rotate((b.fxType==='halo'||b.fxType==='core')?(b.born||0)*.4:a);
@@ -121,6 +121,11 @@ function isIntro(e){
 }
 function isBoss(e){return !!e?.secretRuu}
 function isEncounterEnemy(e){return !!(e?.secretRuu||e?.secretReinforcement||e?.enemyAstraea||e?.secretScreen)}
+function armorLevel(e){
+ if(!isEncounterEnemy(e)||!Number.isFinite(e.hp)||!Number.isFinite(e.maxHp)||e.hp<=0||e.maxHp<=0)return 0;
+ const ratio=e.hp/e.maxHp;return ratio<=.20?2:ratio<=.50?1:0;
+}
+function incomingDamageScale(e){const level=armorLevel(e);return level===2?.72:level===1?.88:1}
 function remainingBosses(){return S.bosses.reduce((n,e)=>n+(!e.secretDeathCounted?1:0),0)}
 function remainingOriginalBosses(){return remainingBosses()+S.reinforcements.reduce((n,e)=>n+(!e?.secretDeathCounted?1:0),0)}
 function status(){
@@ -131,6 +136,11 @@ function status(){
  const astraeaRemaining=S.triggered&&!S.astraea?.secretDeathCounted?ASTRAEA_TOTAL:0;
  const astraeaHp=S.triggered?(S.astraea?Math.max(0,S.astraea.hp||0):S.astraeaMaxHp):0;
  const screenRemaining=S.screens.reduce((n,e)=>n+(e.hp>0&&!e.secretDeathCounted?1:0),0);
+ let armoredCount=0,criticalArmorCount=0;
+ for(const group of [S.bosses,S.reinforcements,S.screens,[S.astraea]])for(const e of group){
+  if(!e||e.secretDeathCounted)continue;const level=armorLevel(e);
+  if(level>0)armoredCount++;if(level===2)criticalArmorCount++;
+ }
  return {
   triggered:S.triggered,active:S.active,finished:S.finished,intro:S.intro,combatClock:S.combatClock,
   enraged:alive.some(e=>e.secretBrain.enraged),frenzy:alive.some(e=>e.secretBrain.frenzy),pattern:first?.pattern||0,
@@ -141,7 +151,8 @@ function status(){
   totalThreats:S.triggered?ECLIPSE_TOTAL+REINFORCEMENT_TOTAL+ASTRAEA_TOTAL:0,remainingThreats:eclipseRemaining+reinforcementRemaining+astraeaRemaining,
   hp:eclipseHp+reinforcementHp+astraeaHp,maxHp:S.eclipseMaxHp+S.reinforcementMaxHp+S.astraeaMaxHp||1,
   qualifiedHp:S.qualifiedHp,encounterLevel:S.level,emitted:S.emitted,attempted:S.attempted,animation:first?.anim||'idle',
-  projectilesCap:PROJECTILE_CAP,eclipseProjectilesCap:ECLIPSE_PROJECTILE_CAP,reinforcementProjectilesCap:REINFORCEMENT_RESERVE
+  projectilesCap:PROJECTILE_CAP,eclipseProjectilesCap:ECLIPSE_PROJECTILE_CAP,reinforcementProjectilesCap:REINFORCEMENT_RESERVE,
+  astraeaProjectilesCap:ASTRAEA_RESERVE,armoredCount,criticalArmorCount
  };
 }
 function reveal(g,api){
@@ -163,8 +174,8 @@ function reveal(g,api){
  S.astraeaMaxHp=window.RUU_ENEMY_ASTRAEA.maxHp(level);
  for(let i=0;i<bosses.length;i++){
   const e=bosses[i];e.secretRuu=true;e.secretBossIndex=i;e.secretBrain=BRAIN(i);e.secretPhase=1;
-  e.maxHp=Math.ceil(2350+level*33);e.hp=e.maxHp;S.eclipseMaxHp+=e.maxHp;
-  e.r=34;e.speed=0;e.dmg=17;e.shoot=9999;e.attack=S.introMax+.4;
+  e.maxHp=Math.ceil(Math.ceil(2350+level*33)*1.25);e.hp=e.maxHp;S.eclipseMaxHp+=e.maxHp;
+  e.r=34;e.speed=0;e.dmg=21;e.shoot=9999;e.attack=S.introMax+.4;
   e.xp=200;e.col='#d4baae';e.pushX=0;e.pushY=0;
  }
  g.secretBossPending=true;g.secretBossCleared=false;
@@ -235,8 +246,8 @@ function spawnScreenWave(g,api,index){
   const kind=i%3===2?'runner':'brute',e=api.spawn(kind,x,y,1);
   if(!e)continue;
   e.secretScreen=true;e.secretScreenWave=index+1;e.secretScreenIntro=SCREEN_ARRIVAL;
-  e.secretScreenSpeed=kind==='brute'?70:120;e.speed=0;e.dmg=kind==='brute'?10:8;
-  e.maxHp=(kind==='brute'?180+S.level*5:75+S.level*2);e.hp=e.maxHp;
+  e.secretScreenSpeed=kind==='brute'?100:165;e.speed=0;e.dmg=kind==='brute'?13:11;
+  e.maxHp=Math.ceil((kind==='brute'?180+S.level*5:75+S.level*2)*1.35);e.hp=e.maxHp;
   e.attack=SCREEN_ARRIVAL+.2;e.shoot=9999;e.elite=false;e.pushX=0;e.pushY=0;
   delete e.mutation;delete e.bossMutation;delete e.phase3;
   slots[i]=e;S.screens.push(e);occupied.push(e);
@@ -290,9 +301,10 @@ function onKill(e,g,api){
 }
 function tick(dt,g,api){
  if(dt<=0)return;
+ // Standalone hostile ASTRAEA also uses the shared allocator after secret reset.
+ S.budgetArray=null;
  S.finishPulse=Math.max(0,S.finishPulse-dt);
  if(!S.active)return;
- S.budgetArray=null;
  const introElapsed=Math.min(dt,S.intro);S.clock+=dt;S.intro=Math.max(0,S.intro-dt);S.combatClock+=dt-introElapsed;
  for(const e of S.bosses){
   if(e.hp<=0)continue;const b=e.secretBrain;b.clock+=dt;
@@ -304,28 +316,50 @@ function tick(dt,g,api){
  for(const e of S.screens){
   if(e.hp<=0||e.secretDeathCounted)continue;
   e.secretScreenIntro=Math.max(0,e.secretScreenIntro-dt);
-  e.speed=e.secretScreenIntro>0?0:e.secretScreenSpeed;
+  const distance=g?.player?Math.hypot(g.player.x-e.x,g.player.y-e.y):0;
+  const catchup=clamp((distance-420)/600,0,1)*(e.kind==='brute'?160:125);
+  // Smoothly close long gaps using ordinary movement; never move arrival positions.
+  e.speed=e.secretScreenIntro>0?0:e.secretScreenSpeed+catchup;
   if(e.secretScreenIntro>0)e.attack=Math.max(e.attack||0,.22);
  }
  if(!S.reinforcementsSpawned&&(S.combatClock>=REINFORCEMENT_DELAY||!remainingBosses()))spawnReinforcements(g,api);
  spawnSupport(g,api,!remainingOriginalBosses());
 }
-function projectileCounts(g){
+function projectileCounts(g,fresh=false){
  const list=g?.ebullets;if(!Array.isArray(list))return null;
- if(S.budgetArray===list&&S.budgetLength===list.length)return S.budget;
- const counts={eclipse:0,reinforcement:0};
- for(const b of list){if(b.secretReinforcement)counts.reinforcement++;else if(b.secretRuu)counts.eclipse++}
+ if(!fresh&&S.budgetArray===list&&S.budgetLength===list.length)return S.budget;
+ const counts={eclipse:0,reinforcement:0,astraea:0};
+ for(const b of list){if(b.enemyAstraeaShot)counts.astraea++;else if(b.secretReinforcement)counts.reinforcement++;else if(b.secretRuu)counts.eclipse++}
  S.budgetArray=list;S.budgetLength=list.length;S.budget=counts;return counts;
 }
 function canEmitReinforcement(g){
- const counts=projectileCounts(g);
+ const counts=projectileCounts(g,true);
  return !!(S.active&&counts&&g.ebullets.length<PROJECTILE_CAP&&counts.reinforcement<REINFORCEMENT_RESERVE);
+}
+function canEmitAstraea(g){
+ const counts=projectileCounts(g,true);
+ return !!(counts&&g.ebullets.length<PROJECTILE_CAP&&counts.astraea<ASTRAEA_RESERVE);
+}
+function emitProjectileBatch(g,shots){
+ // A fresh scan per synchronous volley handles splices/replacements of equal
+ // length. Admission within the volley is O(1), even at the 960-shot ceiling.
+ const counts=projectileCounts(g,true);if(!counts||!Array.isArray(shots))return 0;
+ let emitted=0;
+ for(const shot of shots){
+  if(g.ebullets.length>=PROJECTILE_CAP)break;
+  const group=shot?.enemyAstraeaShot?'astraea':shot?.secretReinforcement?'reinforcement':shot?.secretRuu?'eclipse':null;
+  if(!group||group!=='astraea'&&!S.active)continue;
+  const cap=group==='astraea'?ASTRAEA_RESERVE:group==='reinforcement'?REINFORCEMENT_RESERVE:ECLIPSE_PROJECTILE_CAP;
+  if(counts[group]>=cap)continue;
+  g.ebullets.push(shot);counts[group]++;emitted++;
+ }
+ S.budgetLength=g.ebullets.length;return emitted;
 }
 function bullet(g,e,x,y,a,speed,damage,col,r=7,ttl=3.45,fxType='prism'){
  const brain=e.secretBrain;S.attempted++;brain.attempted++;
  const counts=projectileCounts(g);
  if(!counts||g.ebullets.length>=PROJECTILE_CAP||counts.eclipse>=ECLIPSE_PROJECTILE_CAP)return false;
- g.ebullets.push({x,y,vx:Math.cos(a)*speed,vy:Math.sin(a)*speed,r,ttl,col,damage,secretRuu:true,secretBossIndex:brain.index,fxType,born:brain.clock});
+ g.ebullets.push({x,y,vx:Math.cos(a)*speed,vy:Math.sin(a)*speed,r,ttl,col,damage:Math.ceil(damage*1.15),secretRuu:true,secretBossIndex:brain.index,fxType,born:brain.clock});
  counts.eclipse++;S.budgetLength=g.ebullets.length;S.emitted++;brain.emitted++;return true;
 }
 function shoot(g,e,a,speed,damage,col,r=7,fxType='prism'){
@@ -333,14 +367,17 @@ function shoot(g,e,a,speed,damage,col,r=7,fxType='prism'){
 }
 function queue(e,type,time,data={}){const b=e.secretBrain;if(b.events.length<30)b.events.push({type,time,...data})}
 function scaledCount(e,key,baseCount){
- // Preserve the exact cumulative 3/2 ratio even for odd counts: 7 -> 10, 11.
- const remainder=e.secretBrain.shotRemainders,total=baseCount*3+(remainder[key]||0);
- remainder[key]=total%2;return Math.floor(total/2);
+ // v1.32 doubles each original pattern; no quality-dependent reduction or carry.
+ return baseCount*2;
 }
 function expandedOffsets(e,key,offsets){
  const extra=scaledCount(e,key,offsets.length)-offsets.length,result=offsets.slice(),gaps=[];
  for(let i=0;i<offsets.length-1;i++)gaps.push([offsets[i],offsets[i+1]]);
- for(let i=0;i<extra;i++){const gap=gaps[Math.floor((i+.5)*gaps.length/extra)];result.push((gap[0]+gap[1])/2)}
+ // Subdivide gaps instead of emitting coincident duplicate rays when extra > gaps.
+ for(let i=0;i<gaps.length;i++){
+  const count=Math.floor((i+1)*extra/gaps.length)-Math.floor(i*extra/gaps.length),gap=gaps[i];
+  for(let j=1;j<=count;j++)result.push(gap[0]+(gap[1]-gap[0])*j/(count+1));
+ }
  return result;
 }
 function safeAngle(a,safe,gap){
@@ -360,12 +397,14 @@ function boostedRing(e,key,n,rotation,safe,gap,emit){
  }
 }
 function fan(e,g,a,angleShift=0,wide=false){
+ projectileCounts(g,true);
  const b=e.secretBrain,hot=b.enraged,base=b.frenzy?(wide?22:19):hot?(wide?17:15):(wide?14:12);
  const n=scaledCount(e,wide?'fanWide':'fan',base),spread=b.frenzy?1.62:hot?1.42:1.22;
  for(let i=0;i<n;i++){const angle=a+angleShift+(i-(n-1)/2)*spread/(n-1);const speed=(b.frenzy?334:hot?308:274)+((i%3)-1)*15;
   shoot(g,e,angle,speed,hot?13:11,hot?'#ff7fa5':'#cfa7fa',7,i%4===0?'needle':'crescent');}
 }
 function ring(e,g,safeAngle,rotation=0){
+ projectileCounts(g,true);
  const b=e.secretBrain,hot=b.enraged,n=b.frenzy?42:hot?34:28,speed=b.frenzy?256:hot?234:207;
  boostedRing(e,'ring',n,rotation,safeAngle,.42,(a,i)=>{
   shoot(g,e,a,speed+(i%4)*5,hot?12:10,hot?'#f88ab4':'#c5b1ff',7,'halo');
@@ -379,18 +418,23 @@ function startDash(e,g,api){
  api?.wave?.(e.x,e.y,88,'#ffb2ca');api?.sfx?.('rail');
 }
 function rushShards(e,g){
+ projectileCounts(g,true);
  const b=e.secretBrain,a=Math.atan2(b.dashDirY,b.dashDirX),hot=b.enraged;
  for(const d of expandedOffsets(e,'rush',[-.68,-.40,-.18,0,.18,.40,.68]))shoot(g,e,a+d,hot?305:253,hot?11:9,'#ffd1a9',6,'blade');
 }
 function crossCage(e,g,centerX,centerY){
+ projectileCounts(g,true);
  const p=g.player,hot=e.secretBrain.enraged,cx=centerX??p.x,cy=centerY??p.y;
  const speed=hot?270:230,damage=hot?12:10;
  // Add shots only between existing lanes on the same side of the central gap.
  const lanes=(count,spacing,key)=>{
   const offsets=[];for(let i=-count;i<=count;i++)if(i)offsets.push(i*spacing);
   const extra=scaledCount(e,key,offsets.length)-offsets.length,gaps=[];
-  for(let i=0;i<offsets.length-1;i++)if(offsets[i]*offsets[i+1]>0)gaps.push((offsets[i]+offsets[i+1])/2);
-  for(let i=0;i<extra;i++)offsets.push(gaps[Math.floor((i+.5)*gaps.length/extra)]);
+  for(let i=0;i<offsets.length-1;i++)if(offsets[i]*offsets[i+1]>0)gaps.push([offsets[i],offsets[i+1]]);
+  for(let i=0;i<gaps.length;i++){
+   const count=Math.floor((i+1)*extra/gaps.length)-Math.floor(i*extra/gaps.length),gap=gaps[i];
+   for(let j=1;j<=count;j++)offsets.push(gap[0]+(gap[1]-gap[0])*j/(count+1));
+  }
   return offsets;
  };
  for(const off of lanes(5,43,'crossRows')){
@@ -403,11 +447,13 @@ function crossCage(e,g,centerX,centerY){
  }
 }
 function slash(e,g,ang,shift){
+ projectileCounts(g,true);
  const b=e.secretBrain,hot=b.enraged;
  for(const d of expandedOffsets(e,'slash',[-.15,-.075,0,.075,.15]))shoot(g,e,ang+shift+d,hot?464:410,hot?14:12,'#ffedcc',8,'blade');
  b.slashFlash=.30;b.slashAim=ang+shift;
 }
 function explodeHazard(e,h,g,api){
+ projectileCounts(g,true);
  const b=e.secretBrain,p=g.player,distance=Math.hypot(p.x-h.x,p.y-h.y);
  if(distance<h.r+(p.r||20)*.25)api?.hurt?.(b.enraged?17:13,h.x,h.y);
  const shots=scaledCount(e,'hazard',b.enraged?14:11);
@@ -418,6 +464,7 @@ function explodeHazard(e,h,g,api){
  api?.wave?.(h.x,h.y,h.r*1.4,'#f49bc6');api?.burst?.(h.x,h.y,'#f6adce',12,140);
 }
 function eclipseCurtain(e,g,aim,layer=0){
+ projectileCounts(g,true);
  const b=e.secretBrain,n=scaledCount(e,'curtain',b.frenzy?24:b.enraged?20:17),spread=b.frenzy?2.65:2.38;
  for(let i=0;i<n;i++){
   const a=aim+(i-(n-1)/2)*spread/(n-1)+Math.sin(b.clock*2+layer)*.12;
@@ -426,6 +473,7 @@ function eclipseCurtain(e,g,aim,layer=0){
  }
 }
 function collapsingHalo(e,g,focusX,focusY,layer=0){
+ projectileCounts(g,true);
  // A converging circle, with two opposite safe passages; aim is frozen at windup.
  const b=e.secretBrain,n=b.frenzy?38:b.enraged?31:26,rad=440+layer*40;
  const safe=b.aim+layer*.13;
@@ -487,11 +535,17 @@ function release(e,g,api){
  api?.burst?.(e.x,e.y,hot?'#ffa8c6':'#c6adff',hot?22:16,230);
  api?.sfx?.(base===2||base===3?'rail':'boss');
  b.pattern=(b.pattern+1)%8;
- b.cooldown=((b.frenzy?.82:hot?1.22:1.63)+b.windMax)/BARRAGE_RATE-b.windMax;
+ b.cooldown=(((b.frenzy?.82:hot?1.22:1.63)+b.windMax)/BARRAGE_RATE-b.windMax)*COOLDOWN_SCALE;
 }
 function setAnim(e,mode,dt){
  const b=e.secretBrain;
  if(b.anim!==mode){b.anim=mode;b.animTimer=0}else b.animTimer+=dt;
+}
+function frozenTarget(p,dt,seconds){
+ const rate=dt>0?seconds/dt:0;
+ let dx=(p.x-(Number.isFinite(p.px)?p.px:p.x))*rate,dy=(p.y-(Number.isFinite(p.py)?p.py:p.y))*rate;
+ const length=Math.hypot(dx,dy);if(length>76){dx*=76/length;dy*=76/length}
+ return {x:p.x+dx,y:p.y+dy};
 }
 function step(e,dt,g,api,q='auto'){
  if(!isBoss(e)||!S.active||!S.bosses.includes(e)||e.hp<=0||!g?.player)return;
@@ -499,7 +553,7 @@ function step(e,dt,g,api,q='auto'){
  if(S.intro>0){e.speed=0;setAnim(e,'idle',dt);e.attack=Math.max(e.attack||0,.22);return}
  if(!b.enraged&&e.hp<=e.maxHp*.48){
   b.enraged=true;b.phasePulse=2.4;b.cooldown=Math.max(b.cooldown,.9);
-  e.secretPhase=2;e.dmg=21;e.col='#ff859f';g.scenePulse=Math.max(g.scenePulse||0,1.05);
+  e.secretPhase=2;e.dmg=26;e.col='#ff859f';g.scenePulse=Math.max(g.scenePulse||0,1.05);
   api?.wave?.(e.x,e.y,285,'#ff769c');api?.burst?.(e.x,e.y,'#ffc6dc',28,200);
   api?.toast?.('RUU : ECLIPSE // PHASE II',true);api?.sfx?.('bossBreak');
  }
@@ -531,11 +585,14 @@ function step(e,dt,g,api,q='auto'){
   setAnim(e,'attack',dt);return;
  }
  const p=g.player,dist=Math.hypot(p.x-e.x,p.y-e.y);
- e.speed=dist<95?0:b.frenzy?151:b.enraged?117:96;
+ const baseSpeed=b.frenzy?196:b.enraged?160:132,farSpeed=b.frenzy?360:b.enraged?320:282;
+ e.speed=dist<e.r+(p.r||20)-8?0:baseSpeed+(farSpeed-baseSpeed)*clamp((dist-300)/600,0,1);
  setAnim(e,b.releaseFlash>0?'attack':e.speed===0?'idle':e.speed>125?'run':'walk',dt);
  b.cooldown-=dt;
- if(b.cooldown<=0&&dist<900){
-  b.targetX=p.x;b.targetY=p.y;
+ if(b.cooldown<=0&&dist<820){
+  // Predict modestly once, then keep the displayed target fixed for the whole windup.
+  const target=frozenTarget(p,dt,b.frenzy?.30:b.enraged?.26:.22);
+  b.targetX=target.x;b.targetY=target.y;
   b.aim=Math.atan2(b.targetY-e.y,b.targetX-e.x);
   b.windMax=b.frenzy?.46:b.enraged?.64:.80;b.wind=b.windMax;
   api?.sfx?.('shield');
@@ -675,7 +732,8 @@ function drawScreen(ctx,W,H,g,q='auto'){
  ctx.strokeStyle='#bfa6d2';ctx.lineWidth=2;ctx.strokeRect(W*.065,H*.16,W*.87,H*.65);
  ctx.restore();
 }
-window.RUU_SECRET_BOSS={VERSION:'1.31.0',ART,ATLAS,ECLIPSE_TOTAL,REINFORCEMENT_TOTAL,REINFORCEMENT_DELAY,PROJECTILE_CAP,REINFORCEMENT_RESERVE,
+window.RUU_SECRET_BOSS={VERSION:'1.32.0',ART,ATLAS,ECLIPSE_TOTAL,REINFORCEMENT_TOTAL,REINFORCEMENT_DELAY,PROJECTILE_CAP,ECLIPSE_PROJECTILE_CAP,REINFORCEMENT_RESERVE,ASTRAEA_RESERVE,
  ASTRAEA_TOTAL,ASTRAEA_DELAY,SCREEN_WAVE_TOTAL,SCREEN_WAVE_SIZE,SCREEN_ARRIVAL,
- drawBullet,reset,reveal,tick,step,onKill,status,isActive,isIntro,isBoss,isEncounterEnemy,canEmitReinforcement,drawGround,drawCharacter,drawScreen};
+ drawBullet,reset,reveal,tick,step,onKill,status,isActive,isIntro,isBoss,isEncounterEnemy,armorLevel,incomingDamageScale,
+ canEmitReinforcement,canEmitAstraea,emitProjectileBatch,drawGround,drawCharacter,drawScreen};
 })();

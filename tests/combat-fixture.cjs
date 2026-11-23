@@ -87,6 +87,14 @@ function fixture(options={}){
     reset(){box.resetGame();prepare();},
     run:code=>vm.runInContext(code,box),
     loadWeapons(){vm.runInContext(section(index,'function fireBullet(','function drawWeaponGround('),box);},
+    loadMovement(){box.areaStrike=box.areaStrike||noop;box.playDash=noop;
+      vm.runInContext(section(index,'function dash()','function fillCircle('),box);},
+    applyMaximumSpeed(){box.hideOverlay=noop;box.musicStarted=false;
+      vm.runInContext(section(index,'const upgrades=[','function rollRareChoice(')+'\n'+
+        section(index,'function selectUpgrade(','function fireBullet('),box);
+      vm.runInContext("g.levelChoices=[{...upgrades.find(u=>u.id==='speed'),bonus:99}];state='levelup';selectUpgrade(0);",box);},
+    loadArmorDrawing(ctx){Object.assign(box,{ctx,W:1200,H:675});
+      vm.runInContext(section(index,'function drawEnemyArmor(','function drawEnemy('),box);},
     usePlayerDamage(){vm.runInContext(section(index,'function damagePlayer(','function expToLevel('),box);},
     loadAlly(){const source=fs.readFileSync(path.join(root,'astral-companion.js'),'utf8');
       vm.runInContext(source.replace('window.RUU_COMPANION=',
