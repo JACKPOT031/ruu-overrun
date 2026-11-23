@@ -5,6 +5,7 @@
 (()=>{
 'use strict';
 const TAU=Math.PI*2,clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const BARRAGE_RATE=1.20; // Apply to every 3/5 DEVORA core; keep safe lanes.
 const RARE_FIVE_CHANCE=.10,ROLES=['HUNTER','ORACLE','SIEGE','FRACTURE','REAPER'];
 const COLORS=['#ff719f','#e9a1fd','#ffbd86','#c78bff','#ff668c'];
 const ART={};if(typeof Image!=='undefined')for(const [key,src] of Object.entries({three:'assets/devora_true_end_three.webp',five:'assets/devora_true_end_five.webp'})){const image=new Image();image.src=src;ART[key]=image}
@@ -81,7 +82,7 @@ function step(e,dt,g,api,q='auto'){
  if(S.intro>0){e.attack=Math.max(e.attack||0,.28);return}
  const p=g.player,dist=Math.hypot(p.x-e.x,p.y-e.y);
  if(dist>1150){const a=Math.atan2(e.y-p.y,e.x-p.x);e.x=p.x+Math.cos(a)*750;e.y=p.y+Math.sin(a)*750}
- if(b.wind>0){b.wind-=dt;if(b.wind<=0){b.wind=0;fire(e,g,api);b.cd=[2.55,3.1,3.8,3.3,2.8][e.trueBossIndex]*(S.rare?1.2:1)}}
+ if(b.wind>0){b.wind-=dt;if(b.wind<=0){b.wind=0;fire(e,g,api);b.cd=([2.55,3.1,3.8,3.3,2.8][e.trueBossIndex]*(S.rare?1.2:1)+b.windMax)/BARRAGE_RATE-b.windMax}}
  else {b.cd-=dt;if(b.cd<=0&&dist<820){b.targetX=p.x;b.targetY=p.y;b.angle=Math.atan2(p.y-e.y,p.x-e.x);
   b.windMax=b.role==='SIEGE'?1.18:.88;b.wind=b.windMax;api?.sound?.('shield')}}
 }
@@ -148,5 +149,5 @@ function drawScreen(ctx,W,H,g,q='auto'){
   ctx.fillStyle='#100916d9';ctx.fillRect(W*.32,H*.85,W*.36,29);ctx.textAlign='center';ctx.fillStyle=S.rare?'#ff91a8':'#f6afd9';
   ctx.font='900 12px ui-monospace,monospace';ctx.fillText('DEVORA TRUE BOSS // '+S.remaining+' / '+S.total+' REMAINING',W/2,H*.85+19);ctx.restore()}
 }
-window.RUU_TRUE_END={VERSION:'1.19.1',RARE_FIVE_CHANCE,ROLES,reset,queue,spawnQueued,onKill,status,isIntro,step,tick,drawGround,drawWorld,drawScreen};
+window.RUU_TRUE_END={VERSION:'1.22.1',RARE_FIVE_CHANCE,ROLES,reset,queue,spawnQueued,onKill,status,isIntro,step,tick,drawGround,drawWorld,drawScreen};
 })();

@@ -1,10 +1,11 @@
-/* RUU//OVERRUN v1.22.0 — ECLIPSE BULLET HELL / CELESTIAL ARSENAL
+/* RUU//OVERRUN v1.22.1 — ECLIPSE BULLET HELL / CELESTIAL ARSENAL
    HP-gated secret Ruu, 4x4 animated atlas, multi-stage telegraphed boss.
    No additional ambient enemies; all encounter bullets obey a shared cap.
 */
 (()=>{
 'use strict';
 const TAU=Math.PI*2;
+const BARRAGE_RATE=1.20; // All phases incl. LAST LIGHT; same telegraph/safe patterns and projectile cap.
 const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
 const ART=new Image();ART.decoding='async';ART.src='assets/secret_ruu.webp';
 const ATLAS=new Image();ATLAS.decoding='async';ATLAS.src='assets/secret_ruu_animation_atlas.webp';
@@ -274,7 +275,7 @@ function release(e,g,api){
  api?.burst?.(e.x,e.y,hot?'#ffa8c6':'#c6adff',hot?22:16,230);
  api?.sfx?.(base===2||base===3?'rail':'boss');
  S.pattern=(S.pattern+1)%8;
- S.cooldown=S.frenzy?.82:hot?1.22:1.63;
+ S.cooldown=((S.frenzy?.82:hot?1.22:1.63)+S.windMax)/BARRAGE_RATE-S.windMax;
 }
 function setAnim(mode,dt){
  if(S.anim!==mode){S.anim=mode;S.animTimer=0}else S.animTimer+=dt;
@@ -435,5 +436,5 @@ function drawScreen(ctx,W,H,g,q='auto'){
  ctx.strokeStyle='#bfa6d2';ctx.lineWidth=2;ctx.strokeRect(W*.065,H*.16,W*.87,H*.65);
  ctx.restore();
 }
-window.RUU_SECRET_BOSS={VERSION:'1.22.0',ART,ATLAS,drawBullet,reset,reveal,tick,step,onKill,status,isActive,isIntro,isBoss,drawGround,drawCharacter,drawScreen};
+window.RUU_SECRET_BOSS={VERSION:'1.22.1',ART,ATLAS,drawBullet,reset,reveal,tick,step,onKill,status,isActive,isIntro,isBoss,drawGround,drawCharacter,drawScreen};
 })();

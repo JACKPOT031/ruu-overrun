@@ -1,8 +1,15 @@
-# RUU//OVERRUN — PUBLIC BETA (v1.22.0)
+# RUU//OVERRUN — PUBLIC BETA (v1.22.1)
 
 JACKPOTØ31が制作するオリジナル・ブラウザサバイバルアクション。
 
 **[ゲームを遊ぶ](https://jackpot031.github.io/ruu-overrun/)** / **[公開開始v1.5.3からの更新履歴](./CHANGELOG.md)**
+
+## v1.22.1 — BARRAGE PRESSURE (+20%)
+
+- **敵の弾幕発射頻度を約20%引き上げ。** 予兆＋射撃クールダウンのサイクルを従来の5/6に調整。
+- 対象：HALO SENTINEL／HEX CHOIR、DEVORA／NULL EMPERORの通常射撃・PHASE II・PHASE III、TRUE DEVORA 3/5体、RUU : ECLIPSE（LAST LIGHTを含む）。
+- 維持：1発のダメージ、弾速、予兆時間、包囲弾幕の安全地帯、同時弾数制限、ボス撃破報酬、HP50%の裏ボス出現条件、FX品質・FPS設定。
+- 現場の同時弾数上限・射撃距離などにより、実際の弾数増加率が20%未満になる局面もある。
 
 ## v1.22.0 — ECLIPSE BULLET HELL / BOSS SPOILS
 

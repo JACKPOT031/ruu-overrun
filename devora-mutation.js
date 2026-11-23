@@ -5,6 +5,7 @@
 (()=>{
 'use strict';
 const TAU=Math.PI*2,clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const BARRAGE_RATE=1.20; // PHASE II: telegraphed attack cycle 20% more frequent.
 const COLOR={frenzy:'#ff667d',volatile:'#ffb45d',fracture:'#b58aff',bulwark:'#73f8df',boss:'#ff578f'};
 const LABEL={frenzy:'FRENZY',volatile:'OVERLOAD',fracture:'FRACTURE',bulwark:'BULWARK'};
 let sparks=[],rings=[],screenImpact=0,screenColor='#f9b679',pulseClock=0;
@@ -134,7 +135,7 @@ function step(e,dt,g,api,q){
     if(b.phase!==2)return;
     if(b.wind>0){
       b.wind-=dt;
-      if(b.wind<=0){b.wind=0;fireFan(e,g,api,q);b.cd=e.kind==='final'?3.25:4.1}
+      if(b.wind<=0){b.wind=0;fireFan(e,g,api,q);b.cd=((e.kind==='final'?3.25:4.1)+b.windMax)/BARRAGE_RATE-b.windMax}
     }else{
       b.cd-=dt;
       if(b.cd<=0&&d<780){
@@ -286,5 +287,5 @@ function drawScreen(ctx,W,H,q){
   ctx.restore();
 }
 window.RUU_MUTATION={reset,tick,decorate,bossSpawn,modifyDamage,onEnemyKilled,onPlayerHit,step,drawGround,drawEnemies,drawWorld,drawScreen,
-  VERSION:'1.17.0'};
+  VERSION:'1.22.1'};
 })();

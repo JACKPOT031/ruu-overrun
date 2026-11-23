@@ -6,6 +6,7 @@
 (()=>{
 'use strict';
 const TAU=Math.PI*2,clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const BARRAGE_RATE=1.20; // PHASE III: safe sectors and warning duration stay unchanged.
 const COLOR='#ffc375',SAFE='#9effd8';
 let clock=0;
 function reset(){clock=0}
@@ -108,7 +109,7 @@ function step(e,dt,g,api,q='auto'){
    s.wind=0;
    if(s.pattern==='nova'){shootSiege(e,g,api);s.pattern='fan'}
    else{shootFan(e,g,api);s.pattern='nova'}
-   s.cd=cfg(e).cd;
+   s.cd=(cfg(e).cd+s.windMax)/BARRAGE_RATE-s.windMax;
   }
  }else{
   s.cd-=dt;
@@ -238,5 +239,5 @@ function drawScreen(ctx,W,H,g,q='auto',arts=null){
 }
 
 function tick(dt){clock+=Math.max(0,dt)}
-window.RUU_PHASE3={VERSION:'1.19.0',reset,tick,start,step,drawGround,drawEnemies,drawScreen};
+window.RUU_PHASE3={VERSION:'1.22.1',reset,tick,start,step,drawGround,drawEnemies,drawScreen};
 })();
