@@ -37,9 +37,23 @@ test('boosted planned HP is stable across delayed spawns and finite screens have
   assert.equal(f.status().maxHp,before.maxHp,'Screen HP must stay outside the seven-major health bar');
 });
 
+test('TRUE DEVORA HP gate uses pre-heal NULL EMPEROR kill, exact half threshold, and fixed queued formation',()=>{
+  for(const mode of ['normal','endless','challenge'])for(const [hp,maxHp,count] of [[49,100,3],[50,100,5],[51,100,5],[50,101,3],[51,101,5],[1,100,3],[100,100,5]]){
+    const f=fixture({mode});Object.assign(f.g.player,{hp,maxHp,shield:100});
+    const boss=f.box.makeEnemy('final',0,0);
+    f.kill(boss);
+    assert.equal(f.g.trueEndCount,count);
+    assert.equal(f.g.player.hp,Math.min(maxHp,hp+Math.ceil(maxHp*.18)));
+    f.g.player.hp=count===3?maxHp:1;
+    assert.equal(f.trueEnd.queue(f.g,boss),false);
+    assert.equal(f.trueEnd.spawnQueued(f.g,f.api),true);
+    assert.equal(f.g.enemies.filter(e=>e.trueDevora&&!e.secretReinforcement).length,count);
+  }
+});
+
 test('ordinary TRUE trinity and quintet retain their original HP, contact stats and actual volleys',()=>{
   for(const rare of [false,true])for(const level of [1,24,100]){
-    const f=fixture();f.g.level=level;f.trueEnd.queue(f.g,{kind:'final'},()=>rare?0:.5);
+    const f=fixture();f.g.level=level;f.g.player.hp=f.g.player.maxHp*(rare?.5:.49);f.trueEnd.queue(f.g,{kind:'final'});
     f.trueEnd.spawnQueued(f.g,f.api);f.trueEnd.tick(3,f.g);
     const cores=f.g.enemies.filter(e=>e.trueDevora);assert.equal(cores.length,rare?5:3);
     for(const [i,e] of cores.entries()){
@@ -58,7 +72,7 @@ test('ordinary TRUE trinity and quintet retain their original HP, contact stats 
 });
 
 test('secret DEVORA add 50 percent cumulative shots, preserve original rays and safe gaps, and shorten only cooldown',()=>{
-  const normal=fixture();normal.trueEnd.queue(normal.g,{kind:'final'},()=>.5);
+  const normal=fixture();normal.g.player.hp=49;normal.trueEnd.queue(normal.g,{kind:'final'});
   normal.trueEnd.spawnQueued(normal.g,normal.api);normal.trueEnd.tick(3,normal.g);
   const f=fixture();ready(f);
   for(const [i,e] of f.escorts().entries()){

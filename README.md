@@ -1,8 +1,16 @@
-# RUU//OVERRUN — PUBLIC BETA (v1.32.0)
+# RUU//OVERRUN — PUBLIC BETA (v1.32.1)
 
 JACKPOTØ31が制作するオリジナル・ブラウザサバイバルアクション。
 
 **[ゲームを遊ぶ](https://jackpot031.github.io/ruu-overrun/)** / **[公開開始v1.5.3からの更新履歴](./CHANGELOG.md)**
+
+## v1.32.1 — TRUE DEVORA / HP GATE
+
+- NULL EMPEROR撃破時のルーのHPが最大HPの50%以上なら真DEVORA5体（EXTINCTION PROTOCOL）、50%未満なら3体（DEVORA TRINITY）が確定出現。従来の10%抽選は廃止。
+- 判定は撃破報酬のHP18%回復前に実施し、シールド残量は含めない。決定後にHPが変化しても編成は変わらない。
+- NORMAL・ENDLESS・CHALLENGE共通。ENDLESSでは新たな真ボス戦が発生する際にも同じ条件を適用する。
+- 真DEVORA全滅時のHP50%以上による裏ボス戦への分岐、裏ボスの7体編成、各敵の性能、報酬、ランキング、楽曲、衣装未実装の現状は変更しない。
+- 回帰テスト `node tests/takamiya-pressure.test.cjs` に49%・50%・51%、奇数最大HP、撃破報酬による回復、シールド、モード別、決定後のHP変化の境界条件を追加。
 
 ## v1.32.0 — OPERATION: TAKAMIYA / 裏ボス戦強化
 

@@ -1,21 +1,22 @@
-/* RUU//OVERRUN v1.32.0 — TRUE END / OPERATION: TAKAMIYA REINFORCEMENTS
+/* RUU//OVERRUN v1.32.1 — TRUE END / OPERATION: TAKAMIYA REINFORCEMENTS
    Final boss defeat reveals a real, challenging second battle.
-   Ordinary: three DEVORA. Rare: five (10%). All must be defeated to clear.
+   Three DEVORA below 50% player HP; five at or above 50%, sampled at NULL EMPEROR defeat before rewards. All must be defeated to clear.
 */
 (()=>{
 'use strict';
 const TAU=Math.PI*2,clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const BARRAGE_RATE=1.20; // Apply to every 3/5 DEVORA core; keep safe lanes.
 const SECRET_COOLDOWN_SCALE=.85,SECRET_DAMAGE_SCALE=1.18;
-const RARE_FIVE_CHANCE=.10,ROLES=['HUNTER','ORACLE','SIEGE','FRACTURE','REAPER'];
+const FIVE_HP_THRESHOLD=.50,ROLES=['HUNTER','ORACLE','SIEGE','FRACTURE','REAPER'];
 const COLORS=['#ff719f','#e9a1fd','#ffbd86','#c78bff','#ff668c'];
 const ART={};if(typeof Image!=='undefined')for(const [key,src] of Object.entries({three:'assets/devora_true_end_three.webp',five:'assets/devora_true_end_five.webp'})){const image=new Image();image.src=src;ART[key]=image}
 const initial=()=>({queued:false,active:false,finished:false,total:0,remaining:0,maxHp:0,rare:false,intro:0,introMax:2.65,clock:0,despair:0,banner:0,finishPulse:0,defeated:0,rolls:0});
 let S=initial(),reinforcementsPresent=false;function reset(){S=initial();reinforcementsPresent=false}
-function queue(g,e,rng=Math.random){
+function queue(g,e){
  if(!g||e?.kind!=='final'||e.trueEndQueued||S.active||S.queued)return false;
  e.trueEndQueued=true;S.queued=true;S.rolls++;
- const v=Number(rng());S.rare=Number.isFinite(v)&&v>=0&&v<RARE_FIVE_CHANCE;
+ // HP-only branch; no random draw. Caller must queue before defeat rewards.
+ const p=g.player;S.rare=Number.isFinite(p?.hp)&&Number.isFinite(p?.maxHp)&&p.maxHp>0&&p.hp>=p.maxHp*FIVE_HP_THRESHOLD;
  S.total=S.rare?5:3;S.remaining=S.total;S.maxHp=0;S.defeated=0;
  g.trueEndPending=true;g.trueEndCleared=false;g.trueEndCount=S.total;g.trueEndRemaining=S.total;
  return true;
@@ -210,5 +211,5 @@ function drawScreen(ctx,W,H,g,q='auto'){
   ctx.fillStyle='#100916d9';ctx.fillRect(W*.32,H*.85,W*.36,29);ctx.textAlign='center';ctx.fillStyle=S.rare?'#ff91a8':'#f6afd9';
   ctx.font='900 12px ui-monospace,monospace';ctx.fillText('DEVORA TRUE BOSS // '+S.remaining+' / '+S.total+' REMAINING',W/2,H*.85+19);ctx.restore()}
 }
-window.RUU_TRUE_END={VERSION:'1.32.0',RARE_FIVE_CHANCE,ROLES,reset,queue,spawnQueued,spawnReinforcement,reinforcementHp,onKill,status,isIntro,step,tick,drawGround,drawWorld,drawScreen};
+window.RUU_TRUE_END={VERSION:'1.32.1',FIVE_HP_THRESHOLD,ROLES,reset,queue,spawnQueued,spawnReinforcement,reinforcementHp,onKill,status,isIntro,step,tick,drawGround,drawWorld,drawScreen};
 })();

@@ -106,7 +106,8 @@ function fixture(options={}){
     hit(e,damage){return box.applyDamage(e,damage,0,0,'#fff');},
     reveal(){box.g.trueEndCleared=true;box.g.trueEndPending=false;return f.secret.reveal(box.g,api);},
     originalClear(hp=50,rare=false){
-      assert.equal(f.trueEnd.queue(box.g,{kind:'final'},()=>rare?0:.5),true);
+      box.g.player.hp=box.g.player.maxHp*(rare?.5:.49);
+      assert.equal(f.trueEnd.queue(box.g,{kind:'final'}),true);
       assert.equal(f.trueEnd.spawnQueued(box.g,api),true);
       const cores=box.g.enemies.filter(e=>e.trueDevora);
       assert.equal(cores.length,rare?5:3);
