@@ -41,7 +41,7 @@ function spawn(g,api,level=g?.level){
   patrolIndex:0,patrolTimer:0,facing:-1,defeated:false,
   playerX:p.x,playerY:p.y,velocityX:0,velocityY:0,emitted:0,attempted:0,lastAttack:null};
  units.set(e,g);
- api?.wave?.(e.x,e.y,130,RED);api?.sound?.('boss');
+ api?.wave?.(e.x,e.y,130,RED);api?.sound?.('boss',{cue:'astraea'});
  api?.toast?.('ASTRAEA // HOSTILE SIGNAL',true);
  return e;
 }

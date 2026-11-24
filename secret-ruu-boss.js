@@ -189,7 +189,7 @@ function reveal(g,api){
  g.scenePulse=Math.max(g.scenePulse||0,1.4);
  api?.wave?.(p.x,p.y,360,'#d2b7a8');
  for(const e of bosses)api?.burst?.(e.x,e.y,'#ffddd5',20,180);
- api?.sound?.('bossBreak');api?.toast?.('OPERATION: TAKAMIYA // ECLIPSE ×3',true);
+ api?.sound?.('bossBreak',{cue:'eclipse'});api?.toast?.('OPERATION: TAKAMIYA // ECLIPSE ×3',true);
  return true;
 }
 function spawnReinforcements(g,api){
@@ -202,7 +202,7 @@ function spawnReinforcements(g,api){
  if(!S.reinforcements.every(Boolean))return false;
  S.reinforcementsSpawned=true;
  if(g.bossProgress)g.bossProgress.eclipseDevoraSpawned=true;
- api?.wave?.(g.player.x,g.player.y,330,'#ff97e1');api?.sound?.('bossBreak');
+ api?.wave?.(g.player.x,g.player.y,330,'#ff97e1');api?.sound?.('bossBreak',{cue:'eclipseReinforce'});
  api?.toast?.('TAKAMIYA REINFORCEMENTS // DEVORA ×3',true);
  return true;
 }
@@ -555,12 +555,12 @@ function step(e,dt,g,api,q='auto'){
   b.enraged=true;b.phasePulse=2.4;b.cooldown=Math.max(b.cooldown,.9);
   e.secretPhase=2;e.dmg=26;e.col='#ff859f';g.scenePulse=Math.max(g.scenePulse||0,1.05);
   api?.wave?.(e.x,e.y,285,'#ff769c');api?.burst?.(e.x,e.y,'#ffc6dc',28,200);
-  api?.toast?.('RUU : ECLIPSE // PHASE II',true);api?.sfx?.('bossBreak');
+  api?.toast?.('RUU : ECLIPSE // PHASE II',true);api?.sfx?.('bossBreak',{cue:'eclipsePhase'});
  }
  if(!b.frenzy&&e.hp<=e.maxHp*.20){
   b.frenzy=true;b.frenzyPulse=3.0;b.cooldown=Math.min(b.cooldown,.7);
   api?.wave?.(e.x,e.y,350,'#ff456e');api?.burst?.(e.x,e.y,'#fff2dc',34,230);
-  api?.toast?.('ECLIPSE // LAST LIGHT / FINAL RUSH',true);api?.sfx?.('bossBreak');
+  api?.toast?.('ECLIPSE // LAST LIGHT / FINAL RUSH',true);api?.sfx?.('bossBreak',{cue:'eclipseLast'});
  }
  b.facing=g.player.x<e.x?-1:1;
  // Block excessive knockback; keep the secret boss in the arena without teleporting.

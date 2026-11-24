@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#070b17">
-<title>RUU//OVERRUN — KEY VISUAL / JACKPOTØ31</title>
+<title>RUU//OVERRUN — SOUND OVERDRIVE / JACKPOTØ31</title>
 <style>
 :root{--cyan:#66fff1;--mint:#80ffb3;--pink:#ff5fcf;--gold:#ffe59e;--ink:#080c17;--line:#394963}
 *{box-sizing:border-box}html,body{margin:0;min-height:100%;background:#060a12;color:#effbff;font-family:"Yu Gothic","Hiragino Kaku Gothic ProN",Meiryo,system-ui,sans-serif}
@@ -363,11 +363,11 @@ a.ending-control,a.ending-art-link{text-decoration:none;display:inline-flex;alig
 <link rel="stylesheet" href="public-features.css?v=1.32.1">
 <link rel="stylesheet" href="ruu-style.css?v=1.34.0">
 <link rel="stylesheet" href="run-inspector.css?v=1.25.0">
-<link rel="stylesheet" href="title-screen.css?v=1.34.0">
+<link rel="stylesheet" href="title-screen.css?v=1.35.0">
 </head>
 <body>
 <div class="shell">
- <div class="upper"><div class="brand">JACKPOT<b>Ø</b>31 <span style="color:#667f95">/ ORIGINAL GAMES</span></div><div class="build">RUU//OVERRUN <b>v1.34.0</b> · KEY VISUAL</div></div>
+ <div class="upper"><div class="brand">JACKPOT<b>Ø</b>31 <span style="color:#667f95">/ ORIGINAL GAMES</span></div><div class="build">RUU//OVERRUN <b>v1.35.0</b> · SOUND OVERDRIVE</div></div>
  <main class="frame" id="frame">
   <canvas id="game" width="1200" height="675" aria-label="ルーのサバイバルアクションゲーム"></canvas>
   <div class="hud" id="hud">
@@ -412,10 +412,10 @@ a.ending-control,a.ending-art-link{text-decoration:none;display:inline-flex;alig
 <script src="death-cinema.js"></script>
 <script src="expansion-system.js?v=1.23.1"></script>
 <script src="devora-mutation.js?v=1.22.1"></script>
-<script src="devora-phase3.js?v=1.22.1"></script>
-<script src="devora-true-end.js?v=1.32.1"></script>
-<script src="enemy-astraea.js?v=1.32.1"></script>
-<script src="secret-ruu-boss.js?v=1.32.1"></script>
+<script src="devora-phase3.js?v=1.35.0"></script>
+<script src="devora-true-end.js?v=1.35.0"></script>
+<script src="enemy-astraea.js?v=1.35.0"></script>
+<script src="secret-ruu-boss.js?v=1.35.0"></script>
 <script src="boss-rewards.js?v=1.32.1"></script>
 <script src="swarm-director.js?v=1.19.2"></script>
 <script src="support-pilots.js?v=1.32.1"></script>
@@ -424,7 +424,8 @@ a.ending-control,a.ending-art-link{text-decoration:none;display:inline-flex;alig
 <script src="survival-trials.js?v=1.23.1"></script>
 <script src="performance-engine.js?v=1.32.1"></script>
 <script src="ruu-style.js?v=1.34.0"></script>
-<script src="title-screen.js?v=1.34.0"></script>
+<script src="audio-engine.js?v=1.35.0"></script>
+<script src="title-screen.js?v=1.35.0"></script>
 <script>
 (()=>{
  'use strict';
@@ -670,7 +671,7 @@ const WALK_ATLAS=new Image();WALK_ATLAS.src='assets/ruu_walk_atlas.webp';
  ];
  const trackSelect=document.getElementById('trackSelect');
  const musicEls=Array.from({length:MUSIC_TRACKS.length},(_,i)=>i===0?bossTrack:new Audio());
- musicEls.forEach((el,i)=>{el.removeAttribute('src');el.preload='none';el.loop=i!==ENDING_TRACK_INDEX;el.playsInline=true;el.volume=.8;});
+ musicEls.forEach((el,i)=>{el.removeAttribute('src');el.preload='none';el.loop=i!==ENDING_TRACK_INDEX;el.playsInline=true;el.volume=(window.RUU_AUDIO?.volume('bgm')??.8);});
  let musicMode='mix',activeTrack=0,musicFade=null,musicSeq=0,mixSlot=0,mixRunIndex=0;
  let musicRequest=0,pendingMusic=null;
  function cancelPendingMusic(){musicRequest++;if(pendingMusic&&pendingMusic!==musicEls[activeTrack])pendingMusic.pause();pendingMusic=null;}
@@ -874,7 +875,7 @@ const WALK_ATLAS=new Image();WALK_ATLAS.src='assets/ruu_walk_atlas.webp';
    state='won';
    const completeClear=!!g?.secretBossCleared;
    const t=formatTime(g.time);
-   setOverlay(`<div class="eyebrow">MISSION COMPLETE // EPILOGUE</div><h2 class="result-title">${g.mode==='challenge'?(g.challengeOutcome?.success?'TRIAL CLEARED':'TRIAL FAILED'):completeClear?'COMPLETE CLEAR':'SURVIVED'}</h2>${g.mode==='challenge'?'<div class="challenge-result-stamp">'+(g.challengeOutcome?.success?'CHALLENGE TITLE UNLOCKED':g.challengeOutcome?.reason||'条件未達成')+'</div>':''}<p class="intro">${completeClear?'完全クリアおめでとうございます。<br>結果カードを保存して、JACKPOTØ31のDMへ送ってね。':'旅は、まだ続いている。'}<br><span style="color:#e9c695">エンディングテーマ：さすらえば / JACKPOTØ31</span></p>${equippedTitle()?'<div class="equipped-title">✧ EQUIPPED TITLE / '+equippedTitle()+'</div>':''}${window.RUU_PILOTS?.status()?.name?'<div class="equipped-title">SUPPORT PILOT / '+window.RUU_PILOTS.status().name+'</div>':''}${window.RUU_STYLE?.resultHtml(g)||''}<div class="result-stats"><div>TIME<strong>${t}</strong></div><div>KILLS<strong>${g.kills}</strong></div><div>LEVEL<strong>${g.level}</strong></div><div>SCORE<strong>${Math.floor(g.score).toLocaleString('ja-JP')}</strong></div><div>RARE<strong>${g.rareFinds}</strong></div><div>RELICS<strong>${g.crates}</strong></div><div>MYTHIC<strong>${g.mythicFinds}</strong></div><div>MAX CHAIN<strong>${g.maxCombo||0}</strong></div></div><button class="primary" id="retryBtn">↻ もう一度</button><button class="primary" id="endingReplay" style="margin-left:12px">♫ EDをもう一度</button>${completeClear?`<a class="enemy-archive-btn ending-art-link" href="${COMPLETE_ENDING_POSTER}" target="_blank" rel="noopener">完全クリアイラストを拡大 ↗</a>`:''}<div class="help">RUU//OVERRUN v1.34.0 PUBLIC BETA · © JACKPOTØ31</div>`);
+   setOverlay(`<div class="eyebrow">MISSION COMPLETE // EPILOGUE</div><h2 class="result-title">${g.mode==='challenge'?(g.challengeOutcome?.success?'TRIAL CLEARED':'TRIAL FAILED'):completeClear?'COMPLETE CLEAR':'SURVIVED'}</h2>${g.mode==='challenge'?'<div class="challenge-result-stamp">'+(g.challengeOutcome?.success?'CHALLENGE TITLE UNLOCKED':g.challengeOutcome?.reason||'条件未達成')+'</div>':''}<p class="intro">${completeClear?'完全クリアおめでとうございます。<br>結果カードを保存して、JACKPOTØ31のDMへ送ってね。':'旅は、まだ続いている。'}<br><span style="color:#e9c695">エンディングテーマ：さすらえば / JACKPOTØ31</span></p>${equippedTitle()?'<div class="equipped-title">✧ EQUIPPED TITLE / '+equippedTitle()+'</div>':''}${window.RUU_PILOTS?.status()?.name?'<div class="equipped-title">SUPPORT PILOT / '+window.RUU_PILOTS.status().name+'</div>':''}${window.RUU_STYLE?.resultHtml(g)||''}<div class="result-stats"><div>TIME<strong>${t}</strong></div><div>KILLS<strong>${g.kills}</strong></div><div>LEVEL<strong>${g.level}</strong></div><div>SCORE<strong>${Math.floor(g.score).toLocaleString('ja-JP')}</strong></div><div>RARE<strong>${g.rareFinds}</strong></div><div>RELICS<strong>${g.crates}</strong></div><div>MYTHIC<strong>${g.mythicFinds}</strong></div><div>MAX CHAIN<strong>${g.maxCombo||0}</strong></div></div><button class="primary" id="retryBtn">↻ もう一度</button><button class="primary" id="endingReplay" style="margin-left:12px">♫ EDをもう一度</button>${completeClear?`<a class="enemy-archive-btn ending-art-link" href="${COMPLETE_ENDING_POSTER}" target="_blank" rel="noopener">完全クリアイラストを拡大 ↗</a>`:''}<div class="help">RUU//OVERRUN v1.35.0 PUBLIC BETA · © JACKPOTØ31</div>`);
    document.getElementById('retryBtn').onclick=()=>startGame(g?.mode||'normal',g?.challengeId||'');
    document.getElementById('endingReplay').onclick=()=>startEndingCinema(true);
  }
@@ -911,7 +912,7 @@ const WALK_ATLAS=new Image();WALK_ATLAS.src='assets/ruu_walk_atlas.webp';
    if(titleScreen){
      setOverlay(titleScreen.home({unlocked:window.RUU_STYLE?.stats().unlocked||1,best:best?.score,normal:endingUnlocked(),complete:completeEndingUnlocked()}),'home');
    }else{
-     setOverlay(`<div class="menu-grid"><div class="menu-copy"><div class="menu-tick">JACKPOT<strong>Ø</strong>31 / ORIGINAL GAME <span style="color:#dcc2a2">— v1.34.0 PUBLIC BETA</span></div><h1 class="menu-logo"><span class="ruu">RUU</span><span class="slashes">//</span>OVERRUN</h1><div class="menu-nameplate">RUU STYLE // WARDROBE UNLOCKED</div><div class="menu-separator"></div><p class="menu-intro">攻撃は自動。敵を倒して、武器を強化。<br><strong>押し寄せる侵食を生き抜き、最後の脅威を撃ち砕け。</strong><br><span style="color:#ddb2cc;font-size:.79em">一定確率で『星屑の鎧 -Guardian Genome-』のキャラクターが参戦。</span></p><div class="start-row"><button class="primary" id="startBtn" type="button">▶ START // DEPLOY  ·  ENTER</button><button class="enemy-archive-btn" id="enemyArchive" type="button">☷ DEVORA FILES</button><button class="enemy-archive-btn" id="achievementsBtn" type="button">✧ ACHIEVEMENTS</button><button class="enemy-archive-btn" id="ruuStyleBtn" type="button">♟ RUU STYLE · ${window.RUU_STYLE?.stats().unlocked||1}/9</button>${endingUnlocked()?`<button class="enemy-archive-btn" id="challengeBtn" type="button">✦ CHALLENGE MISSIONS</button><button class="enemy-archive-btn" id="endlessBtn" type="button" title="クリア後解放 / 自己ベスト ${endlessBest?.score||0}">∞ ENDLESS MODE</button>`:``}${endingUnlocked()?`<button class="enemy-archive-btn" id="endingTheater" type="button">♫ ENDING THEATER</button>`:``}${completeEndingUnlocked()?`<button class="enemy-archive-btn" id="completeEndingTheater" type="button">✦ COMPLETE ENDING</button>`:``}<div class="run-record">PERSONAL BEST<strong>${best?best.score.toLocaleString('ja-JP'):'— — —'}</strong></div></div><div class="menu-controls"><span class="key">WASD / ↑↓←→</span> MOVE　<span class="key">SPACE</span> DASH　<span class="key">1–3</span> UPGRADE　<span class="key">ESC</span> PAUSE</div></div><div class="hero-figure" id="heroArt"><div class="hero-hint">RUU / CHARACTER DATA</div></div></div>`);
+     setOverlay(`<div class="menu-grid"><div class="menu-copy"><div class="menu-tick">JACKPOT<strong>Ø</strong>31 / ORIGINAL GAME <span style="color:#dcc2a2">— v1.35.0 PUBLIC BETA</span></div><h1 class="menu-logo"><span class="ruu">RUU</span><span class="slashes">//</span>OVERRUN</h1><div class="menu-nameplate">RUU STYLE // WARDROBE UNLOCKED</div><div class="menu-separator"></div><p class="menu-intro">攻撃は自動。敵を倒して、武器を強化。<br><strong>押し寄せる侵食を生き抜き、最後の脅威を撃ち砕け。</strong><br><span style="color:#ddb2cc;font-size:.79em">一定確率で『星屑の鎧 -Guardian Genome-』のキャラクターが参戦。</span></p><div class="start-row"><button class="primary" id="startBtn" type="button">▶ START // DEPLOY  ·  ENTER</button><button class="enemy-archive-btn" id="enemyArchive" type="button">☷ DEVORA FILES</button><button class="enemy-archive-btn" id="achievementsBtn" type="button">✧ ACHIEVEMENTS</button><button class="enemy-archive-btn" id="ruuStyleBtn" type="button">♟ RUU STYLE · ${window.RUU_STYLE?.stats().unlocked||1}/9</button>${endingUnlocked()?`<button class="enemy-archive-btn" id="challengeBtn" type="button">✦ CHALLENGE MISSIONS</button><button class="enemy-archive-btn" id="endlessBtn" type="button" title="クリア後解放 / 自己ベスト ${endlessBest?.score||0}">∞ ENDLESS MODE</button>`:``}${endingUnlocked()?`<button class="enemy-archive-btn" id="endingTheater" type="button">♫ ENDING THEATER</button>`:``}${completeEndingUnlocked()?`<button class="enemy-archive-btn" id="completeEndingTheater" type="button">✦ COMPLETE ENDING</button>`:``}<div class="run-record">PERSONAL BEST<strong>${best?best.score.toLocaleString('ja-JP'):'— — —'}</strong></div></div><div class="menu-controls"><span class="key">WASD / ↑↓←→</span> MOVE　<span class="key">SPACE</span> DASH　<span class="key">1–3</span> UPGRADE　<span class="key">ESC</span> PAUSE</div></div><div class="hero-figure" id="heroArt"><div class="hero-hint">RUU / CHARACTER DATA</div></div></div>`);
      setupTitleGallery();
    }
    const bind=(id,fn)=>{const el=document.getElementById(id);if(el)el.onclick=fn;};
@@ -933,7 +934,13 @@ const WALK_ATLAS=new Image();WALK_ATLAS.src='assets/ruu_walk_atlas.webp';
    const bind=(id,fn)=>{const el=document.getElementById(id);if(el)el.onclick=fn;};
    bind('titleBack',showStart);bind('challengeBtn',showChallengeArchive);bind('endlessBtn',()=>startGame('endless'));
    bind('endingTheater',()=>startEndingCinema(true));bind('completeEndingTheater',()=>startEndingCinema(true,true));
-   if(kind==='settings')screen.bindSettings(document);
+   if(kind==='settings'){
+     screen.bindSettings(document);
+     window.RUU_AUDIO?.bindSettings(document,(kind,level)=>{
+       if(kind==='bgm')for(const el of musicEls)try{el.volume=level;}catch(e){}
+       else if(kind==='sfx')window.RUU_AUDIO?.syncMaster(audio,sfxEnabled);
+     },()=>userSfx('levelup'));
+   }
    if(kind==='gallery')setupTitleGallery();
  }
  function showTitleExtras(){showTitleSubscreen('extras')}
@@ -950,6 +957,7 @@ const WALK_ATLAS=new Image();WALK_ATLAS.src='assets/ruu_walk_atlas.webp';
  }
  function resetGame(){g={time:0,kills:0,level:1,rareFinds:0,combo:0,comboTimer:0,comboMilestones:0,stageBlend:0,stageReveal:0,scenePulse:0,sceneUlt:0,sceneBoss:0,sceneShift:0,crates:0,rerolls:2,mythicFinds:0,driveGauge:0,driveTime:0,finisherGauge:0,finisherTime:0,finisherPulse:0,finisherCooldown:0,finisherType:0,finisherCursor:0,finisherCount:0,finisherHits:0,finisherChain:0,signatureFx:[],jackpotTime:0,jackpotIntro:0,jackpotPulse:0,jackpotType:-1,jackpotCount:0,jackpotFx:[],jackpotResumeIndex:0,cutin:0,elites:0,elite1:false,elite2:false,xp:0,need:26,spawnT:0,shotT:.1,novaT:0,lightT:0,meteorT:1.4,railT:1.7,frostT:1.1,wellT:2.4,missileT:1.3,sonicT:1.6,prismT:2.3,shardT:1.3,satelliteT:2.0,riftT:2.2,fireworksT:1.7,crossT:2.6,beat:0,flash:0,shake:0,boss1:false,boss2:false,evolved:false,finalBossDead:false,trueEndPending:false,trueEndCleared:false,trueEndCount:0,trueEndRemaining:0,secretBossPending:false,secretBossCleared:false,trueEndRewardGranted:false,secretRewardClear:false,bossRewardCinematic:0,bossProgress:{devora:false,nullEmperor:false,trueKilled:0,trueTotal:0,trueCleared:false,eclipseSeen:false,eclipseCleared:false,eclipseTotal:0,eclipseKilled:0,eclipseDevoraTotal:0,eclipseDevoraKilled:0,eclipseDevoraSpawned:false,eclipseAstraeaTotal:0,eclipseAstraeaKilled:0,eclipseAstraeaSpawned:false,eclipseScreenWaves:0,eclipseScreenSpawned:0,eclipseScreenKilled:0},supportPilot:null,phase:1,score:0,levelChoices:[],enemies:[],bullets:[],ebullets:[],gems:[],particles:[],texts:[],waves:[],lightningFx:[],shards:[],impacts:[],ghosts:[],muzzle:[],meteors:[],wells:[],missiles:[],weaponFx:[],chests:[],crystals:[],evoGravity:false,evoPrism:false,evoSat:false,evoRift:false,evoBloom:false,hexAnnounced:false,fxPulse:0,fxBeat:0,ghostClock:0,player:{x:0,y:0,px:0,py:0,r:20,hp:115,maxHp:115,shield:0,maxShield:0,inv:0,speed:208,damage:13,haste:1,magnet:110,crit:0,dash:0,dashRemain:0,dashX:0,dashY:0,face:1,dir:'down',isMoving:false,hexSlow:0,animPhase:0,wasMoving:false,mods:{pulse:1,orbit:0,nova:0,lightning:0,meteor:0,rail:0,frost:0,well:0,missile:0,sonic:0,prism:0,shard:0,satellite:0,rift:0,fireworks:0,cross:0,echo:0,crit:0,damage:0,haste:0,speed:0,magnet:0,vital:0,shield:0}}};window.RUU_SPECTACLE?.reset();window.RUU_PREMIUM?.reset();window.RUU_MUTATION?.reset();window.RUU_PHASE3?.reset();window.RUU_SWARM?.reset();window.RUU_TRUE_END?.reset();window.RUU_SECRET_BOSS?.reset();window.RUU_ENEMY_ASTRAEA?.reset?.();window.RUU_BOSS_REWARDS?.reset();window.RUU_COMPANION?.reset();keys.clear();joy.active=false}
  function startGame(mode='normal',challengeId=''){
+   window.RUU_AUDIO?.stopAll(audio);
    if(endingState){endingState=null;endingDom.pane.hidden=true;}
    // Trigger real BGM playback during START's trusted click/key user gesture.
    // Never let browser media policy/errors block gameplay.
@@ -966,7 +974,7 @@ const WALK_ATLAS=new Image();WALK_ATLAS.src='assets/ruu_walk_atlas.webp';
    bossAlert.classList.remove('active');deathScene=null;deathSequenceDone=false;bossBreakScene=null;window.RUU_EXPANSION?.reset();ui.hud.style.opacity='';musicIndicator.style.opacity='';resetGame();g.mode=mode==='endless'&&endingUnlocked()?'endless':mode==='challenge'&&endingUnlocked()?'challenge':'normal';window.RUU_OPERATIONS?.start(g,challengeId);g.maxCombo=0;g.damageTaken=0;g.fusions={};g.fusionTimers={};window.RUU_STYLE?.start(g);g.endlessNextBoss=145;g.endlessStarted=false;g.bossBreaks=0;const rolledPilot=window.RUU_PILOTS?.start(g)||null;g.supportPilot=rolledPilot?{id:rolledPilot.id,name:rolledPilot.name,jp:rolledPilot.jp}:null;state='playing';loadoutButton.disabled=false;quickLoadoutButton.hidden=false;
    ui.hud.style.display='block';ui.pause.disabled=false;ui.pause.textContent='Ⅱ PAUSE';hideOverlay();
    try{startStageMusic(true);}catch(e){console.warn('Music unavailable',e);musicLabel('BGM ERROR / 再生ボタンを押して');showMusicRetry(true);}
-   try{ensureAudio();const a=getAudio();if(a)a.ac.resume().then(()=>sfx('start')).catch(()=>{});}catch(e){}
+   try{userSfx('start');}catch(e){}
    toast(rolledPilot?'ALLIED REINFORCEMENT // '+rolledPilot.name+' INBOUND':g.mode==='endless'?'∞ ENDLESS // NO FINAL LIMIT':g.mode==='challenge'?'✦ CHALLENGE // '+(window.RUU_OPERATIONS?.currentInfo(g)?.name||'TRIAL'):'PHASE 01 // AWAKENING');updateHUD();
  }
 
@@ -1020,7 +1028,7 @@ const WALK_ATLAS=new Image();WALK_ATLAS.src='assets/ruu_walk_atlas.webp';
    saveBest(); // Preserve the last score even if the tab closes during the animation.
    const track=musicEls[activeTrack];
    if(musicFade){if(musicFade.from&&musicFade.from!==track)try{musicFade.from.pause()}catch(e){}musicFade=null;}
-   deathScene={elapsed:0,duration:window.RUU_DEATH?.DURATION||3.05,source:track,volume:track?.volume??.8,echoed:false};
+   deathScene={elapsed:0,duration:window.RUU_DEATH?.DURATION||3.05,source:track,volume:track?.volume??(window.RUU_AUDIO?.volume('bgm')??.8),echoed:false};
    state='dying';keys.clear();joy.active=false;ui.pause.disabled=true;
    g.player.inv=0;g.player.isMoving=false;g.player.wasMoving=false;
    ui.toasts.innerHTML='';bossAlert.classList.remove('active');
@@ -1047,10 +1055,10 @@ const WALK_ATLAS=new Image();WALK_ATLAS.src='assets/ruu_walk_atlas.webp';
    const b=window.RUU_EXPANSION?.bossStart(e);
    if(!b)return;
    const track=musicEls[activeTrack];
-   bossBreakScene={elapsed:0,duration:b.duration,final:e.kind==='final',track,oldVolume:track?.volume??.8};
+   bossBreakScene={elapsed:0,duration:b.duration,final:e.kind==='final',track,oldVolume:track?.volume??(window.RUU_AUDIO?.volume('bgm')??.8)};
    state='bossbreak';g.bossBreaks=(g.bossBreaks||0)+1;
    ui.pause.disabled=true;keys.clear();joy.active=false;
-   if(track&&!track.paused)track.volume=Math.min(.39,bossBreakScene.oldVolume);
+   if(track&&!track.paused)track.volume=Math.min((window.RUU_AUDIO?.volume('bgm')??.8)*(.39/.8),bossBreakScene.oldVolume);
    g.shake=30;g.flash=.42;sfx('bossBreak');
  }
  function updateBossBreak(dt){
@@ -1075,15 +1083,15 @@ const WALK_ATLAS=new Image();WALK_ATLAS.src='assets/ruu_walk_atlas.webp';
     if(win){sfx('victory');if(g.mode==='normal'){awardAchievement('clear');if(g.damageTaken===0)awardAchievement('flawless');}}else if(!deathSequenceDone)sfx('defeat');saveBest();pauseAllMusic();ui.pause.disabled=true;ui.bossbar.style.display='none';
    if(win){startEndingCinema(false);return;}
    state='lost';musicIndicator.classList.remove('visible');musicMeter.classList.remove('visible');
-   setOverlay(`<div class="eyebrow">${g.mode==='endless'?'∞ ENDLESS // SURVIVAL RECORD':'SIGNAL LOST // MISSION FAILED'}</div><h2 class="result-title defeat">${g.mode==='endless'?'ENDLESS OVER':g.mode==='challenge'?'TRIAL FAILED':'GAME OVER'}</h2>${g.mode==='challenge'?'<div class="challenge-result-stamp">'+(g.challengeOutcome?.reason||'未達成')+'</div>':''}<p class="intro">終わりじゃない。次は、もう少し遠くまで。</p>${equippedTitle()?'<div class="equipped-title">✧ EQUIPPED TITLE / '+equippedTitle()+'</div>':''}${window.RUU_PILOTS?.status()?.name?'<div class="equipped-title">SUPPORT PILOT / '+window.RUU_PILOTS.status().name+'</div>':''}${window.RUU_STYLE?.resultHtml(g)||''}<div class="result-stats"><div>TIME<strong>${formatTime(g.time)}</strong></div><div>KILLS<strong>${g.kills}</strong></div><div>LEVEL<strong>${g.level}</strong></div><div>SCORE<strong>${Math.floor(g.score).toLocaleString('ja-JP')}</strong></div><div>RARE<strong>${g.rareFinds}</strong></div><div>RELICS<strong>${g.crates}</strong></div><div>MYTHIC<strong>${g.mythicFinds}</strong></div><div>MAX CHAIN<strong>${g.maxCombo||0}</strong></div></div><button class="primary" id="retryBtn">↻ もう一度</button><div class="help">RUU//OVERRUN v1.34.0 PUBLIC BETA · © JACKPOTØ31</div>`);
+   setOverlay(`<div class="eyebrow">${g.mode==='endless'?'∞ ENDLESS // SURVIVAL RECORD':'SIGNAL LOST // MISSION FAILED'}</div><h2 class="result-title defeat">${g.mode==='endless'?'ENDLESS OVER':g.mode==='challenge'?'TRIAL FAILED':'GAME OVER'}</h2>${g.mode==='challenge'?'<div class="challenge-result-stamp">'+(g.challengeOutcome?.reason||'未達成')+'</div>':''}<p class="intro">終わりじゃない。次は、もう少し遠くまで。</p>${equippedTitle()?'<div class="equipped-title">✧ EQUIPPED TITLE / '+equippedTitle()+'</div>':''}${window.RUU_PILOTS?.status()?.name?'<div class="equipped-title">SUPPORT PILOT / '+window.RUU_PILOTS.status().name+'</div>':''}${window.RUU_STYLE?.resultHtml(g)||''}<div class="result-stats"><div>TIME<strong>${formatTime(g.time)}</strong></div><div>KILLS<strong>${g.kills}</strong></div><div>LEVEL<strong>${g.level}</strong></div><div>SCORE<strong>${Math.floor(g.score).toLocaleString('ja-JP')}</strong></div><div>RARE<strong>${g.rareFinds}</strong></div><div>RELICS<strong>${g.crates}</strong></div><div>MYTHIC<strong>${g.mythicFinds}</strong></div><div>MAX CHAIN<strong>${g.maxCombo||0}</strong></div></div><button class="primary" id="retryBtn">↻ もう一度</button><div class="help">RUU//OVERRUN v1.35.0 PUBLIC BETA · © JACKPOTØ31</div>`);
    document.getElementById('retryBtn').onclick=()=>startGame(g?.mode||'normal',g?.challengeId||'');
  }
 
- function toast(msg,special=false){ui.toasts.innerHTML=`<div class="toast ${special?'special':''}">${msg}</div>`;setTimeout(()=>{if(ui.toasts.firstElementChild?.textContent===msg)ui.toasts.innerHTML=''},2300)}
+ function toast(msg,special=false){if(typeof msg==='string'&&msg.startsWith('RUU STYLE UNLOCKED // '))sfx('styleUnlock');ui.toasts.innerHTML=`<div class="toast ${special?'special':''}">${msg}</div>`;setTimeout(()=>{if(ui.toasts.firstElementChild?.textContent===msg)ui.toasts.innerHTML=''},2300)}
  function makeEnemy(kind,x,y,scale=1){let data={wisp:{r:16,hp:24,speed:78,dmg:10,xp:5,col:'#ffc46e'},runner:{r:13,hp:17,speed:135,dmg:8,xp:6,col:'#ff7168'},brute:{r:25,hp:77,speed:50,dmg:18,xp:13,col:'#83f5ef'},caster:{r:18,hp:33,speed:65,dmg:11,xp:8,col:'#a4acff'},hex:{r:18,hp:40,speed:61,dmg:9,xp:10,col:'#ff91e2'},boss:{r:57,hp:510,speed:48,dmg:22,xp:110,col:'#ff539b'},final:{r:70,hp:950,speed:63,dmg:29,xp:200,col:'#ffbd74'},true_devora:{r:39,hp:850,speed:90,dmg:16,xp:55,col:'#f575ce'},secret_ruu:{r:34,hp:2900,speed:0,dmg:17,xp:200,col:'#d4baae'},enemy_astraea:{r:42,hp:3960,speed:0,dmg:18,xp:200,col:'#ff7195'}}[kind];let isBoss=kind==='boss'||kind==='final'||kind==='secret_ruu'||kind==='enemy_astraea';let mult=(1+g.time*.012)*scale;const bossScale=isBoss&&g.mode==='endless'?1+Math.min(7,Math.max(0,g.time-100)*.013):1;
  const e={kind,x,y,r:data.r,hp:data.hp*(isBoss?bossScale:mult),maxHp:data.hp*(isBoss?bossScale:mult),speed:data.speed*(isBoss?1:1+Math.min(.45,g.time*.005)),dmg:data.dmg,xp:data.xp,col:data.col,attack:0,shoot:rand(.8,2.5),orbCd:0,novaCd:0,slow:0,wellCd:0,flash:0,t:rand(0,5),dir:Math.random()*TAU,pushX:0,pushY:0};g.enemies.push(e);return e}
  function spawnEnemy(){let a=rand(0,TAU),r=rand(530,745),x=g.player.x+Math.cos(a)*r,y=g.player.y+Math.sin(a)*r;let q=Math.random(),k='wisp';if(g.time>15&&q<.26)k='runner';else if(g.time>26&&q<.42)k='brute';else if(g.time>48&&q<.56)k='caster';else if(g.time>56&&q<.70)k='hex';const e=makeEnemy(k,x,y);window.RUU_MUTATION?.decorate(e,g)}
- function spawnBoss(final=false){g.sceneBoss=2.9;g.scenePulse=.86;sfx('boss');const a=rand(0,TAU),r=500,e=makeEnemy(final?'final':'boss',g.player.x+Math.cos(a)*r,g.player.y+Math.sin(a)*r);window.RUU_MUTATION?.bossSpawn(e);g.shake=24;g.flash=.55;showBossAlert(final);if(fxMax){shockwave(g.player.x,g.player.y,380,final?'#ffe8ae':'#ff8bd1');sparkBurst(g.player.x,g.player.y,final?'#ffe7ad':'#ff8ada',50,300)};burst(e.x,e.y,final?'#ffe28f':'#ff70c6',80,220);toast(final?'FINAL BOSS // NULL EMPEROR':'WARNING // DEVORA APPROACHES',true);if(final){g.boss2=true;window.RUU_COMPANION?.onFinalBossSpawn?.(g,{wave:shockwave,burst,sound:sfx,toast},fxPreset)}else g.boss1=true}
+ function spawnBoss(final=false){g.sceneBoss=2.9;g.scenePulse=.86;sfx('boss',{cue:final?'nullEmperor':'devora'});const a=rand(0,TAU),r=500,e=makeEnemy(final?'final':'boss',g.player.x+Math.cos(a)*r,g.player.y+Math.sin(a)*r);window.RUU_MUTATION?.bossSpawn(e);g.shake=24;g.flash=.55;showBossAlert(final);if(fxMax){shockwave(g.player.x,g.player.y,380,final?'#ffe8ae':'#ff8bd1');sparkBurst(g.player.x,g.player.y,final?'#ffe7ad':'#ff8ada',50,300)};burst(e.x,e.y,final?'#ffe28f':'#ff70c6',80,220);toast(final?'FINAL BOSS // NULL EMPEROR':'WARNING // DEVORA APPROACHES',true);if(final){g.boss2=true;window.RUU_COMPANION?.onFinalBossSpawn?.(g,{wave:shockwave,burst,sound:sfx,toast},fxPreset)}else g.boss1=true}
 
  function sparkBurst(x,y,col,n=12,power=190){
    if(!g)return;
@@ -1316,7 +1324,7 @@ const WALK_ATLAS=new Image();WALK_ATLAS.src='assets/ruu_walk_atlas.webp';
    g.player.inv=Math.max(g.player.inv,.45);
    pulseGhost(g.player.x,g.player.y,2);shockwave(g.player.x,g.player.y,170,f.color);window.RUU_SPECTACLE?.onFinisher(index,g.player,f.color,fxPreset);window.RUU_PREMIUM?.finisher(index,g.player,fxPreset);
    ui.toasts.innerHTML='';sfx('signature');
-    sfx(index===1||index===6?'rail':index===2?'fireworks':index===4?'frost':index===5?'rift':index===7?'bolt':index===8?'cross':'jackpot');
+    if(!window.RUU_AUDIO)sfx(index===1||index===6?'rail':index===2?'fireworks':index===4?'frost':index===5?'rift':index===7?'bolt':index===8?'cross':'ultimatePulse');
  }
  function ultimateHit(e,base,col,kx=0,ky=0){
    if(!e||e.hp<=0)return;
@@ -1483,7 +1491,7 @@ const WALK_ATLAS=new Image();WALK_ATLAS.src='assets/ruu_walk_atlas.webp';
  if(e.kind==='final')window.RUU_TRUE_END?.queue(g,e);
  // Rewards come AFTER both HP gates; bonus healing cannot change either decision.
  window.RUU_BOSS_REWARDS?.onKill(e,g,{wave:shockwave,burst,sound:sfx,toast,text:floatText});
- if(g.kills===1)awardAchievement('first');if(g.kills===300)awardAchievement('kills300');if(g.kills===500)awardAchievement('kills500');if(g.kills%12===0||e.elite||e.kind==='boss'||e.kind==='final')g.scenePulse=Math.max(g.scenePulse,e.elite?.85:.55);g.combo++;g.maxCombo=Math.max(g.maxCombo||0,g.combo);g.comboTimer=4.5;if(window.RUU_EXPANSION?.comboMilestone(g.combo)){if(g.combo===50)awardAchievement('combo50');if(g.combo===100)awardAchievement('combo100');if(g.combo===200)awardAchievement('combo200');sfx('comboBig');}gainDrive(e.kind==='final'?35:e.kind==='boss'?25:e.elite?16:2.1);gainFinisher(e.kind==='final'?100:e.kind==='boss'?40:e.elite?18:4.5);if(g.combo>0&&g.combo%20===0){g.comboMilestones++;g.score+=g.combo*40;gainDrive(7);floatText(e.x,e.y-43,`CHAIN BONUS ×${g.combo}`,'#ffe4ab',19);sfx('combo')}if(e.elite){g.chests.push({x:e.x,y:e.y,t:0});if(g.chests.length>6)g.chests.shift();sfx('chest')} sfx(e.kind==='boss'||e.kind==='final'?'bossDown':'kill');hitImpact(e.x,e.y,e.col,e.kind==='boss'||e.kind==='final'?80:20);if(fxMax&&g.shards.length<125)sparkBurst(e.x,e.y,e.col,e.kind==='boss'||e.kind==='final'?30:5,e.kind==='boss'||e.kind==='final'?260:150);g.score+=(e.kind==='boss'?1800:e.kind==='final'?4200:100)*Math.min(4,1+Math.floor(g.combo/15)*.5);burst(e.x,e.y,e.col,e.kind==='boss'||e.kind==='final'?50:ri(5,10),e.r*4);spawnGem(e.x,e.y,e.xp);if(e.kind==='boss'||e.kind==='final'){shockwave(e.x,e.y,260,e.col);g.shake=27;g.flash=.5;for(let i=0;i<18;i++)spawnGem(e.x+rand(-70,70),e.y+rand(-70,70),8);if(e.kind==='final'){g.finalBossDead=true;awardAchievement('final')}else awardAchievement('boss');toast(e.kind==='final'?'NULL EMPEROR DEFEATED':'DEVORA DEFEATED',true);startBossBreak(e)}}
+ if(g.kills===1)awardAchievement('first');if(g.kills===300)awardAchievement('kills300');if(g.kills===500)awardAchievement('kills500');if(g.kills%12===0||e.elite||e.kind==='boss'||e.kind==='final')g.scenePulse=Math.max(g.scenePulse,e.elite?.85:.55);g.combo++;g.maxCombo=Math.max(g.maxCombo||0,g.combo);g.comboTimer=4.5;if(window.RUU_EXPANSION?.comboMilestone(g.combo)){if(g.combo===50)awardAchievement('combo50');if(g.combo===100)awardAchievement('combo100');if(g.combo===200)awardAchievement('combo200');sfx('comboBig');}gainDrive(e.kind==='final'?35:e.kind==='boss'?25:e.elite?16:2.1);gainFinisher(e.kind==='final'?100:e.kind==='boss'?40:e.elite?18:4.5);if(g.combo>0&&g.combo%20===0){g.comboMilestones++;g.score+=g.combo*40;gainDrive(7);floatText(e.x,e.y-43,`CHAIN BONUS ×${g.combo}`,'#ffe4ab',19);sfx('combo')}if(e.elite){g.chests.push({x:e.x,y:e.y,t:0});if(g.chests.length>6)g.chests.shift();sfx('chest')} sfx(e.kind==='boss'||e.kind==='final'?'bossDown':'kill',e);hitImpact(e.x,e.y,e.col,e.kind==='boss'||e.kind==='final'?80:20);if(fxMax&&g.shards.length<125)sparkBurst(e.x,e.y,e.col,e.kind==='boss'||e.kind==='final'?30:5,e.kind==='boss'||e.kind==='final'?260:150);g.score+=(e.kind==='boss'?1800:e.kind==='final'?4200:100)*Math.min(4,1+Math.floor(g.combo/15)*.5);burst(e.x,e.y,e.col,e.kind==='boss'||e.kind==='final'?50:ri(5,10),e.r*4);spawnGem(e.x,e.y,e.xp);if(e.kind==='boss'||e.kind==='final'){shockwave(e.x,e.y,260,e.col);g.shake=27;g.flash=.5;for(let i=0;i<18;i++)spawnGem(e.x+rand(-70,70),e.y+rand(-70,70),8);if(e.kind==='final'){g.finalBossDead=true;awardAchievement('final')}else awardAchievement('boss');toast(e.kind==='final'?'NULL EMPEROR DEFEATED':'DEVORA DEFEATED',true);startBossBreak(e)}}
  function applyDamage(e,dmg,kx=0,ky=0,col='#fcf2d1',limits=null){if(e.hp<=0||e.trueDevora&&window.RUU_TRUE_END?.isIntro?.(e)||(e.secretRuu||e.secretScreen)&&window.RUU_SECRET_BOSS?.isIntro?.(e)||e.enemyAstraea&&window.RUU_ENEMY_ASTRAEA?.isIntro?.(e))return 0; if(g.driveTime>0)dmg*=1.32;if(g.player.crit>0&&Math.random()<g.player.crit){dmg*=1.72;col='#ffe6a5';}dmg*=window.RUU_PILOTS?.markedMultiplier?.(e,g)||1;dmg=window.RUU_MUTATION?.modifyDamage(e,dmg,g,{sfx,text:floatText},fxPreset)??dmg;
  if(e.trueDevora||e.enemyAstraea)dmg*=.74; // Cores and hostile ASTRAEA retain a major-boss damage resistance.
  if(e.secretRuu)dmg*=.78; // Each ECLIPSE keeps its existing final-boss resistance.
@@ -1493,7 +1501,7 @@ const WALK_ATLAS=new Image();WALK_ATLAS.src='assets/ruu_walk_atlas.webp';
  if(limits?.nonlethal)dmg=Math.min(dmg,Math.max(0,e.hp-1));
  if(dmg<=0)return 0;
  const dealt=Math.min(e.hp,dmg);
- e.hp-=dmg;e.flash=.13;sfx('hit');window.RUU_SPECTACLE?.onHit(e,col,dmg,fxPreset,g.player);window.RUU_PREMIUM?.impact(e,col,dmg,fxPreset,g?.jackpotTime>0?g.jackpotType:-1);hitImpact(e.x,e.y,col,e.kind==='boss'||e.kind==='final'?22:13);e.pushX+=kx;e.pushY+=ky;floatText(e.x+rand(-12,12),e.y-e.r,Math.ceil(dmg),col,Math.min(22,12+dmg/18));if(e.hp<=0)killEnemy(e);return dealt;}
+ e.hp-=dmg;e.flash=.13;sfx('hit',e);window.RUU_SPECTACLE?.onHit(e,col,dmg,fxPreset,g.player);window.RUU_PREMIUM?.impact(e,col,dmg,fxPreset,g?.jackpotTime>0?g.jackpotType:-1);hitImpact(e.x,e.y,col,e.kind==='boss'||e.kind==='final'?22:13);e.pushX+=kx;e.pushY+=ky;floatText(e.x+rand(-12,12),e.y-e.r,Math.ceil(dmg),col,Math.min(22,12+dmg/18));if(e.hp<=0)killEnemy(e);return dealt;}
  function damagePlayer(dmg,x,y){const p=g.player;if(p.inv>0||state!=='playing')return;let remain=dmg;if(p.shield>0){const block=Math.min(p.shield,remain);p.shield-=block;remain-=block}p.hp=Math.max(0,p.hp-remain);window.RUU_MUTATION?.onPlayerHit(remain,g);sfx(remain>0?'hurt':'shield');p.inv=.65;g.shake=Math.min(20,g.shake+9);burst(p.x,p.y,'#ff7498',18,130);hitImpact(p.x,p.y,'#ff7aac',30);sparkBurst(p.x,p.y,'#ffbbac',20,210);floatText(p.x,p.y-38,`-${Math.ceil(dmg)}`,'#ffb2cf',19);if(remain>0){const brokenCombo=g.combo||0;g.combo=0;g.comboTimer=0;if(brokenCombo>=6)floatText(p.x,p.y-68,'COMBO BREAK ×'+brokenCombo,'#ff8ca3',16);g.damageTaken=(g.damageTaken||0)+remain;window.RUU_OPERATIONS?.onDamage(g,remain);}if(p.hp<=0)startDeathSequence()}
  function expToLevel(){if(state!=='playing'||g?.bossRewardCinematic>0||g?.finisherTime>0||g?.jackpotTime>0||window.RUU_TRUE_END?.isIntro?.()||window.RUU_SECRET_BOSS?.isIntro?.())return;const p=g.player;if(g.xp<g.need)return;g.xp-=g.need;g.level++;g.need=Math.floor(g.need*1.19+14);g.levelChoices=chooseUpgrades();state='levelup';if(musicStarted)musicOnScreen();g.flash=.23;sfx('levelup');renderCards();updateHUD()}
  const upgrades=[
@@ -1616,7 +1624,7 @@ function rollRareChoice(choices){
        toast(`${steps>=4?'MYTHIC':steps>=3?'JACKPOT':'RARE'} UPGRADE // ${u.name} +${steps}`,true);
      }
    }
-   sfx(u.type==='JACKPOT_MODE'?'jackpot':u.type==='EVOLUTION'||u.type==='FUSION'?'evolve':bonus>=4?'mythic':bonus>=3?'jackpot':bonus>=2?'rare':'select');
+   if(u.type!=='JACKPOT_MODE')sfx(u.type==='EVOLUTION'||u.type==='FUSION'?'evolve':bonus>=4?'mythic':bonus>=2?'rare':'select');
    state='playing';hideOverlay();
    if(jackpotChoice>=0)activateJackpot(jackpotChoice);
    if(musicStarted&&soundOn&&!activeMusic().paused)musicOnScreen();
@@ -1624,7 +1632,7 @@ function rollRareChoice(choices){
  }
  function fireBullet(x,y,vx,vy,dmg,r=7,pierce=0,col='#9afcf2',ttl=1.55){g.bullets.push({x,y,vx,vy,dmg,r,pierce,col,ttl,trail:[],hit:new Set()});if(g.bullets.length>150)g.bullets.shift()}
  function nearestEnemy(x,y,limit=720){let best=null,bd=limit*limit;for(const e of g.enemies){if(e.hp<=0)continue;let dx=e.x-x,dy=e.y-y,d=dx*dx+dy*dy;if(d<bd){bd=d;best=e}}return best}
- function attackPulse(){const p=g.player,level=p.mods.pulse,target=nearestEnemy(p.x,p.y,710);if(!target)return;sfx('shoot');let a=Math.atan2(target.y-p.y,target.x-p.x),count=1+Math.floor((level-1)/2)+(g.evolved?2:0),spread=g.evolved?.20:.16;for(let i=0;i<count;i++){let angle=a+(i-(count-1)/2)*spread,spd=g.evolved?710:580;fireBullet(p.x+Math.cos(angle)*25,p.y+Math.sin(angle)*25,Math.cos(angle)*spd,Math.sin(angle)*spd,p.damage*(1+(level-1)*.21)*(g.evolved?1.45:1),g.evolved?10:7,g.evolved?2:level>=5?1:0,g.evolved?'#ffe9a3':'#75fff3')}if(p.mods.echo){let copies=p.mods.echo;for(let i=1;i<=copies;i++){let off=(.19+.13*i);for(let s of [-1,1]){let angle=a+off*s;fireBullet(p.x,p.y,Math.cos(angle)*510,Math.sin(angle)*510,p.damage*.62,5,0,'#f99afc',1.1)}}}burst(p.x+Math.cos(a)*22,p.y+Math.sin(a)*22,g.evolved?'#ffedb1':'#81fff4',fxMax?9:4,90);addMuzzle(p.x+Math.cos(a)*24,p.y+Math.sin(a)*24,a,g.evolved?'#fff4c2':'#84ffef')}
+ function attackPulse(){const p=g.player,level=p.mods.pulse,target=nearestEnemy(p.x,p.y,710);if(!target)return;sfx('shoot',target);let a=Math.atan2(target.y-p.y,target.x-p.x),count=1+Math.floor((level-1)/2)+(g.evolved?2:0),spread=g.evolved?.20:.16;for(let i=0;i<count;i++){let angle=a+(i-(count-1)/2)*spread,spd=g.evolved?710:580;fireBullet(p.x+Math.cos(angle)*25,p.y+Math.sin(angle)*25,Math.cos(angle)*spd,Math.sin(angle)*spd,p.damage*(1+(level-1)*.21)*(g.evolved?1.45:1),g.evolved?10:7,g.evolved?2:level>=5?1:0,g.evolved?'#ffe9a3':'#75fff3')}if(p.mods.echo){let copies=p.mods.echo;for(let i=1;i<=copies;i++){let off=(.19+.13*i);for(let s of [-1,1]){let angle=a+off*s;fireBullet(p.x,p.y,Math.cos(angle)*510,Math.sin(angle)*510,p.damage*.62,5,0,'#f99afc',1.1)}}}burst(p.x+Math.cos(a)*22,p.y+Math.sin(a)*22,g.evolved?'#ffedb1':'#81fff4',fxMax?9:4,90);addMuzzle(p.x+Math.cos(a)*24,p.y+Math.sin(a)*24,a,g.evolved?'#fff4c2':'#84ffef')}
  function strikeLightning(){const p=g.player,lv=p.mods.lightning;if(!lv)return;let prev={x:p.x,y:p.y},used=new Set(),links=[];for(let n=0;n<lv+1;n++){let next=null,dd=285*285;for(let e of g.enemies){if(e.hp<=0||used.has(e))continue;let d=(e.x-prev.x)**2+(e.y-prev.y)**2;if(d<dd){dd=d;next=e}}if(!next)break;used.add(next);links.push({x1:prev.x,y1:prev.y,x2:next.x,y2:next.y});applyDamage(next,p.damage*(1.05+lv*.31)*(1-n*.09),0,0,'#a8caff');prev=next}if(links.length){sfx('bolt');g.lightningFx.push({links,life:.32});for(const l of links)hitImpact(l.x2,l.y2,'#a6d7ff',24)}}
  function applyNova(dt){const p=g.player,lv=p.mods.nova;if(!lv)return;g.novaT+=dt;let tick=1.25/(p.haste*(1+lv*.08));if(g.novaT>=tick){g.novaT-=tick;let r=95+lv*20;shockwave(p.x,p.y,r,'#df8bff');if(fxMax)shockwave(p.x,p.y,r*.67,'#9bcaff');sfx('nova');if(fxMax)sparkBurst(p.x,p.y,'#e9a7ff',24,240);for(let e of g.enemies){if(e.hp>0&&distance(p,e)<r+e.r)applyDamage(e,p.damage*(.72+lv*.2),0,0,'#e4b0ff')}}}
  function applyOrbit(dt){const p=g.player,lv=p.mods.orbit;if(!lv)return;let num=lv+1,rr=74+(lv*3);for(let j=0;j<num;j++){let a=g.time*(2.45+lv*.2)+j*TAU/num,x=p.x+Math.cos(a)*rr,y=p.y+Math.sin(a)*rr;for(let e of g.enemies){if(e.hp<=0||e.orbCd>0)continue;let dx=e.x-x,dy=e.y-y;if(dx*dx+dy*dy<(e.r+22)**2){e.orbCd=.3;let n=norm(dx,dy);applyDamage(e,p.damage*(.65+lv*.2)*dt*13,n.x*95,n.y*95,'#9effc7')}}}}
@@ -2309,7 +2317,7 @@ function rollRareChoice(choices){
  }
  for(let i=g.ebullets.length-1;i>=0;i--){let b=g.ebullets[i];b.ttl-=dt;b.x+=b.vx*dt;b.y+=b.vy*dt;if(b.ttl<=0){g.ebullets.splice(i,1);continue}if(distance(b,p)<p.r+b.r){if(b.debuff==='hex'){p.hexSlow=Math.max(p.hexSlow,2.2);floatText(p.x,p.y-51,'SIGNAL JAM','#f5a8e6',12);sfx('shield')}damagePlayer(b.damage,b.x,b.y);g.ebullets.splice(i,1)}}
  g.enemies=g.enemies.filter(e=>e.hp>0&&(e.kind==='boss'||e.kind==='final'||e.trueDevora||e.secretRuu||e.enemyAstraea||e.secretScreen||distance(e,p)<1800));
- for(let i=g.gems.length-1;i>=0;i--){let gem=g.gems[i];gem.t+=dt*3;let d=distance(gem,p);if(d<p.magnet){let n=norm(p.x-gem.x,p.y-gem.y),sp=lerp(180,800,1-d/p.magnet);gem.x+=n.x*sp*dt;gem.y+=n.y*sp*dt}if(d<30){window.RUU_PILOTS?.onGemPickup?.(gem,g,fxPreset);g.xp+=gem.xp*(window.RUU_PILOTS?.xpMultiplier?.()||1);g.score+=gem.xp*6;sfx('gem');burst(gem.x,gem.y,'#87fcd4',3,38);g.gems.splice(i,1)}}
+ for(let i=g.gems.length-1;i>=0;i--){let gem=g.gems[i];gem.t+=dt*3;let d=distance(gem,p);if(d<p.magnet){let n=norm(p.x-gem.x,p.y-gem.y),sp=lerp(180,800,1-d/p.magnet);gem.x+=n.x*sp*dt;gem.y+=n.y*sp*dt}if(d<30){window.RUU_PILOTS?.onGemPickup?.(gem,g,fxPreset);g.xp+=gem.xp*(window.RUU_PILOTS?.xpMultiplier?.()||1);g.score+=gem.xp*6;sfx('gem',gem);burst(gem.x,gem.y,'#87fcd4',3,38);g.gems.splice(i,1)}}
  for(let i=g.particles.length-1;i>=0;i--){let a=g.particles[i];a.life-=dt;a.x+=a.vx*dt;a.y+=a.vy*dt;a.vx*=.98;a.vy*=.98;if(a.life<=0)g.particles.splice(i,1)}
  for(let i=g.texts.length-1;i>=0;i--){g.texts[i].life-=dt;g.texts[i].y-=dt*37;if(g.texts[i].life<=0)g.texts.splice(i,1)}
  for(let i=g.waves.length-1;i>=0;i--){g.waves[i].t+=dt;if(g.waves[i].t>=g.waves[i].life)g.waves.splice(i,1)}
@@ -2810,7 +2818,7 @@ ui.healthFill.style.width=`${100*p.hp/p.maxHp}%`;ui.healthText.textContent=`${Ma
  function setExclusiveTrack(index){
    pauseAllMusic();const request=musicRequest;
    activeTrack=index;musicStarted=true;musicIndicator.classList.add('visible');musicMeter.classList.add('visible');
-   const el=ensureTrackLoaded(index);el.loop=index!==ENDING_TRACK_INDEX;el.volume=.8;el.muted=!soundOn;
+   const el=ensureTrackLoaded(index);el.loop=index!==ENDING_TRACK_INDEX;el.volume=(window.RUU_AUDIO?.volume('bgm')??.8);el.muted=!soundOn;
    try{el.currentTime=0}catch(e){}
    musicLabel('✦ JACKPOT SONG // '+MUSIC_TRACKS[index].title);
    if(soundOn)try{const prom=el.play();if(prom&&prom.catch)prom.catch(()=>{if(request!==musicRequest)return;showMusicRetry(true);musicLabel('✦ JACKPOT SONG / ▶ BGM再生')})}catch(e){showMusicRetry(true)}
@@ -2828,7 +2836,7 @@ ui.healthFill.style.width=`${100*p.hp/p.maxHp}%`;ui.healthText.textContent=`${Ma
    pauseAllMusic();const request=musicRequest;
    if(!musicStarted)musicStarted=true;
    activeTrack=ENDING_TRACK_INDEX;const el=ensureTrackLoaded(ENDING_TRACK_INDEX);
-   el.loop=false;el.muted=!soundOn;el.volume=.8;
+   el.loop=false;el.muted=!soundOn;el.volume=(window.RUU_AUDIO?.volume('bgm')??.8);
    try{el.currentTime=ENDING_AUDIO_CUE+position}catch(e){}
    if(el.readyState===0)el.addEventListener('loadedmetadata',()=>{
      if(request===musicRequest&&state==='ending'&&endingState)try{el.currentTime=ENDING_AUDIO_CUE+endingClock()}catch(e){}
@@ -2841,7 +2849,7 @@ ui.healthFill.style.width=`${100*p.hp/p.maxHp}%`;ui.healthText.textContent=`${Ma
    musicStarted=true;musicIndicator.classList.add('visible');musicMeter.classList.add('visible');showMusicRetry(false);
    pauseAllMusic();mixSlot=musicMode==='mix'?mixTargetIndex(0):0;activeTrack=musicMode==='mix'?mixSlot:Number(musicMode);
    const request=musicRequest;
-   const el=activeMusic();el.volume=.80;el.muted=!soundOn;
+   const el=activeMusic();el.volume=(window.RUU_AUDIO?.volume('bgm')??.8);el.muted=!soundOn;
    if(restart){try{el.currentTime=0}catch(e){}}
    if(!soundOn){musicLabel('♫ BGM OFF / PRESS M');return}
    musicLabel('♫ LOADING // '+nowTrackName());
@@ -2856,7 +2864,7 @@ ui.healthFill.style.width=`${100*p.hp/p.maxHp}%`;ui.healthText.textContent=`${Ma
      if(musicMode==='mix')mixSlot=activeTrack;
    }
    musicFade=null;for(let i=0;i<musicEls.length;i++){if(i!==activeTrack)musicEls[i].pause()}
-   const el=activeMusic();el.muted=false;el.volume=.80;
+   const el=activeMusic();el.muted=false;el.volume=(window.RUU_AUDIO?.volume('bgm')??.8);
    try{const promise=el.play();if(promise&&promise.then)promise.then(()=>{if(request!==musicRequest)return;musicOnScreen();showMusicRetry(false)}).catch(()=>{if(request!==musicRequest)return;showMusicRetry(true);musicLabel('♫ PRESS ▶ TO PLAY')})}
    catch(e){showMusicRetry(true)}
  }
@@ -2864,13 +2872,13 @@ ui.healthFill.style.width=`${100*p.hp/p.maxHp}%`;ui.healthText.textContent=`${Ma
    index=Math.max(0,Math.min(MUSIC_TRACKS.length-1,index|0));
    cancelPendingMusic();const request=musicRequest;
    if(index===activeTrack&&!force)return;
-   if(musicFade){musicFade.from.pause();musicFade.to.volume=.8;musicFade=null}
+   if(musicFade){musicFade.from.pause();musicFade.to.volume=(window.RUU_AUDIO?.volume('bgm')??.8);musicFade=null}
    const old=activeMusic(),next=ensureTrackLoaded(index);
    if(!musicStarted||!soundOn||state==='paused'||state==='won'||state==='lost'||state==='dying'||state==='ending'){
-     old.pause();activeTrack=index;next.volume=.8;musicLabel('♫ SELECTED // '+nowTrackName());return;
+     old.pause();activeTrack=index;next.volume=(window.RUU_AUDIO?.volume('bgm')??.8);musicLabel('♫ SELECTED // '+nowTrackName());return;
    }
    if(index===activeTrack){next.currentTime=0;resumeStageMusic();return}
-   next.muted=false;next.volume=.001;
+   next.muted=false;next.volume=Math.min(.001,(window.RUU_AUDIO?.volume('bgm')??.8));
    pendingMusic=next;
    try{next.currentTime=0}catch(e){}
    try{
@@ -2894,8 +2902,8 @@ ui.healthFill.style.width=`${100*p.hp/p.maxHp}%`;ui.healthText.textContent=`${Ma
    if(!musicFade)return;
    const f=musicFade;f.elapsed+=Math.min(.06,dt);
    const k=Math.min(1,f.elapsed/f.duration);
-   f.from.volume=Math.max(0,.80*(1-k));f.to.volume=.80*k;
-   if(k>=1){f.from.pause();f.from.volume=.80;unloadTrack(f.from);musicFade=null}
+   f.from.volume=Math.max(0,(window.RUU_AUDIO?.volume('bgm')??.8)*(1-k));f.to.volume=(window.RUU_AUDIO?.volume('bgm')??.8)*k;
+   if(k>=1){f.from.pause();f.from.volume=(window.RUU_AUDIO?.volume('bgm')??.8);unloadTrack(f.from);musicFade=null}
  }
  musicEls.forEach((el,i)=>{
    el.addEventListener('error',()=>{if(musicStarted&&i===activeTrack){musicLabel('♫ FILE ERROR / ZIPを展開して起動');showMusicRetry(true)}});
@@ -2920,22 +2928,28 @@ ui.healthFill.style.width=`${100*p.hp/p.maxHp}%`;ui.healthText.textContent=`${Ma
    if(g){const c1=next==='high'?180:next==='lite'?24:65,c2=next==='high'?35:next==='lite'?8:16;g.shards.splice(0,Math.max(0,g.shards.length-c1));g.impacts.splice(0,Math.max(0,g.impacts.length-c2))}
  }
  fxMode.onclick=()=>{const next=fxPreset==='auto'?'high':fxPreset==='high'?'lite':'auto';setFxPreset(next);if(g)toast('VISUAL FX // '+next.toUpperCase())};
- sfxToggle.onclick=()=>{sfxEnabled=!sfxEnabled;sfxToggle.textContent=sfxEnabled?'🔊 SFX ON':'🔇 SFX OFF';if(sfxEnabled){ensureAudio();sfx('select')}};
+ sfxToggle.onclick=()=>{sfxEnabled=!sfxEnabled;sfxToggle.textContent=sfxEnabled?'🔊 SFX ON':'🔇 SFX OFF';window.RUU_AUDIO?.syncMaster(audio,sfxEnabled);if(sfxEnabled)userSfx('select');};
  setFxPreset('auto');
 
  function getAudio(){
    try{
      if(audio)return audio;
      const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return null;
-     const ac=new AC({latencyHint:'interactive'}),gain=ac.createGain();gain.gain.value=.36;
+     const ac=new AC({latencyHint:'interactive'}),gain=ac.createGain();gain.gain.value=sfxEnabled?.45*(window.RUU_AUDIO?.volume('sfx')??.8):0;
      const limiter=ac.createDynamicsCompressor();limiter.threshold.value=-13;limiter.knee.value=17;limiter.ratio.value=8;limiter.attack.value=.003;limiter.release.value=.14;
      gain.connect(limiter);limiter.connect(ac.destination);
      const noise=ac.createBuffer(1,Math.ceil(ac.sampleRate*.25),ac.sampleRate),d=noise.getChannelData(0);
      for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;
-     audio={ac,gain,noise};return audio;
+     audio={ac,gain,noise};window.RUU_AUDIO?.prime(audio);return audio;
    }catch(e){return null}
  }
- function ensureAudio(){if(!sfxEnabled)return;let a=getAudio();if(!a)return; if(a.ac.state==='suspended')a.ac.resume().catch(()=>{})}
+ function ensureAudio(){if(!sfxEnabled)return;let a=getAudio();if(!a)return;if(a.ac.state!=='running'&&a.ac.state!=='closed')a.ac.resume().catch(()=>{})}
+ function userSfx(name){
+   if(!sfxEnabled)return;const a=getAudio();if(!a)return;const run=g;
+   const play=()=>{if(sfxEnabled&&(name!=='start'||(g===run&&state==='playing')))sfx(name);};
+   if(a.ac.state==='running')play();
+   else if(a.ac.state!=='closed')try{Promise.resolve(a.ac.resume()).then(play).catch(()=>{});}catch(e){}
+ }
  function tone(freq,start,dur,type='sine',volume=.15,to=null){
    if(!audio||!sfxEnabled||audio.ac.state!=='running')return;
    let {ac,gain}=audio,o=ac.createOscillator(),v=ac.createGain();
@@ -2953,12 +2967,20 @@ ui.healthFill.style.width=`${100*p.hp/p.maxHp}%`;ui.healthText.textContent=`${Ma
    gain.gain.exponentialRampToValueAtTime(.001,start+dur);
    src.connect(filter);filter.connect(gain);gain.connect(a.gain);src.start(start);src.stop(start+dur+.005);
  }
- const SFX_GAP={pilotArrival:1,pilotElio:.7,pilotOz:.7,pilotKai:.45,pilotSera:.7,pilotMina:.7,heartbeat:.75,bossBreak:2.2,comboBig:.55,death:3,deathEcho:1.2,shoot:.13,hit:.095,kill:.12,gem:.16,dash:.08,levelup:.18,select:.05,start:.5,hurt:.45,boss:2,evolve:.5,victory:1,defeat:1,bolt:.43,nova:.9,shield:.4,bossDown:2,sonic:.8,prism:1.3,shard:.32,elite:2,drive:3,chest:.6,satellite:1.0,rift:.8,fireworks:.7,cross:1.1,signature:2,ultimatePulse:.32,combo:.65,reroll:.08,mythic:.6,meteor:1,rail:.9,frost:.3,well:1.3,missile:.22,explosion:.15,rare:.35,jackpot:.6};
- function sfx(name){
+ const SFX_GAP={menu:.075,styleUnlock:.8,pilotArrival:1,pilotElio:.7,pilotOz:.7,pilotKai:.45,pilotSera:.7,pilotMina:.7,heartbeat:.75,bossBreak:2.2,comboBig:.55,death:3,deathEcho:1.2,shoot:.13,hit:.095,kill:.12,gem:.16,dash:.08,levelup:.18,select:.05,start:.5,hurt:.45,boss:2,evolve:.5,victory:1,defeat:1,bolt:.43,nova:.9,shield:.4,bossDown:2,sonic:.8,prism:1.3,shard:.32,elite:2,drive:3,chest:.6,satellite:1.0,rift:.8,fireworks:.7,cross:1.1,signature:2,ultimatePulse:.32,combo:.65,reroll:.08,mythic:.6,meteor:1,rail:.9,frost:.3,well:1.3,missile:.22,explosion:.15,rare:.35,jackpot:.6};
+ function sfx(name,where=null){
    if(!sfxEnabled||!audio||audio.ac.state!=='running')return;
-   const now=audio.ac.currentTime,prev=sfxCooldown[name]??-1e6;
+   const opt={cue:where?.cue,jackpotType:g?.jackpotType,finisherType:g?.finisherType};
+   const p=g?.player;
+   if(p&&Number.isFinite(where?.x)&&Number.isFinite(where?.y)){
+     opt.pan=Math.max(-.85,Math.min(.85,(where.x-p.x)/600));
+     opt.distance=Math.hypot(where.x-p.x,where.y-p.y);
+   }
+   const key=opt.cue&&window.RUU_AUDIO?.resolve(name,opt)===opt.cue?'cue:'+opt.cue:name;
+   const now=audio.ac.currentTime,prev=sfxCooldown[key]??-1e6;
    if(now-prev<(SFX_GAP[name]||0))return;
-   sfxCooldown[name]=now;
+   sfxCooldown[key]=now;
+   if(window.RUU_AUDIO?.play(name,audio,opt))return;
    if(window.RUU_PREMIUM?.playSound(name,audio,g?.jackpotType,g?.jackpotTime>0))return;
    switch(name){
      case 'shoot':tone(760,now,.065,'triangle',.09,330);noiseShot(now,.026,.037,3200);break;
@@ -3017,6 +3039,13 @@ ui.healthFill.style.width=`${100*p.hp/p.maxHp}%`;ui.healthText.textContent=`${Ma
  }
  function updateMusic(){} // Gameplay BGM is the user's supplied track, never synthetic backing.
  function playDash(){sfx('dash')}
+ // Capture before menu handlers replace the menu. The gesture also unlocks WebAudio.
+ ui.menu.addEventListener('click',ev=>{
+   if(!ev.isTrusted||!['start','title-menu','style'].includes(state))return;
+   const btn=ev.target?.closest?.('button');
+   if(!btn||btn.disabled||['startBtn','endlessBtn','audioPreview'].includes(btn.id)||btn.matches('[data-trial],[data-kv-toggle="sfxToggle"]'))return;
+   userSfx('menu');
+ },true);
 
   ui.mute.onclick=()=>{if(state==='ending'){endingDom.sound.click();return;}soundOn=!soundOn;ui.mute.textContent=soundOn?'♫ BGM ON':'♫ BGM OFF';if(soundOn){if(musicStarted&&state!=='paused'&&state!=='lost'&&state!=='won')resumeStageMusic();else musicLabel('♫ BGM ON')}else{pauseAllMusic();musicLabel('♫ BGM OFF // PRESS M');showMusicRetry(false)}};ui.pause.onclick=togglePause;loadoutButton.onclick=showRunInspector;quickLoadoutButton.onclick=showRunInspector;ui.mobileDash.addEventListener('pointerdown',ev=>{ev.preventDefault();dash()});
  window.addEventListener('keydown',ev=>{let k=ev.key.toLowerCase();if(state==='title-menu'||(state==='start'&&!document.getElementById('startBtn'))){if(k==='escape'&&!ev.repeat){ev.preventDefault();showStart();}return;}if(state==='start'&&ev.target?.closest?.('button,input,select,textarea,a,[contenteditable]'))return;if(state==='style'){if(k==='escape'&&!ev.repeat){ev.preventDefault();showStart();}return;}if(['arrowup','arrowdown','arrowleft','arrowright',' ','1','2','3'].includes(k))ev.preventDefault();if(state==='ending'&&k==='escape'&&!ev.repeat){endingDom.skip.click();return;}if(state==='dying'){if(!ev.repeat&&(k==='enter'||k==='escape')&&deathScene?.elapsed>.65)finishDeathSequence();return;}if(state==='bossbreak')return;if(k==='m'&&!ev.repeat)ui.mute.click();if(k==='n'&&!ev.repeat)sfxToggle.click();if(k==='v'&&!ev.repeat)animToggle.click();if(k==='g'&&!ev.repeat){sceneToggle.click();return}if(k==='b'&&!ev.repeat){trackSelect.selectedIndex=(trackSelect.selectedIndex+1)%(NORMAL_TRACK_COUNT+1);trackSelect.dispatchEvent(new Event('change'));return}if(k==='f'&&!ev.repeat){finisherSelect.selectedIndex=(finisherSelect.selectedIndex+1)%finisherSelect.options.length;finisherSelect.dispatchEvent(new Event('change'));return}if(k==='i'&&!ev.repeat){if(inspectorOpen)closeRunInspector();else showRunInspector();return}if(k==='escape'||k==='p'){if(!ev.repeat)togglePause();return}if(state==='start'&&k==='enter'){startGame();return}if(state==='levelup'&&k==='r'&&!ev.repeat){rerollUpgrades();return}if(state==='levelup'&&['1','2','3'].includes(k)){selectUpgrade(Number(k)-1);return}if(k===' '&&!ev.repeat){dash();return}keys.add(k)});
@@ -3098,8 +3127,8 @@ ui.healthFill.style.width=`${100*p.hp/p.maxHp}%`;ui.healthText.textContent=`${Ma
    level: Math.max(1, Math.floor(g?.level || 1)),
    durationSeconds: Math.max(0, Math.floor(g?.time || 0)),
    won: state === 'won',
-   version: '1.34.0',
-   operation: 'KEY VISUAL',
+   version: '1.35.0',
+   operation: 'SOUND OVERDRIVE',
    styleName: window.RUU_STYLE?.name(g?.ruuStyle)||'DEFAULT',
     mode: g?.mode==='challenge'?'challenge':g?.mode==='endless'?'endless':'normal',
      challengeId:g?.challengeId||'',

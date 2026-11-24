@@ -1,8 +1,18 @@
-# RUU//OVERRUN — PUBLIC BETA (v1.34.0)
+# RUU//OVERRUN — PUBLIC BETA (v1.35.0)
 
 JACKPOTØ31が制作するオリジナル・ブラウザサバイバルアクション。
 
 **[ゲームを遊ぶ](https://jackpot031.github.io/ruu-overrun/)** / **[公開開始v1.5.3からの更新履歴](./CHANGELOG.md)**
+
+## v1.35.0 — SOUND OVERDRIVE / AUDIO REFORGE
+
+- 効果音を専用のWeb Audioエンジンに刷新。射撃・命中・撃破・結晶回収・ダッシュ・武器・報酬などのオリジナル多層波形、低域インパクト、金属共鳴、短いステレオ残響を生成。
+- 9種類のSIGNATURE FINISHER、3種類のJACKPOT MODE、DEVORA、NULL EMPEROR、TRUE DEVORAの3体／5体編成、ECLIPSE、敵ASTRAEAなどに専用の音。衣装解放音・メニュー選択音・敗北シネマも刷新。
+- 命中・撃破・射撃方向・結晶回収は位置による左右定位と距離補正に対応。軽いピッチ変化で連続効果音の単調さを抑える。
+- 同時発音24音（通常音16音、重要音用の枠を確保）、サンプルキャッシュと頻出音の分割事前生成。既存のSFXクールダウン、コンプレッサーを維持。旧音響処理はフォールバックとして残す。
+- SETTINGSにBGM / SFX音量（各0〜100%、初期80%）と効果音試聴を追加。個別にlocalStorage保存。BGMの再生・クロスフェード・JACKPOT専用曲・ED・撃破シネマの音量処理にも適用。SFX OFFで新しいエンジンの再生中の音も停止する。
+- 戦闘・当たり判定・JACKPOT MODE出現率・衣装解放・ランキング・全16曲の音源は変更しない。音量操作の可否はブラウザのメディア実装にも依存する。
+- テスト: `node tests/audio-engine.test.cjs`。波形生成とモックWeb Audioによる検証。実機での聴感・端末負荷は未測定。
 
 ## v1.34.0 — KEY VISUAL / TITLE REFORGE
 

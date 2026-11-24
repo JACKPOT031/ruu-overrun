@@ -65,7 +65,7 @@ function spawnQueued(g,api){
  g.shake=Math.max(g.shake||0,S.rare?30:23);g.scenePulse=Math.max(g.scenePulse||0,S.rare?1.6:1.2);
  api?.wave?.(p.x,p.y,S.rare?415:330,S.rare?'#ff5389':'#df78c5');
  api?.burst?.(p.x,p.y,S.rare?'#ff5389':'#f9a0ee',S.rare?62:43,270);
- api?.sound?.('bossBreak');api?.toast?.(S.rare?'DEVORA QUINTET // EXTINCTION PROTOCOL':'DEVORA TRINITY // TRUE END',true);
+ api?.sound?.('bossBreak',{cue:S.rare?'trueQuintet':'trueTrinity'});api?.toast?.(S.rare?'DEVORA QUINTET // EXTINCTION PROTOCOL':'DEVORA TRINITY // TRUE END',true);
  return true;
 }
 function isIntro(e){return e?.secretReinforcement?!!e.trueDevora&&e.trueIntro>0:S.active&&S.intro>0}
