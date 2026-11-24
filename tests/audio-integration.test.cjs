@@ -25,6 +25,15 @@ test('player muzzle stays centered while target impacts retain their own positio
  near(sounds[1][1].pan,0);near(sounds[1][1].distance,0);near(bullets[1][2],-580);
  box.sfx('hit',target);near(sounds[2][1].pan,-.5);near(sounds[2][1].distance,300);
 });
+test('live audition uses the actual shot without consuming combat cooldown or bypassing mute',()=>{
+ const {box,sounds}=fixture();box.getAudio=()=>box.audio;
+ vm.runInContext(section('function userSfx(name','function tone('),box);
+ box.sfx('shoot');assert.equal(sounds.length,1);const cooldown=box.sfxCooldown.shoot;
+ box.userSfx('shoot',{preview:true});assert.equal(sounds.length,2);near(box.sfxCooldown.shoot,cooldown);
+ box.userSfx('shoot');assert.equal(sounds.length,2,'normal gesture still respects combat cooldown');
+ box.sfxEnabled=false;box.userSfx('shoot',{preview:true});assert.equal(sounds.length,2,'muted preview never reaches playback');
+ box.sfxEnabled=true;box.audio.ac.state='closed';box.userSfx('shoot',{preview:true});assert.equal(sounds.length,2);
+});
 test('different boss warnings do not mask each other; repeated cue cooldown',()=>{const {box,sounds}=fixture();box.sfx('boss',{cue:'devora'});box.sfx('boss',{cue:'nullEmperor'});box.sfx('boss',{cue:'devora'});assert.equal(sounds.length,2);box.sfxEnabled=false;box.sfx('gem');assert.equal(sounds.length,2);});
 test('old audio fallback remains usable when new module unavailable',()=>{const {box,old}=fixture();delete box.window.RUU_AUDIO;box.sfx('hit');assert.equal(old.length,1);});
 test('selected BGM volume in battle, exclusive song, ending and resume',()=>{const {box,musicEls,levels}=fixture();box.startStageMusic();near(musicEls[0].volume,.37);box.setExclusiveTrack(14);near(musicEls[14].volume,.37);box.playEndingSong(true);near(musicEls[15].volume,.37);box.soundOn=true;box.state='playing';box.resumeStageMusic();near(musicEls[0].volume,.37);levels.bgm=0;box.soundOn=false;box.setExclusiveTrack(12);near(musicEls[12].volume,0);box.playEndingSong(true);near(musicEls[15].volume,0);});

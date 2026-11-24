@@ -2,7 +2,7 @@
 (()=>{
 'use strict';
 const ART='assets/title-keyvisual.webp?v=1.34.0';
-const version='v1.38.0';
+const version='v1.39.0';
 const btn=(id,label,sub,extra='')=>`<button id="${id}" type="button" class="kv-button ${extra}"><span>${label}</span><small>${sub}</small></button>`;
 const safeCount=(n,limit)=>Math.min(limit,Math.max(0,Math.floor(Number(n)||0)));
 const score=n=>Number.isFinite(n)&&n>=0?Math.floor(n).toLocaleString('ja-JP'):'—';
@@ -14,7 +14,7 @@ function home({unlocked=1,best=null,normal=false,complete=false}={}){
  <div class="kv-edition"><i>///</i> ${version} <span>PUBLIC BETA</span></div>
  <div class="menu-copy kv-rail">
   <div class="kv-brand">JACKPOT<b>Ø</b>31 <span>/ ORIGINAL GAME</span></div>
-  <div class="kv-signal"><i></i> SPECTRAL FORGE // RUU STYLE</div>
+  <div class="kv-signal"><i></i> SPELL RESONANCE // RUU STYLE</div>
   <p class="kv-intro">押し寄せる侵食を生き抜き、<br>最後の脅威を撃ち砕け。</p>
   <button id="startBtn" class="kv-button kv-start" type="button"><span>▶ START GAME</span><small>NORMAL // DEPLOY　[ENTER]</small></button>
   <nav class="kv-nav" aria-label="メインメニュー">
