@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#070b17">
-<title>RUU//OVERRUN — SIGNAL EDGE / JACKPOTØ31</title>
+<title>RUU//OVERRUN — SPECTRAL FORGE / JACKPOTØ31</title>
 <style>
 :root{--cyan:#66fff1;--mint:#80ffb3;--pink:#ff5fcf;--gold:#ffe59e;--ink:#080c17;--line:#394963}
 *{box-sizing:border-box}html,body{margin:0;min-height:100%;background:#060a12;color:#effbff;font-family:"Yu Gothic","Hiragino Kaku Gothic ProN",Meiryo,system-ui,sans-serif}
@@ -368,7 +368,7 @@ a.ending-control,a.ending-art-link{text-decoration:none;display:inline-flex;alig
 </head>
 <body>
 <div class="shell">
- <div class="upper"><div class="brand">JACKPOT<b>Ø</b>31 <span style="color:#667f95">/ ORIGINAL GAMES</span></div><div class="build">RUU//OVERRUN <b>v1.37.0</b> · SIGNAL EDGE</div></div>
+ <div class="upper"><div class="brand">JACKPOT<b>Ø</b>31 <span style="color:#667f95">/ ORIGINAL GAMES</span></div><div class="build">RUU//OVERRUN <b>v1.38.0</b> · SPECTRAL FORGE</div></div>
  <main class="frame" id="frame">
   <canvas id="game" width="1200" height="675" aria-label="ルーのサバイバルアクションゲーム"></canvas>
   <div class="hud" id="hud">
@@ -425,9 +425,9 @@ a.ending-control,a.ending-art-link{text-decoration:none;display:inline-flex;alig
 <script src="survival-trials.js?v=1.23.1"></script>
 <script src="performance-engine.js?v=1.32.1"></script>
 <script src="ruu-style.js?v=1.34.0"></script>
-<script src="audio-engine.js?v=1.37.0"></script>
-<script src="audio-mixer.js?v=1.37.0"></script>
-<script src="title-screen.js?v=1.37.0"></script>
+<script src="audio-engine.js?v=1.38.0"></script>
+<script src="audio-mixer.js?v=1.38.0"></script>
+<script src="title-screen.js?v=1.38.0"></script>
 <script>
 (()=>{
  'use strict';
@@ -878,7 +878,7 @@ const WALK_ATLAS=new Image();WALK_ATLAS.src='assets/ruu_walk_atlas.webp';
    state='won';
    const completeClear=!!g?.secretBossCleared;
    const t=formatTime(g.time);
-   setOverlay(`<div class="eyebrow">MISSION COMPLETE // EPILOGUE</div><h2 class="result-title">${g.mode==='challenge'?(g.challengeOutcome?.success?'TRIAL CLEARED':'TRIAL FAILED'):completeClear?'COMPLETE CLEAR':'SURVIVED'}</h2>${g.mode==='challenge'?'<div class="challenge-result-stamp">'+(g.challengeOutcome?.success?'CHALLENGE TITLE UNLOCKED':g.challengeOutcome?.reason||'条件未達成')+'</div>':''}<p class="intro">${completeClear?'完全クリアおめでとうございます。<br>結果カードを保存して、JACKPOTØ31のDMへ送ってね。':'旅は、まだ続いている。'}<br><span style="color:#e9c695">エンディングテーマ：さすらえば / JACKPOTØ31</span></p>${equippedTitle()?'<div class="equipped-title">✧ EQUIPPED TITLE / '+equippedTitle()+'</div>':''}${window.RUU_PILOTS?.status()?.name?'<div class="equipped-title">SUPPORT PILOT / '+window.RUU_PILOTS.status().name+'</div>':''}${window.RUU_STYLE?.resultHtml(g)||''}<div class="result-stats"><div>TIME<strong>${t}</strong></div><div>KILLS<strong>${g.kills}</strong></div><div>LEVEL<strong>${g.level}</strong></div><div>SCORE<strong>${Math.floor(g.score).toLocaleString('ja-JP')}</strong></div><div>RARE<strong>${g.rareFinds}</strong></div><div>RELICS<strong>${g.crates}</strong></div><div>MYTHIC<strong>${g.mythicFinds}</strong></div><div>MAX CHAIN<strong>${g.maxCombo||0}</strong></div></div><button class="primary" id="retryBtn">↻ もう一度</button><button class="primary" id="endingReplay" style="margin-left:12px">♫ EDをもう一度</button>${completeClear?`<a class="enemy-archive-btn ending-art-link" href="${COMPLETE_ENDING_POSTER}" target="_blank" rel="noopener">完全クリアイラストを拡大 ↗</a>`:''}<div class="help">RUU//OVERRUN v1.37.0 PUBLIC BETA · © JACKPOTØ31</div>`);
+   setOverlay(`<div class="eyebrow">MISSION COMPLETE // EPILOGUE</div><h2 class="result-title">${g.mode==='challenge'?(g.challengeOutcome?.success?'TRIAL CLEARED':'TRIAL FAILED'):completeClear?'COMPLETE CLEAR':'SURVIVED'}</h2>${g.mode==='challenge'?'<div class="challenge-result-stamp">'+(g.challengeOutcome?.success?'CHALLENGE TITLE UNLOCKED':g.challengeOutcome?.reason||'条件未達成')+'</div>':''}<p class="intro">${completeClear?'完全クリアおめでとうございます。<br>結果カードを保存して、JACKPOTØ31のDMへ送ってね。':'旅は、まだ続いている。'}<br><span style="color:#e9c695">エンディングテーマ：さすらえば / JACKPOTØ31</span></p>${equippedTitle()?'<div class="equipped-title">✧ EQUIPPED TITLE / '+equippedTitle()+'</div>':''}${window.RUU_PILOTS?.status()?.name?'<div class="equipped-title">SUPPORT PILOT / '+window.RUU_PILOTS.status().name+'</div>':''}${window.RUU_STYLE?.resultHtml(g)||''}<div class="result-stats"><div>TIME<strong>${t}</strong></div><div>KILLS<strong>${g.kills}</strong></div><div>LEVEL<strong>${g.level}</strong></div><div>SCORE<strong>${Math.floor(g.score).toLocaleString('ja-JP')}</strong></div><div>RARE<strong>${g.rareFinds}</strong></div><div>RELICS<strong>${g.crates}</strong></div><div>MYTHIC<strong>${g.mythicFinds}</strong></div><div>MAX CHAIN<strong>${g.maxCombo||0}</strong></div></div><button class="primary" id="retryBtn">↻ もう一度</button><button class="primary" id="endingReplay" style="margin-left:12px">♫ EDをもう一度</button>${completeClear?`<a class="enemy-archive-btn ending-art-link" href="${COMPLETE_ENDING_POSTER}" target="_blank" rel="noopener">完全クリアイラストを拡大 ↗</a>`:''}<div class="help">RUU//OVERRUN v1.38.0 PUBLIC BETA · © JACKPOTØ31</div>`);
    document.getElementById('retryBtn').onclick=()=>startGame(g?.mode||'normal',g?.challengeId||'');
    document.getElementById('endingReplay').onclick=()=>startEndingCinema(true);
  }
@@ -916,7 +916,7 @@ const WALK_ATLAS=new Image();WALK_ATLAS.src='assets/ruu_walk_atlas.webp';
    if(titleScreen){
      setOverlay(titleScreen.home({unlocked:window.RUU_STYLE?.stats().unlocked||1,best:best?.score,normal:endingUnlocked(),complete:completeEndingUnlocked()}),'home');
    }else{
-     setOverlay(`<div class="menu-grid"><div class="menu-copy"><div class="menu-tick">JACKPOT<strong>Ø</strong>31 / ORIGINAL GAME <span style="color:#dcc2a2">— v1.37.0 PUBLIC BETA</span></div><h1 class="menu-logo"><span class="ruu">RUU</span><span class="slashes">//</span>OVERRUN</h1><div class="menu-nameplate">RUU STYLE // WARDROBE UNLOCKED</div><div class="menu-separator"></div><p class="menu-intro">攻撃は自動。敵を倒して、武器を強化。<br><strong>押し寄せる侵食を生き抜き、最後の脅威を撃ち砕け。</strong><br><span style="color:#ddb2cc;font-size:.79em">一定確率で『星屑の鎧 -Guardian Genome-』のキャラクターが参戦。</span></p><div class="start-row"><button class="primary" id="startBtn" type="button">▶ START // DEPLOY  ·  ENTER</button><button class="enemy-archive-btn" id="enemyArchive" type="button">☷ DEVORA FILES</button><button class="enemy-archive-btn" id="achievementsBtn" type="button">✧ ACHIEVEMENTS</button><button class="enemy-archive-btn" id="ruuStyleBtn" type="button">♟ RUU STYLE · ${window.RUU_STYLE?.stats().unlocked||1}/9</button>${endingUnlocked()?`<button class="enemy-archive-btn" id="challengeBtn" type="button">✦ CHALLENGE MISSIONS</button><button class="enemy-archive-btn" id="endlessBtn" type="button" title="クリア後解放 / 自己ベスト ${endlessBest?.score||0}">∞ ENDLESS MODE</button>`:``}${endingUnlocked()?`<button class="enemy-archive-btn" id="endingTheater" type="button">♫ ENDING THEATER</button>`:``}${completeEndingUnlocked()?`<button class="enemy-archive-btn" id="completeEndingTheater" type="button">✦ COMPLETE ENDING</button>`:``}<div class="run-record">PERSONAL BEST<strong>${best?best.score.toLocaleString('ja-JP'):'— — —'}</strong></div></div><div class="menu-controls"><span class="key">WASD / ↑↓←→</span> MOVE　<span class="key">SPACE</span> DASH　<span class="key">1–3</span> UPGRADE　<span class="key">ESC</span> PAUSE</div></div><div class="hero-figure" id="heroArt"><div class="hero-hint">RUU / CHARACTER DATA</div></div></div>`);
+     setOverlay(`<div class="menu-grid"><div class="menu-copy"><div class="menu-tick">JACKPOT<strong>Ø</strong>31 / ORIGINAL GAME <span style="color:#dcc2a2">— v1.38.0 PUBLIC BETA</span></div><h1 class="menu-logo"><span class="ruu">RUU</span><span class="slashes">//</span>OVERRUN</h1><div class="menu-nameplate">RUU STYLE // WARDROBE UNLOCKED</div><div class="menu-separator"></div><p class="menu-intro">攻撃は自動。敵を倒して、武器を強化。<br><strong>押し寄せる侵食を生き抜き、最後の脅威を撃ち砕け。</strong><br><span style="color:#ddb2cc;font-size:.79em">一定確率で『星屑の鎧 -Guardian Genome-』のキャラクターが参戦。</span></p><div class="start-row"><button class="primary" id="startBtn" type="button">▶ START // DEPLOY  ·  ENTER</button><button class="enemy-archive-btn" id="enemyArchive" type="button">☷ DEVORA FILES</button><button class="enemy-archive-btn" id="achievementsBtn" type="button">✧ ACHIEVEMENTS</button><button class="enemy-archive-btn" id="ruuStyleBtn" type="button">♟ RUU STYLE · ${window.RUU_STYLE?.stats().unlocked||1}/9</button>${endingUnlocked()?`<button class="enemy-archive-btn" id="challengeBtn" type="button">✦ CHALLENGE MISSIONS</button><button class="enemy-archive-btn" id="endlessBtn" type="button" title="クリア後解放 / 自己ベスト ${endlessBest?.score||0}">∞ ENDLESS MODE</button>`:``}${endingUnlocked()?`<button class="enemy-archive-btn" id="endingTheater" type="button">♫ ENDING THEATER</button>`:``}${completeEndingUnlocked()?`<button class="enemy-archive-btn" id="completeEndingTheater" type="button">✦ COMPLETE ENDING</button>`:``}<div class="run-record">PERSONAL BEST<strong>${best?best.score.toLocaleString('ja-JP'):'— — —'}</strong></div></div><div class="menu-controls"><span class="key">WASD / ↑↓←→</span> MOVE　<span class="key">SPACE</span> DASH　<span class="key">1–3</span> UPGRADE　<span class="key">ESC</span> PAUSE</div></div><div class="hero-figure" id="heroArt"><div class="hero-hint">RUU / CHARACTER DATA</div></div></div>`);
      setupTitleGallery();
    }
    const bind=(id,fn)=>{const el=document.getElementById(id);if(el)el.onclick=fn;};
@@ -1082,7 +1082,7 @@ const WALK_ATLAS=new Image();WALK_ATLAS.src='assets/ruu_walk_atlas.webp';
     if(win){sfx('victory');if(g.mode==='normal'){awardAchievement('clear');if(g.damageTaken===0)awardAchievement('flawless');}}else if(!deathSequenceDone)sfx('defeat');saveBest();pauseAllMusic();ui.pause.disabled=true;ui.bossbar.style.display='none';
    if(win){startEndingCinema(false);return;}
    state='lost';musicIndicator.classList.remove('visible');musicMeter.classList.remove('visible');
-   setOverlay(`<div class="eyebrow">${g.mode==='endless'?'∞ ENDLESS // SURVIVAL RECORD':'SIGNAL LOST // MISSION FAILED'}</div><h2 class="result-title defeat">${g.mode==='endless'?'ENDLESS OVER':g.mode==='challenge'?'TRIAL FAILED':'GAME OVER'}</h2>${g.mode==='challenge'?'<div class="challenge-result-stamp">'+(g.challengeOutcome?.reason||'未達成')+'</div>':''}<p class="intro">終わりじゃない。次は、もう少し遠くまで。</p>${equippedTitle()?'<div class="equipped-title">✧ EQUIPPED TITLE / '+equippedTitle()+'</div>':''}${window.RUU_PILOTS?.status()?.name?'<div class="equipped-title">SUPPORT PILOT / '+window.RUU_PILOTS.status().name+'</div>':''}${window.RUU_STYLE?.resultHtml(g)||''}<div class="result-stats"><div>TIME<strong>${formatTime(g.time)}</strong></div><div>KILLS<strong>${g.kills}</strong></div><div>LEVEL<strong>${g.level}</strong></div><div>SCORE<strong>${Math.floor(g.score).toLocaleString('ja-JP')}</strong></div><div>RARE<strong>${g.rareFinds}</strong></div><div>RELICS<strong>${g.crates}</strong></div><div>MYTHIC<strong>${g.mythicFinds}</strong></div><div>MAX CHAIN<strong>${g.maxCombo||0}</strong></div></div><button class="primary" id="retryBtn">↻ もう一度</button><div class="help">RUU//OVERRUN v1.37.0 PUBLIC BETA · © JACKPOTØ31</div>`);
+   setOverlay(`<div class="eyebrow">${g.mode==='endless'?'∞ ENDLESS // SURVIVAL RECORD':'SIGNAL LOST // MISSION FAILED'}</div><h2 class="result-title defeat">${g.mode==='endless'?'ENDLESS OVER':g.mode==='challenge'?'TRIAL FAILED':'GAME OVER'}</h2>${g.mode==='challenge'?'<div class="challenge-result-stamp">'+(g.challengeOutcome?.reason||'未達成')+'</div>':''}<p class="intro">終わりじゃない。次は、もう少し遠くまで。</p>${equippedTitle()?'<div class="equipped-title">✧ EQUIPPED TITLE / '+equippedTitle()+'</div>':''}${window.RUU_PILOTS?.status()?.name?'<div class="equipped-title">SUPPORT PILOT / '+window.RUU_PILOTS.status().name+'</div>':''}${window.RUU_STYLE?.resultHtml(g)||''}<div class="result-stats"><div>TIME<strong>${formatTime(g.time)}</strong></div><div>KILLS<strong>${g.kills}</strong></div><div>LEVEL<strong>${g.level}</strong></div><div>SCORE<strong>${Math.floor(g.score).toLocaleString('ja-JP')}</strong></div><div>RARE<strong>${g.rareFinds}</strong></div><div>RELICS<strong>${g.crates}</strong></div><div>MYTHIC<strong>${g.mythicFinds}</strong></div><div>MAX CHAIN<strong>${g.maxCombo||0}</strong></div></div><button class="primary" id="retryBtn">↻ もう一度</button><div class="help">RUU//OVERRUN v1.38.0 PUBLIC BETA · © JACKPOTØ31</div>`);
    document.getElementById('retryBtn').onclick=()=>startGame(g?.mode||'normal',g?.challengeId||'');
  }
 
@@ -1631,7 +1631,7 @@ function rollRareChoice(choices){
  }
  function fireBullet(x,y,vx,vy,dmg,r=7,pierce=0,col='#9afcf2',ttl=1.55){g.bullets.push({x,y,vx,vy,dmg,r,pierce,col,ttl,trail:[],hit:new Set()});if(g.bullets.length>150)g.bullets.shift()}
  function nearestEnemy(x,y,limit=720){let best=null,bd=limit*limit;for(const e of g.enemies){if(e.hp<=0)continue;let dx=e.x-x,dy=e.y-y,d=dx*dx+dy*dy;if(d<bd){bd=d;best=e}}return best}
- function attackPulse(){const p=g.player,level=p.mods.pulse,target=nearestEnemy(p.x,p.y,710);if(!target)return;sfx('shoot',target);let a=Math.atan2(target.y-p.y,target.x-p.x),count=1+Math.floor((level-1)/2)+(g.evolved?2:0),spread=g.evolved?.20:.16;for(let i=0;i<count;i++){let angle=a+(i-(count-1)/2)*spread,spd=g.evolved?710:580;fireBullet(p.x+Math.cos(angle)*25,p.y+Math.sin(angle)*25,Math.cos(angle)*spd,Math.sin(angle)*spd,p.damage*(1+(level-1)*.21)*(g.evolved?1.45:1),g.evolved?10:7,g.evolved?2:level>=5?1:0,g.evolved?'#ffe9a3':'#75fff3')}if(p.mods.echo){let copies=p.mods.echo;for(let i=1;i<=copies;i++){let off=(.19+.13*i);for(let s of [-1,1]){let angle=a+off*s;fireBullet(p.x,p.y,Math.cos(angle)*510,Math.sin(angle)*510,p.damage*.62,5,0,'#f99afc',1.1)}}}burst(p.x+Math.cos(a)*22,p.y+Math.sin(a)*22,g.evolved?'#ffedb1':'#81fff4',fxMax?9:4,90);addMuzzle(p.x+Math.cos(a)*24,p.y+Math.sin(a)*24,a,g.evolved?'#fff4c2':'#84ffef')}
+ function attackPulse(){const p=g.player,level=p.mods.pulse,target=nearestEnemy(p.x,p.y,710);if(!target)return;sfx('shoot',p);let a=Math.atan2(target.y-p.y,target.x-p.x),count=1+Math.floor((level-1)/2)+(g.evolved?2:0),spread=g.evolved?.20:.16;for(let i=0;i<count;i++){let angle=a+(i-(count-1)/2)*spread,spd=g.evolved?710:580;fireBullet(p.x+Math.cos(angle)*25,p.y+Math.sin(angle)*25,Math.cos(angle)*spd,Math.sin(angle)*spd,p.damage*(1+(level-1)*.21)*(g.evolved?1.45:1),g.evolved?10:7,g.evolved?2:level>=5?1:0,g.evolved?'#ffe9a3':'#75fff3')}if(p.mods.echo){let copies=p.mods.echo;for(let i=1;i<=copies;i++){let off=(.19+.13*i);for(let s of [-1,1]){let angle=a+off*s;fireBullet(p.x,p.y,Math.cos(angle)*510,Math.sin(angle)*510,p.damage*.62,5,0,'#f99afc',1.1)}}}burst(p.x+Math.cos(a)*22,p.y+Math.sin(a)*22,g.evolved?'#ffedb1':'#81fff4',fxMax?9:4,90);addMuzzle(p.x+Math.cos(a)*24,p.y+Math.sin(a)*24,a,g.evolved?'#fff4c2':'#84ffef')}
  function strikeLightning(){const p=g.player,lv=p.mods.lightning;if(!lv)return;let prev={x:p.x,y:p.y},used=new Set(),links=[];for(let n=0;n<lv+1;n++){let next=null,dd=285*285;for(let e of g.enemies){if(e.hp<=0||used.has(e))continue;let d=(e.x-prev.x)**2+(e.y-prev.y)**2;if(d<dd){dd=d;next=e}}if(!next)break;used.add(next);links.push({x1:prev.x,y1:prev.y,x2:next.x,y2:next.y});applyDamage(next,p.damage*(1.05+lv*.31)*(1-n*.09),0,0,'#a8caff');prev=next}if(links.length){sfx('bolt');g.lightningFx.push({links,life:.32});for(const l of links)hitImpact(l.x2,l.y2,'#a6d7ff',24)}}
  function applyNova(dt){const p=g.player,lv=p.mods.nova;if(!lv)return;g.novaT+=dt;let tick=1.25/(p.haste*(1+lv*.08));if(g.novaT>=tick){g.novaT-=tick;let r=95+lv*20;shockwave(p.x,p.y,r,'#df8bff');if(fxMax)shockwave(p.x,p.y,r*.67,'#9bcaff');sfx('nova');if(fxMax)sparkBurst(p.x,p.y,'#e9a7ff',24,240);for(let e of g.enemies){if(e.hp>0&&distance(p,e)<r+e.r)applyDamage(e,p.damage*(.72+lv*.2),0,0,'#e4b0ff')}}}
  function applyOrbit(dt){const p=g.player,lv=p.mods.orbit;if(!lv)return;let num=lv+1,rr=74+(lv*3);for(let j=0;j<num;j++){let a=g.time*(2.45+lv*.2)+j*TAU/num,x=p.x+Math.cos(a)*rr,y=p.y+Math.sin(a)*rr;for(let e of g.enemies){if(e.hp<=0||e.orbCd>0)continue;let dx=e.x-x,dy=e.y-y;if(dx*dx+dy*dy<(e.r+22)**2){e.orbCd=.3;let n=norm(dx,dy);applyDamage(e,p.damage*(.65+lv*.2)*dt*13,n.x*95,n.y*95,'#9effc7')}}}}
@@ -2851,8 +2851,12 @@ ui.healthFill.style.width=`${100*p.hp/p.maxHp}%`;ui.healthText.textContent=`${Ma
  }
  function focusMusicForCue(name){
    if(!sfxEnabled||(window.RUU_AUDIO?.volume('sfx')??.8)===0||!soundOn||state==='ending')return;
-   if(!['signature','jackpot','boss','evolve'].includes(name))return;
-   musicFocus.target=.72;musicFocus.hold=Math.max(musicFocus.hold,name==='boss'?.38:.22);
+   // Leave room for the opening gesture, while preserving each song's entrance.
+   // Routine shots and impacts never turn the soundtrack down.
+   const focus={signature:[.76,.5],boss:[.74,.46],evolve:[.84,.34],mythic:[.86,.3],jackpot:[.86,.3]}[name];
+   if(!focus)return;
+   musicFocus.target=musicFocus.hold>0?Math.min(musicFocus.target,focus[0]):focus[0];
+   musicFocus.hold=Math.max(musicFocus.hold,focus[1]);
  }
  function updateMusicFocus(dt){
    if(musicFocus.hold>0)musicFocus.hold=Math.max(0,musicFocus.hold-dt);
@@ -2861,7 +2865,7 @@ ui.healthFill.style.width=`${100*p.hp/p.maxHp}%`;ui.healthText.textContent=`${Ma
      if(musicFocus.level!==musicFocus.target){musicFocus.level=musicFocus.target;applyMusicVolumes();}
      return;
    }
-   const seconds=musicFocus.target<musicFocus.level?.016:.22;
+   const seconds=musicFocus.target<musicFocus.level?.025:.32;
    musicFocus.level+=(musicFocus.target-musicFocus.level)*(1-Math.exp(-dt/seconds));
    applyMusicVolumes();
  }
@@ -3181,8 +3185,8 @@ ui.healthFill.style.width=`${100*p.hp/p.maxHp}%`;ui.healthText.textContent=`${Ma
    level: Math.max(1, Math.floor(g?.level || 1)),
    durationSeconds: Math.max(0, Math.floor(g?.time || 0)),
    won: state === 'won',
-   version: '1.37.0',
-   operation: 'SIGNAL EDGE',
+   version: '1.38.0',
+   operation: 'SPECTRAL FORGE',
    styleName: window.RUU_STYLE?.name(g?.ruuStyle)||'DEFAULT',
     mode: g?.mode==='challenge'?'challenge':g?.mode==='endless'?'endless':'normal',
      challengeId:g?.challengeId||'',
