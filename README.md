@@ -1,8 +1,19 @@
-# RUU//OVERRUN — PUBLIC BETA (v1.36.0)
+# RUU//OVERRUN — PUBLIC BETA (v1.37.0)
 
 JACKPOTØ31が制作するオリジナル・ブラウザサバイバルアクション。
 
 **[ゲームを遊ぶ](https://jackpot031.github.io/ruu-overrun/)** / **[公開開始v1.5.3からの更新履歴](./CHANGELOG.md)**
+
+## v1.37.0 — SIGNAL EDGE / DISCHARGE & CUT
+
+- 射撃・命中・撃破・武器音を、短い発射音、放電、切断の質感へ再設計。前版で音の大半を占めていた低い共鳴や、低音へ落ち着く打撃の音源を置き換える。
+- 必殺技はチャージからエネルギーが走る構成に変更し、9種類の違いを放電の動き・切断・連射の構成で表す。ボスやJACKPOTの音も同じ音響設計へそろえる。
+- 低HP警告とBLOOD VEILの心拍状の低音を、短い電気的な警告・放電へ変更。回収音や操作音は短く保ち、連続する戦闘音に長い響きを重ねない。
+- 音を重ねた後にも低域を抑え、歪みで新たな胴鳴りが発生しにくくする。音の強さは中高域の立ち上がり、音の動き、チャージと解放の差で作る。
+- タイトルSETTINGSとプレイ中AUDIOの効果音試聴を、同じレール放電音に統一。BGM/SFX個別音量、ON/OFF、保存、Oキーでの開閉は引き続き使える。
+- 同時発音上限、重要音の優先、ゲームの乱数と独立した音生成、分割事前生成とキャッシュを継続する。
+
+検証: `node tests/audio-engine.test.cjs`、`node tests/audio-integration.test.cjs`、`node tests/audio-mixer.test.cjs`、`node tests/title-screen.test.cjs`。音源の低域比率と余韻、波形の上限、発音制御、BGM処理、設定UIを確認する。周波数の検証は音色の設計を確かめるためのもので、聴感の評価を代替するものではない。
 
 ## v1.36.0 — CYBER IMPACT / LIVE AUDIO MIXER
 

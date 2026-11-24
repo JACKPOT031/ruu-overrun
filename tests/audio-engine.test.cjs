@@ -26,7 +26,40 @@ test('mute stops all active voices without changing saved levels',()=>{const f=s
 test('storage blocked, no stereo panner, suspended/unknown events safe',()=>{const f=setup(new Map(),true,false);f.s.setVolume('sfx',.5);assert.equal(f.s.play('styleUnlock',f.engine),true);assert.equal(f.s.play('not-a-sound',f.engine),false);f.engine.ac.state='suspended';assert.equal(f.s.play('shoot',f.engine),false);});
 test('settings sliders and actual user event callback',()=>{const f=setup(),input={dataset:{audioVolume:'bgm'},value:'0'},out={},button={},changes=[];const doc={querySelectorAll:()=>[input],getElementById:id=>id==='audioPreview'?button:out};let preview=0;assert.match(f.s.settingsMarkup(),/data-audio-volume="bgm"/);f.s.bindSettings(doc,(k,n)=>changes.push([k,n]),()=>preview++);assert.equal(input.value,'80');input.value='37';input.oninput();assert.equal(out.textContent,'37%');assert.equal(changes[0][1],.37);button.onclick();assert.equal(preview,1);});
 test('master level is shared with the inline graph and direct plays stay muted',()=>{const f=setup();assert.ok(Math.abs(f.s.masterGain()-.464)<1e-8);assert.equal(f.s.masterGain(false),0);f.s.syncMaster(f.engine,false);f.s.play('shoot',f.engine);assert.equal(f.sounds.length,0);f.s.syncMaster(f.engine,true);f.s.play('shoot',f.engine);assert.equal(f.sounds.length,1);});
-test('cached stereo samples have quiet edges and retained impact body',()=>{const f=setup();for(const key of ['shoot','hit','kill','rail','explosion']){f.s.play(key,f.engine);const b=f.sounds.at(-1).buffer,a=b.a[0];assert.equal(a[0],0,key+' start');assert.equal(a.at(-1),0,key+' end');let low=0,high=0,power=0;const lo=1-Math.exp(-2*Math.PI*280/24000),hi=1-Math.exp(-2*Math.PI*75/24000);for(const x of a){low+=lo*(x-low);high+=hi*(x-high);power+=(low-high)**2;}assert.ok(Math.sqrt(power/a.length)>.07,key+' must retain audible low-mid body');f.sounds.at(-1).onended();}});
+function spectralShares(samples){
+ let n=1;while(n<samples.length)n*=2;
+ const re=new Float64Array(n),im=new Float64Array(n);re.set(samples);
+ for(let i=1,j=0;i<n;i++){let bit=n>>1;for(;j&bit;bit>>=1)j^=bit;j^=bit;if(i<j){const v=re[i];re[i]=re[j];re[j]=v;}}
+ for(let len=2;len<=n;len*=2){
+  const theta=-2*Math.PI/len,dr=Math.cos(theta),di=Math.sin(theta);
+  for(let offset=0;offset<n;offset+=len){let wr=1,wi=0;for(let j=0;j<len/2;j++){
+   const a=offset+j,b=a+len/2,tr=wr*re[b]-wi*im[b],ti=wr*im[b]+wi*re[b];
+   re[b]=re[a]-tr;im[b]=im[a]-ti;re[a]+=tr;im[a]+=ti;
+   const old=wr;wr=wr*dr-wi*di;wi=old*di+wi*dr;
+  }}
+ }
+ let total=0,low=0,air=0;
+ for(let k=1;k<=n/2;k++){const f=k*24000/n,p=re[k]*re[k]+im[k]*im[k];total+=p;if(f>=20&&f<=300)low+=p;if(f>=8000)air+=p;}
+ return {low:low/total,air:air/total};
+}
+test('cached stereo samples have quiet edges and short routine release tails',()=>{
+ const f=setup();
+ for(const key of ['shoot','hit','kill','bolt','shard','frost','rail','explosion']){
+  f.s.play(key,f.engine);const a=f.sounds.at(-1).buffer.a[0];assert.equal(a[0],0,key+' start');assert.equal(a.at(-1),0,key+' end');
+  const from=['rail','explosion'].includes(key)?.32:.15;let all=0,tail=0;
+  for(let i=0;i<a.length;i++){const p=a[i]*a[i];all+=p;if(i>=from*24000)tail+=p;}
+  assert.ok(tail/all<.015,key+' must not leave a ringing body after its gesture');f.sounds.at(-1).onended();
+ }
+});
+test('weapon, threat and finisher spectra exclude a bass drum body without excessive high hiss',()=>{
+ const f=setup(),ordinary=['shoot','hit','kill','gem','dash','bolt','nova','sonic','prism','shard','meteor','rail','frost','well','missile','explosion','satellite','rift','fireworks','cross','ultimatePulse'];
+ const important=['hurt','heartbeat','devora','nullEmperor','eclipse','death',...Array.from({length:9},(_,i)=>'finisher'+i)];
+ for(const key of [...ordinary,...important]){
+  f.s.play(key,f.engine);const b=f.sounds.at(-1).buffer;
+  for(const a of b.a){const share=spectralShares(a);assert.ok(share.low<(ordinary.includes(key)?.03:.06),key+' low band '+share.low);assert.ok(share.air<.04,key+' high hiss '+share.air);}
+  f.sounds.at(-1).onended();
+ }
+});
 test('routine interface cues stay short and lower level than combat',()=>{const f=setup();for(const key of ['gem','menu','select']){f.s.play(key,f.engine);const s=f.sounds.at(-1);assert.ok(s.buffer.duration<=.12,key+' avoids long ringing');assert.ok(s.connections[0].gain.value<.32,key+' mix level');s.onended();}f.s.play('shoot',f.engine);assert.ok(f.sounds.at(-1).buffer.duration<.19);});
 test('sample synthesis never consumes the combat random source and is reproducible',()=>{const a=setup(),b=setup();for(const key of ['shoot','kill','finisher7']){a.s.play(key,a.engine);b.s.play(key,b.engine);assert.deepEqual(a.sounds.at(-1).buffer.a,b.sounds.at(-1).buffer.a);a.sounds.at(-1).onended();b.sounds.at(-1).onended();}});
 test('settings bind to a scoped panel and refresh initial output values',()=>{const f=setup();f.s.setVolume('sfx',.23);const input={dataset:{audioVolume:'sfx'}},out={},button={},queries=[];const panel={querySelectorAll:()=>[input],querySelector:q=>{queries.push(q);return q==='#audioPreview'?button:out;}};let changed=0;f.s.bindSettings(panel,()=>changed++);assert.equal(input.value,'23');assert.equal(out.textContent,'23%');input.value='42';input.oninput();assert.equal(out.textContent,'42%');assert.equal(f.s.volume('sfx'),.42);assert.equal(changed,1);assert.ok(queries.includes('#mix-sfx-value'));});

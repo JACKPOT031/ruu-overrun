@@ -1,4 +1,4 @@
-/* RUU//OVERRUN v1.36.0 — live audio controls. Opening the mixer never changes game state. */
+/* RUU//OVERRUN v1.37.0 — live audio controls. Opening the mixer never changes game state. */
 (()=>{
 'use strict';
 let current=null;
@@ -11,7 +11,7 @@ function init(options={}){
  const panel=doc.createElement('section');
  panel.id='audioMixerPanel';panel.className='audio-mixer';panel.hidden=true;
  panel.setAttribute('role','region');panel.setAttribute('aria-labelledby','audioMixerHeading');
- panel.innerHTML=`<header class="audio-mixer-head"><div><span class="audio-mixer-kicker">CYBER IMPACT</span><h2 id="audioMixerHeading">AUDIO MIXER <small>音量</small></h2></div><button id="audioMixerClose" type="button" aria-label="音量パネルを閉じる" title="閉じる / O・ESC">×</button></header>
+ panel.innerHTML=`<header class="audio-mixer-head"><div><span class="audio-mixer-kicker">SIGNAL EDGE</span><h2 id="audioMixerHeading">AUDIO MIXER <small>音量</small></h2></div><button id="audioMixerClose" type="button" aria-label="音量パネルを閉じる" title="閉じる / O・ESC">×</button></header>
  <p class="audio-mixer-state" id="audioMixerState"></p>
  ${['Bgm','Sfx'].map(k=>`<div class="audio-mixer-channel" data-channel="${k.toLowerCase()}"><label for="liveAudio${k}">${k==='Bgm'?'BGM <small>楽曲</small>':'SFX <small>効果音</small>'}</label><output id="liveAudio${k}Value" for="liveAudio${k}">80%</output><button id="liveAudio${k}Toggle" type="button" aria-label="${k==='Bgm'?'BGM':'効果音'}の再生" aria-pressed="true">ON</button><input id="liveAudio${k}" type="range" min="0" max="100" step="1" value="80" data-live-audio-volume="${k.toLowerCase()}" aria-label="${k==='Bgm'?'BGM':'効果音'}音量" aria-valuetext="80%"></div>`).join('')}
  <div class="audio-mixer-foot"><button id="audioMixerPreview" type="button">⚡ 効果音を試聴</button><span>設定は自動保存</span></div>
