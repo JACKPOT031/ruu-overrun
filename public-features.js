@@ -288,6 +288,7 @@
     text(duration,465,448,'900 30px ui-monospace,Consolas,monospace','#f6e8d1',170);
     text('PLAYER  '+name,73,500,'900 20px system-ui,sans-serif','#f3dbb6',568);
     text('TITLE  '+String(r.title||'—'),73,538,'800 17px system-ui,sans-serif','#d8c6d1',566);
+    text('STYLE  '+String(r.styleName||'DEFAULT'),73,559,'800 14px ui-monospace,Consolas,monospace','#e6c48e',566);
 
     const cores=Math.max(0,Math.floor(Number(bp.trueTotal)||0));
     const killed=Math.max(0,Math.min(cores,Math.floor(Number(bp.trueKilled)||0)));

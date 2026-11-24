@@ -1,8 +1,30 @@
-# RUU//OVERRUN — PUBLIC BETA (v1.32.1)
+# RUU//OVERRUN — PUBLIC BETA (v1.33.0)
 
 JACKPOTØ31が制作するオリジナル・ブラウザサバイバルアクション。
 
 **[ゲームを遊ぶ](https://jackpot031.github.io/ruu-overrun/)** / **[公開開始v1.5.3からの更新履歴](./CHANGELOG.md)**
+
+## v1.33.0 — RUU STYLE / WARDROBE UNLOCKED
+
+タイトル画面の RUU STYLE から9着（初期衣装＋追加8着）を選択・閲覧。選択中の衣装、解放状況、達成進捗、累計記録をブラウザの localStorage に保存する。衣装は見た目のみで、攻撃・移動・当たり判定は従来通り。結果カードには実際のプレイで装備した衣装を記録する。
+
+| 衣装 | 解放条件 |
+|---|---|
+| DEFAULT | 初期衣装 |
+| ECLIPSE | 完全クリア |
+| DESIRE | 1プレイで異なる3種類のJACKPOT MODE発動 |
+| NEO JAPONISM | NORMAL累計5回クリア（完全クリアを含む） |
+| WHITE RESONANCE | NORMAL初クリア |
+| NOIR DIVIDE | 異なる4種類の複合攻撃を累計で獲得 |
+| GOLDEN SOVEREIGN | 1プレイで500体撃破 |
+| SUMMER DRIFT | 累計100回ダッシュ |
+| PALE REVENANT | 生存中のHP25%以下で主要ボスを撃破（報酬回復前） |
+
+既存の通常クリア・完全クリア・500体撃破の実績から確認できる最低限の達成状況を引き継ぐ。過去の未記録回数は復元しない。セーブのインポート／エクスポート機能なし。ランキング・完全クリア記念品の判定には衣装保存データを使わない。DEVモードでは衣装実績を保存しない。
+
+画像は既存の1536×1024、256pxセル×24コマのアトラス規格に合わせて透過と位置を補正。装備中のアトラスのみ必要時に読み込む。通常武器、敵性能、BGM、エンディングは変更しない。
+
+検証: `node tests/ruu-style.test.cjs`（12テスト）。ブラウザ実機での表示確認は別途必要。
 
 ## v1.32.1 — TRUE DEVORA / HP GATE
 
