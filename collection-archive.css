@@ -1,0 +1,40 @@
+/* BEYOND THE END — the archive is a scrollable, non-combat screen. */
+#overlay.ruu-collection-overlay{align-items:flex-start;justify-content:center;overflow:auto;overscroll-behavior:contain}
+#menu.ruu-collection-menu{width:100%;max-width:1040px;min-width:0;flex:none;margin:0 auto;text-align:left}
+.ruu-collect-panel{width:100%;padding:16px 12px 24px;color:#e4edf4;line-height:1.5}
+.ruu-collect-panel h2{font-family:ui-monospace,Consolas,monospace;font-size:clamp(22px,4vw,38px);letter-spacing:.06em;margin:8px 0 14px;color:#f4e4cf}
+.ruu-collect-tabs{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}
+.ruu-collect-panel button:not(.primary){font-family:inherit;min-height:36px;border:1px solid #46536a;background:#121d30;color:#d5e4ef;padding:7px 11px;border-radius:5px;cursor:pointer;font-size:11px;font-weight:700;line-height:1.3}
+.ruu-collect-panel button[aria-pressed=true]{border-color:#93e1d8;color:#a4fff0;background:#163a3e}
+.ruu-collect-panel button:disabled{opacity:.48;cursor:default}
+.ruu-collect-panel button:focus-visible{outline:2px solid #f6dca8;outline-offset:2px}
+.ruu-collect-summary{display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding:11px 12px;background:#0d1523;border:1px solid #384a61;border-radius:7px;font-family:ui-monospace,Consolas,monospace;font-size:13px}
+.ruu-collect-summary strong{color:#f8d594;white-space:nowrap}
+.ruu-collect-meter{flex:1;min-width:80px;height:8px;background:#263146;border-radius:10px;overflow:hidden}
+.ruu-collect-meter span{display:block;height:100%;background:linear-gradient(90deg,#699dc6,#8dffdb)}
+.ruu-collect-note{font-size:11px;color:#a5b7c7;margin:10px 0;line-height:1.8}
+.ruu-collect-note summary{cursor:pointer;color:#d1e0e6;font-weight:700}
+.ruu-collect-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:12px 0}
+.ruu-collect-item{min-width:0;display:flex;gap:10px;align-items:flex-start;padding:11px;border:1px solid var(--relic-color,#586278);border-radius:7px;background:#111a2ae8;text-align:left;box-shadow:inset 0 1px 0 #ffffff0a}
+.ruu-collect-icon,.ruu-archive-art,.ruu-archive-symbol{width:48px;height:48px;flex:none;object-fit:contain}
+.ruu-archive-symbol{display:grid;place-items:center;color:var(--relic-color);background:#253046;border-radius:7px;font-size:26px}
+.ruu-collect-body{min-width:0;flex:1;overflow-wrap:anywhere}
+.ruu-collect-body small{display:block;font:700 9px ui-monospace,Consolas,monospace;letter-spacing:.06em;color:var(--relic-color);margin-bottom:4px}
+.ruu-collect-body b{display:block;font-size:13px;color:#eff2f6;line-height:1.4}
+.ruu-collect-body p{font-size:10px;margin:5px 0;color:#aebfd0;line-height:1.6}
+.ruu-collect-body span{font-size:10px;color:#c1d4d9}
+.ruu-collect-body button{margin-top:7px;display:block}
+.ruu-style-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.ruu-style-card{border:1px solid #56677c;background:#101725;text-align:center;padding:14px;border-radius:8px}
+.ruu-style-card img,.ruu-style-locked{width:100%;height:clamp(100px,23vw,230px);object-fit:contain;margin-bottom:9px}
+.ruu-style-locked{display:grid;place-items:center;font-size:64px;color:#4a566c;background:radial-gradient(ellipse,#233145,#111827);border-radius:5px}
+.ruu-style-card b{display:block;color:#e6d6bb;font-size:14px}
+.ruu-style-card p{color:#b7c4d1;font-size:11px;margin:6px 0 10px}
+.ruu-collect-back{margin-top:15px}
+.ruu-collect-result{font-size:11px;text-align:center;color:#b9d9e0;margin:10px auto;padding:8px 10px;max-width:720px;background:#152735;border:1px solid #416371;border-radius:5px;line-height:1.7}
+.ruu-collect-result b{font-family:ui-monospace,Consolas,monospace;color:#b3f2dc}
+.ruu-collect-result div{font-size:10px;color:#f0dab5}
+.ruu-collect-notice{position:absolute;z-index:14;pointer-events:none;left:50%;bottom:16%;transform:translateX(-50%);max-width:90%;font:800 12px ui-monospace,Consolas,monospace;letter-spacing:.03em;text-align:center;padding:6px 11px;border:1px solid currentColor;background:#0b1524e8;border-radius:5px;white-space:normal}
+.ruu-collect-notice[hidden]{display:none!important}
+@media(max-width:850px){.ruu-collect-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:520px){.ruu-collect-grid,.ruu-style-grid{grid-template-columns:1fr}.ruu-collect-panel{padding:8px 3px 12px}.ruu-collect-summary{gap:6px;font-size:10px}.ruu-collect-panel button:not(.primary){min-height:40px;padding:6px 9px;font-size:10px}.ruu-collect-notice{font-size:9px}}
