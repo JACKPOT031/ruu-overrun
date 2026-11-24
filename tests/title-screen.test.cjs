@@ -1,0 +1,38 @@
+/* Title UI tests execute the shipped title module and extracted integration. */
+'use strict';
+const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm'),path=require('node:path');
+const root=process.argv[2]||path.resolve(__dirname,'..');
+const js=fs.readFileSync(path.join(root,'title-screen.js'),'utf8');
+const index=fs.readFileSync(path.join(root,'index.html'),'utf8');
+const pub=fs.readFileSync(path.join(root,'public-features.js'),'utf8');
+let count=0;function test(name,fn){fn();console.log('PASS',name);count++;}
+const events=[];
+class El{
+ constructor(id=''){this.id=id;this.textContent='';this.innerHTML='';this.disabled=false;this.value='';this.dataset={};this.listeners=new Map();this.style={};this.hidden=false;this.classes=new Set();this.classList={toggle:(k,on)=>{if(on)this.classes.add(k);else this.classes.delete(k);return !!on},remove:k=>this.classes.delete(k),add:k=>this.classes.add(k),contains:k=>this.classes.has(k)};}
+ addEventListener(k,fn){const a=this.listeners.get(k)||[];a.push(fn);this.listeners.set(k,a)}
+ removeEventListener(k,fn){this.listeners.set(k,(this.listeners.get(k)||[]).filter(x=>x!==fn))}
+ dispatchEvent(e){for(const f of this.listeners.get(e.type)||[])f(e)}
+ click(){if(this.disabled)return;this.onclick?.();this.dispatchEvent({type:'click',target:this})}
+}
+function fixture({normal=false,complete=false,fallback=false}={}){
+ const nodes=new Map(),get=id=>{if(!nodes.has(id))nodes.set(id,new El(id));return nodes.get(id)},active=new Set();let markup='',played=[],ending=[],links=[],scrolls=0;
+ const frame=get('frame'),overlay=get('overlay'),menu=get('menu'),settingsProxies=[],selectProxies=[];
+ const box={console,window:{RUU_STYLE:{init(){},stats:()=>({unlocked:3})}},document:{getElementById:id=>active.has(id)||['frame','overlay','menu','mute','sfxToggle','animToggle','sceneToggle','fxMode','trackSelect','finisherSelect'].includes(id)?get(id):null,querySelectorAll:s=>s==='[data-kv-toggle]'?settingsProxies:s==='[data-kv-select]'?selectProxies:[],activeElement:null},Event:class{constructor(type){this.type=type}},state:'won',g:null,ui:{frame,overlay,menu,hud:get('hud'),pause:get('pause')},loadoutButton:get('loadout'),quickLoadoutButton:get('quick'),musicIndicator:get('music'),musicMeter:get('meter'),bossAlert:get('bossAlert'),keys:new Set(['a']),joy:{active:true},getBest:mode=>({score:mode==='endless'?999:123456}),endingUnlocked:()=>normal,completeEndingUnlocked:()=>complete,showMusicRetry(){},setupTitleGallery(){links.push('gallery')},showDevoraFiles(){links.push('devora')},showAchievementArchive(){links.push('ach')},showStyleArchive(){links.push('style')},showChallengeArchive(){links.push('challenge')},startGame(mode='normal'){played.push(mode)},startEndingCinema(a,b){ending.push([a,!!b])}};
+ function setMarkup(h){markup=h;active.clear();for(const m of h.matchAll(/\bid="([^"]+)"/g)){nodes.set(m[1],new El(m[1]));active.add(m[1]);}}
+ Object.defineProperty(menu,'innerHTML',{get:()=>markup,set:setMarkup,configurable:true});
+ const a=index.indexOf('function setOverlay('),b=index.indexOf('const TITLE_ARTS=',a);assert.ok(a>=0&&b>a);
+ const c=index.indexOf('function showStart()'),d=index.indexOf('function showStyleArchive()',c);assert.ok(c>=0&&d>c);
+ vm.createContext(box);vm.runInContext(js,box);if(fallback)delete box.window.RUU_TITLE_SCREEN;vm.runInContext(index.slice(a,b)+'\n'+index.slice(c,d),box);
+ return {box,get,active,frame,overlay,menu,played,ending,links,settingsProxies,selectProxies,markup:()=>markup,t:box.window.RUU_TITLE_SCREEN};
+}
+test('home full illustration, one actual start button, no baked interactive UI',()=>{const f=fixture();f.box.showStart();assert.match(f.markup(),/assets\/title-keyvisual.webp/);assert.equal((f.markup().match(/id="startBtn"/g)||[]).length,1);assert.match(f.markup(),/3 \/ 9/);assert.match(f.markup(),/123,456/);assert.ok(f.frame.classes.has('kv-title-active'));f.get('startBtn').click();assert.deepEqual(f.played,['normal']);});
+test('style achievements devora links use original functions',()=>{const f=fixture();f.box.showStart();f.get('ruuStyleBtn').click();f.get('achievementsBtn').click();f.get('enemyArchive').click();assert.deepEqual(f.links,['style','ach','devora']);});
+test('locked extras are informational, do not start run',()=>{const f=fixture();f.box.showStart();f.get('titleExtrasBtn').click();assert.match(f.markup(),/LOCKED/);assert.ok(!f.active.has('endlessBtn'));assert.ok(!f.active.has('challengeBtn'));assert.equal(f.box.state,'title-menu');assert.ok(f.frame.classes.has('kv-sub-active'));f.get('titleBack').click();assert.ok(f.frame.classes.has('kv-title-active'));});
+test('unlocked extras dispatch original modes',()=>{const f=fixture({normal:true});f.box.showStart();f.get('titleExtrasBtn').click();f.get('endlessBtn').click();f.get('challengeBtn').click();assert.deepEqual(f.played,['endless']);assert.deepEqual(f.links,['challenge']);});
+test('both ending routes retain independent gates',()=>{for(const [n,c] of [[false,false],[true,false],[true,true],[false,true]]){const f=fixture({normal:n,complete:c});f.box.showStart();f.get('titleEndingBtn').click();assert.equal(f.active.has('endingTheater'),n);assert.equal(f.active.has('completeEndingTheater'),c);if(n)f.get('endingTheater').click();if(c)f.get('completeEndingTheater').click();assert.deepEqual(f.ending,[...(n?[[true,false]]:[]),...(c?[[true,true]]:[])]);}});
+test('visual archive preserves original gallery mechanism',()=>{const f=fixture();f.box.showStart();f.get('titleGalleryBtn').click();assert.ok(f.active.has('heroArt'));assert.deepEqual(f.links,['gallery']);f.get('titleBack').click();assert.ok(f.active.has('startBtn'));});
+test('settings links existing control handlers and select values',()=>{const f=fixture();const toggle=f.get('mute');toggle.textContent='BGM ON';toggle.onclick=()=>{toggle.textContent=toggle.textContent==='BGM ON'?'BGM OFF':'BGM ON'};const p=new El();p.dataset.kvToggle='mute';f.settingsProxies.push(p);const select=f.get('trackSelect');select.value='mix';select.innerHTML='<option>mix</option><option>1</option>';let changed=0;select.addEventListener('change',()=>changed++);const sp=new El();sp.dataset.kvSelect='trackSelect';f.selectProxies.push(sp);f.box.showStart();f.get('titleSettingsBtn').click();assert.match(f.markup(),/data-kv-toggle="mute"/);assert.equal(p.textContent,'BGM ON');p.click();assert.equal(toggle.textContent,'BGM OFF');assert.equal(p.textContent,'BGM OFF');assert.equal(sp.value,'mix');sp.value='1';sp.onchange();assert.equal(select.value,'1');assert.equal(changed,1);f.get('titleBack').click();select.value='mix';select.dispatchEvent({type:'change'});assert.equal(sp.value,'1');});
+test('overlay classes clear on old menu and start/ending hide',()=>{const f=fixture();f.box.showStart();f.box.setOverlay('<p>legacy</p>');assert.ok(!f.frame.classes.has('kv-title-active'));assert.ok(!f.overlay.classes.has('kv-title-overlay'));f.box.showStart();f.get('titleSettingsBtn').click();f.box.hideOverlay();assert.ok(!f.frame.classes.has('kv-sub-active'));assert.ok(f.overlay.classes.has('hidden'));});
+test('old title remains usable if module missing',()=>{const f=fixture({fallback:true,normal:true,complete:true});f.box.showStart();assert.match(f.markup(),/id="heroArt"/);assert.ok(f.active.has('startBtn'));f.get('startBtn').click();assert.deepEqual(f.played,['normal']);assert.ok(f.active.has('endingTheater'));});
+test('ranking mount and keyboard guards preserve native interaction',()=>{assert.match(pub,/copy\.querySelector\('#titleCommunity'\)/);assert.match(index,/state==='title-menu'/);assert.match(index,/ev\.target\?\.closest\?\./);assert.match(index,/title-screen\.js\?v=1\.34\.0/);});
+console.log(`${count} title suites passed`);

@@ -1,8 +1,16 @@
-# RUU//OVERRUN — PUBLIC BETA (v1.33.1)
+# RUU//OVERRUN — PUBLIC BETA (v1.34.0)
 
 JACKPOTØ31が制作するオリジナル・ブラウザサバイバルアクション。
 
 **[ゲームを遊ぶ](https://jackpot031.github.io/ruu-overrun/)** / **[公開開始v1.5.3からの更新履歴](./CHANGELOG.md)**
+
+## v1.34.0 — KEY VISUAL / TITLE REFORGE
+
+- 公式キービジュアルをタイトル画面全体に配置。元イラスト内のロゴをそのまま使用し、ネオンピンクのSTARTとHTML操作メニューを重ねる。スマホの縦画面はイラストの下にタッチ操作用メニューを表示。
+- RUU STYLE・ACHIEVEMENTS・DEVORA FILES・EXTRA MODES・ENDING THEATER・SETTINGS・VISUAL ARCHIVE・世界ランキング・プレイヤー名入力を整理。既存のエンディングと追加モードの解放条件を維持。
+- SETTINGSは既存のBGM・SFX・歩行・背景・画質・選曲・必殺技設定に接続。旧タイトルのイラストギャラリーはVISUAL ARCHIVEとして残す。
+- 元画像は軽量なWebPへ変換。アニメーションは軽いシグナル点滅のみ、モーション低減設定にも対応。戦闘・保存・ランキング・楽曲・衣装の仕様は変更しない。
+- 新機能テスト: `node tests/title-screen.test.cjs`。タイトルUI単体のPC・スマホ表示もChromiumで確認。
 
 ## v1.33.1 — RUU STYLE / DESIRE COLLECTION
 

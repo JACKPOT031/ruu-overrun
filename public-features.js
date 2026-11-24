@@ -364,7 +364,7 @@
     const label=document.createElement('label');label.textContent='PLAYER NAME';const input=inputElement();
     p.append(label,input,createButton('🏆 世界ランキング',()=>showBoard('normal')));if(storage.get('RUU_OVERRUN_ENDING_UNLOCK')==='1')p.append(createButton('∞ ENDLESS順位',()=>showBoard('endless')));
     const hint=document.createElement('span');hint.textContent='※ 名前の登録はプレイ結果画面で行う';hint.style.fontSize='10px';hint.style.color='#a7a7a7';p.append(hint);
-    const controls=copy.querySelector('.menu-controls');if(controls)copy.insertBefore(p,controls);else copy.append(p);
+    const mount=copy.querySelector('#titleCommunity');if(mount){mount.append(p);return;}const controls=copy.querySelector('.menu-controls');if(controls)copy.insertBefore(p,controls);else copy.append(p);
   }
   function addResultControls(){
     if(menu.querySelector('#ruu-public-result'))return;
