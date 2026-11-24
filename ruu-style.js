@@ -1,11 +1,11 @@
-/* RUU//OVERRUN v1.33.0 — RUU STYLE / WARDROBE UNLOCKED. Cosmetic only. */
+/* RUU//OVERRUN v1.33.1 — RUU STYLE / WARDROBE UNLOCKED. Cosmetic only. */
 (()=>{
 'use strict';
 const KEY='RUU_STYLE_V1', DIR='assets/styles/';
 const items=[
  ['default','DEFAULT','通常衣装','初期衣装',1,'#dcc2a2'],
  ['eclipse','ECLIPSE','月蝕','完全クリア（裏ボス戦の主要7体を撃破）',1,'#c6b9d5'],
- ['desire','DESIRE','欲望','1プレイで異なる3種類のJACKPOT MODEを発動',3,'#e2bed4'],
+ ['desire','DESIRE','欲望','異なる3種類のJACKPOT MODEを累計で発動',3,'#e2bed4'],
  ['neo_japonism','NEO JAPONISM','新和装','NORMALを累計5回クリア',5,'#ef9c8b'],
  ['white_resonance','WHITE RESONANCE','白の共鳴','NORMALを初クリア',1,'#e8dfce'],
  ['noir_divide','NOIR DIVIDE','黒の分界','異なる4種類の複合攻撃を累計で獲得',4,'#c7c3cf'],
@@ -16,16 +16,18 @@ const items=[
 const byId=new Map(items.map(v=>[v.id,v]));
 const FUSIONS=['frostThunder','meteorBloom','railRift','sonicCross'];
 const number=x=>Number.isFinite(x)?Math.max(0,Math.min(Number.MAX_SAFE_INTEGER,Math.floor(x))):0;
-const empty=()=>({schema:1,selected:'default',unlocked:['default'],plays:0,clears:0,complete:0,kills:0,dashes:0,bestKills:0,bestJackpots:0,fusions:[],criticalBoss:false});
+const empty=()=>({schema:1,selected:'default',unlocked:['default'],plays:0,clears:0,complete:0,kills:0,dashes:0,bestKills:0,bestJackpots:0,jackpotTypes:[],fusions:[],criticalBoss:false});
 let data=empty(),persistOk=true, loaded=false,images=new Map();
 function dev(){return !!window.RUU_LOCAL_DEV_MODE;}
 function save(){if(dev())return;try{localStorage.setItem(KEY,JSON.stringify(data));persistOk=true;}catch(e){persistOk=false;}}
 function sanitize(v){const d=empty();if(!v||typeof v!=='object'||v.schema!==1)return d;
  for(const key of ['plays','clears','complete','kills','dashes','bestKills','bestJackpots'])d[key]=number(v[key]);
- d.bestJackpots=Math.min(3,d.bestJackpots);d.fusions=Array.isArray(v.fusions)?[...new Set(v.fusions.filter(x=>FUSIONS.includes(x)))]:[];d.criticalBoss=v.criticalBoss===true;
+ d.bestJackpots=Math.min(3,d.bestJackpots);
+ d.jackpotTypes=Array.isArray(v.jackpotTypes)?[...new Set(v.jackpotTypes.filter(x=>Number.isInteger(x)&&x>=0&&x<=2))]:[];
+ d.fusions=Array.isArray(v.fusions)?[...new Set(v.fusions.filter(x=>FUSIONS.includes(x)))]:[];d.criticalBoss=v.criticalBoss===true;
  d.unlocked=Array.isArray(v.unlocked)?[...new Set(['default',...v.unlocked.filter(x=>byId.has(x))])]:['default'];
  d.selected=d.unlocked.includes(v.selected)?v.selected:'default';return d;}
-function value(id){switch(id){case'default':return 1;case'eclipse':return data.complete;case'desire':return data.bestJackpots;case'neo_japonism':case'white_resonance':return data.clears;case'noir_divide':return data.fusions.length;case'golden_sovereign':return data.bestKills;case'summer_drift':return data.dashes;case'pale_revenant':return data.criticalBoss?1:0;default:return 0;}}
+function value(id){switch(id){case'default':return 1;case'eclipse':return data.complete;case'desire':return Math.max(data.bestJackpots,data.jackpotTypes.length,data.unlocked.includes('desire')?3:0);case'neo_japonism':case'white_resonance':return data.clears;case'noir_divide':return data.fusions.length;case'golden_sovereign':return data.bestKills;case'summer_drift':return data.dashes;case'pale_revenant':return data.criticalBoss?1:0;default:return 0;}}
 function check(g){if(dev())return [];const added=[];for(const item of items)if(!data.unlocked.includes(item.id)&&value(item.id)>=item.target){data.unlocked.push(item.id);added.push(item);if(g?.styleRun)g.styleRun.newStyles.push(item.id);}return added;}
 function migrate(){if(dev())return;let history=[];try{history=window.RUU_EXPANSION?.status?.()||[];}catch(e){}const legacy=new Set(history.filter(x=>x.unlocked).map(x=>x.id));
  // Historical achievements prove a minimum, never invent unrecorded counts.
@@ -44,7 +46,15 @@ function start(g){init();if(!g)return;g.ruuStyle=selected();asset(g.ruuStyle);g.
 function announce(added,notice){if(!added.length)return;const msg='RUU STYLE UNLOCKED // '+added.map(x=>x.name).join(' / ');if(typeof notice==='function')notice(msg,true);try{const frame=document.getElementById('frame');if(!frame)return;document.getElementById('styleUnlockAlert')?.remove();const el=document.createElement('div');el.id='styleUnlockAlert';el.className='style-unlock-alert';el.setAttribute('role','status');el.textContent=msg;frame.appendChild(el);setTimeout(()=>el.remove(),3500);}catch(e){}}
 function event(g,notice){const added=check(g);save();announce(added,notice);return added;}
 function dash(g,notice){if(!eligible(g))return [];data.dashes++;return event(g,notice);}
-function jackpot(g,index,notice){if(!eligible(g)||!Number.isInteger(index)||index<0||index>2)return [];if(!g.styleRun.jackpots.includes(index))g.styleRun.jackpots.push(index);data.bestJackpots=Math.max(data.bestJackpots,g.styleRun.jackpots.length);return event(g,notice);}
+function jackpot(g,index,notice){
+ if(!eligible(g)||!Number.isInteger(index)||index<0||index>2)return [];
+ if(!g.styleRun.jackpots.includes(index))g.styleRun.jackpots.push(index);
+ // v1.33.0 saved only the maximum distinct count per run; retain that lower bound,
+ // but do not guess which historical types it represents.
+ if(!data.jackpotTypes.includes(index))data.jackpotTypes.push(index);
+ data.bestJackpots=Math.max(data.bestJackpots,g.styleRun.jackpots.length);
+ return event(g,notice);
+}
 function fusion(g,id,notice){if(!eligible(g)||!FUSIONS.includes(id)||data.fusions.includes(id))return [];data.fusions.push(id);return event(g,notice);}
 function major(e){return !!e&&!e.secretScreen&&(e.kind==='boss'||e.kind==='final'||e.trueDevora||e.secretRuu||e.secretReinforcement||e.enemyAstraea);}
 function kill(g,e,notice){if(!eligible(g))return [];data.kills++;data.bestKills=Math.max(data.bestKills,number(g.kills));const p=g.player;
