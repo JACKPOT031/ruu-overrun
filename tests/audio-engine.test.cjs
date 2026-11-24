@@ -38,9 +38,28 @@ function spectralShares(samples){
    const old=wr;wr=wr*dr-wi*di;wi=old*di+wi*dr;
   }}
  }
- let total=0,low=0,air=0,sub=0,body=0;
- for(let k=1;k<=n/2;k++){const f=k*24000/n,p=re[k]*re[k]+im[k]*im[k];total+=p;if(f>=20&&f<=300)low+=p;if(f>=8000)air+=p;if(f<100)sub+=p;if(f>=300&&f<1400)body+=p;}
- return {low:low/total,air:air/total,sub:sub/total,body:body/total};
+ let total=0,low=0,air=0,sub=0,core=0,peak=0,pitch=0;
+ for(let k=1;k<=n/2;k++){
+  const f=k*24000/n,p=re[k]*re[k]+im[k]*im[k];total+=p;
+  if(f>=20&&f<=300)low+=p;if(f>=8000)air+=p;if(f<100)sub+=p;
+  if(f>=500&&f<=4000){core+=p;if(p>peak){peak=p;pitch=f;}}
+ }
+ return {low:low/total,air:air/total,sub:sub/total,core:core/total,pitch};
+}
+function periodicity(a){
+ // Weighted normalized autocorrelation over 16 ms windows: harmonic pulses
+ // retain a local period even through a short slide, broadband pressure does not.
+ let weighted=0,total=0;const window=384;
+ for(let start=0;start+window<=a.length;start+=192){
+  let energy=0,best=0;for(let i=0;i<window;i++)energy+=a[start+i]**2;
+  for(let lag=8;lag<=48;lag++){
+   let xy=0,xx=0,yy=0;
+   for(let i=0;i<window-lag;i++){const x=a[start+i],y=a[start+i+lag];xy+=x*y;xx+=x*x;yy+=y*y;}
+   if(xx&&yy)best=Math.max(best,xy/Math.sqrt(xx*yy));
+  }
+  weighted+=best*energy;total+=energy;
+ }
+ return weighted/total;
 }
 test('sample edges are quiet and routine decays remain bounded by their role',()=>{
  const f=setup();
@@ -51,12 +70,42 @@ test('sample edges are quiet and routine decays remain bounded by their role',()
   assert.ok(tail/all<.02,key+' must finish its role-specific decay');f.sounds.at(-1).onended();
  }
 });
-test('core actions carry broad mid body while subbass and abrasive air remain restrained',()=>{
+test('harmonic midrange carries actions while subbass and abrasive air remain restrained',()=>{
  const f=setup();
- for(const key of ['shoot','hit','kill','bolt','explosion','hurt','devora','finisher0','finisher3','finisher8']){
+ for(const key of ['shoot','hit','kill','gem','bolt','explosion','hurt','death','start','devora','astraea','finisher0','finisher3','finisher8']){
   f.s.play(key,f.engine);const b=f.sounds.at(-1).buffer;
-  for(const a of b.a){const share=spectralShares(a);assert.ok(share.sub<.06,key+' excessive subbass '+share.sub);assert.ok(share.low<.40,key+' low-band domination '+share.low);assert.ok(share.body>.12,key+' needs material body '+share.body);assert.ok(share.air<.04,key+' excessive high hiss '+share.air);}
+  for(const a of b.a){const share=spectralShares(a);assert.ok(share.sub<.03,key+' excessive subbass '+share.sub);assert.ok(share.low<.12,key+' low-band domination '+share.low);assert.ok(share.core>.85,key+' audible pitched core '+share.core);assert.ok(share.air<.025,key+' excessive high hiss '+share.air);}
   f.sounds.at(-1).onended();
+ }
+});
+test('rapid actions are tonal, pitch-stable across takes, and distinct by role',()=>{
+ const f=setup(),families=[];
+ for(const key of ['shoot','hit','kill','gem']){
+  const pitches=[];
+  for(let i=0;i<3;i++){
+   f.s.play(key,f.engine);const src=f.sounds.at(-1),a=src.buffer.a[0];
+   assert.ok(periodicity(a)>.85,key+' clean local harmonic period');pitches.push(spectralShares(a).pitch);src.onended();
+  }
+  assert.ok(Math.max(...pitches)/Math.min(...pitches)<1.025,key+' variants must not play random notes');families.push(pitches[0]);
+ }
+ for(let i=0;i<families.length;i++)for(let j=i+1;j<families.length;j++)assert.ok(Math.abs(families[i]-families[j])>160,'rapid roles need distinct pitch centers');
+});
+test('maximum gameplay cadence leaves compact isolated rapid gestures',()=>{
+ const f=setup();
+ for(const [key,hz] of [['shoot',6.25],['hit',10.5],['kill',8.3],['gem',6.25]])for(let take=0;take<3;take++){
+  f.s.play(key,f.engine);const src=f.sounds.at(-1),a=src.buffer.a[0];let total=0,late=0;
+  for(let i=0;i<a.length;i++){const e=a[i]*a[i];total+=e;if(i>=24000/hz*.65)late+=e;}
+  assert.ok(late/total<.015,key+' decay before the next action');assert.ok(src.buffer.duration<1/hz*1.15,key+' bounded repetition density');src.onended();
+ }
+ f.s.play('hurt',f.engine);assert.ok(f.sounds.at(-1).buffer.duration<=.18,'hurt stays brief when repeated');f.sounds.at(-1).onended();
+ f.s.play('death',f.engine);assert.ok(f.sounds.at(-1).buffer.duration>.30,'death gets a separate falling release');
+});
+test('all finishers begin with an immediate signal before their longer flourish',()=>{
+ const f=setup();
+ for(let i=0;i<9;i++){
+  f.s.play('signature',f.engine,{finisherType:i});const src=f.sounds.at(-1),a=src.buffer.a[0];let early=0,total=0;
+  for(let j=0;j<a.length;j++){const e=a[j]*a[j];total+=e;if(j<.025*24000)early+=e;}
+  assert.ok(early/total>.001,'finisher '+i+' must signal the immediate gameplay pulse');src.onended();
  }
 });
 test('common actions have three distinct deterministic takes and never immediately repeat',()=>{
@@ -64,7 +113,7 @@ test('common actions have three distinct deterministic takes and never immediate
  for(const key of ['shoot','hit','kill','gem','bolt','prism','shard','frost','missile','explosion','ultimatePulse','select','menu']){
   const takes=[];for(let i=0;i<7;i++){f.s.play(key,f.engine);const src=f.sounds.at(-1);takes.push(src.buffer);src.onended();}
   assert.equal(new Set(takes).size,3,key+' bounded cache');for(let i=1;i<takes.length;i++)assert.notEqual(takes[i],takes[i-1],key+' repetition');
-  assert.equal(takes[0],takes[3],key+' reuse after one cycle');assert.notDeepEqual(takes[0].a,takes[1].a,key+' real material variation');
+  assert.equal(takes[0],takes[3],key+' reuse after one cycle');assert.notDeepEqual(takes[0].a,takes[1].a,key+' real articulation variation');
  }
 });
 test('stereo detail retains a stable center and major events have longer richer silhouettes',()=>{

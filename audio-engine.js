@@ -1,5 +1,5 @@
-/* RUU//OVERRUN v1.38.0 — SPECTRAL FORGE
-   Original layered one-shot sound design: energy, pressure, glass and fracture.
+/* RUU//OVERRUN v1.39.0 — SPELL RESONANCE
+   Original harmonic arcade shots, spell bells and concise gameplay feedback.
    PCM is cached in small idle slices; playback never consumes combat randomness. */
 (()=>{
 'use strict';
@@ -11,115 +11,115 @@ const levels={bgm:.8,sfx:.8};
 try{const saved=JSON.parse(localStorage.getItem(KEY)||'null');if(saved)for(const k of ['bgm','sfx'])levels[k]=clamp(finite(saved[k],levels[k]),0,1);}catch{}
 function volume(k){return levels[k]??.8;}
 function setVolume(k,n){if(!Object.hasOwn(levels,k)||!Number.isFinite(n))return false;levels[k]=clamp(n,0,1);try{localStorage.setItem(KEY,JSON.stringify(levels));}catch{}return true;}
-// Separate materials with separate envelopes. Body is broad filtered air, never a
-// falling bass oscillator. Pitched energy stays above the low percussion register.
-const P=(f,end,d,a,at=0,color=.35)=>({k:'p',f,end,d,a,at,color,attack:.002});
-const B=(lo,hi,d,a,at=0)=>({k:'b',lo,hi,d,a,at,attack:.003});
-const N=(lo,hi,d,a,at=0)=>({k:'n',lo,hi,d,a,at,attack:.0007});
-const W=(f,end,d,a,at=0)=>({k:'w',f,end,d,a,at,color:.55,attack:.003});
-const C=(f,end,d,a,at=0,color=.35)=>({k:'c',f,end,d,a,at,color,attack:.008});
-const G=(f,d,a,at=0,glass=1)=>({k:'g',f,end:f,d,a,at,color:glass,attack:.0012});
-const F=(f,d,a,at=0)=>({k:'f',f,end:f*.72,d,a,at,color:.72,attack:.001});
-const H=(f,d,a,at=0)=>({k:'h',f,end:f*1.018,d,a,at,color:.2,attack:.015});
-const arc=(f=1000,d=.14,a=.8,at=0)=>[
- P(f*1.09,f*.86,d,a*.44,at,.48),B(210,1450,d*.9,a*.79,at),N(2400,6800,.015,a*.22,at),F(2200,d*.55,a*.19,at+.01)
+// Original arcade/danmaku palette. A rounded harmonic pulse and a soft bell
+// carry each action; air is only a quiet accent. There are no imported samples.
+const T=(f,end,d,a,at=0,color=.32)=>({k:'t',f,end,d,a,at,color,attack:.0016});
+const L=(f,d,a,at=0,color=.30)=>({k:'l',f,end:f,d,a,at,color,attack:.0014});
+const V=(f,d,a,at=0)=>({k:'v',f,end:f*1.004,d,a,at,color:.18,attack:.014});
+const C=(f,end,d,a,at=0)=>({k:'c',f,end,d,a,at,color:.26,attack:.006});
+const A=(f,end,d,a,at=0)=>({k:'a',f,end,d,a,at,color:.2,attack:.004});
+const N=(lo,hi,d,a,at=0)=>({k:'n',lo,hi,d,a,at,attack:.0008});
+const dart=(f=1320,d=.10,a=.7,at=0)=>[
+ T(f,f*.82,d,a*.76,at,.37),T(f*.5,f*.52,d*.63,a*.12,at,.15),N(1600,4700,.009,a*.045,at)
 ];
-const cut=(f=2400,d=.16,a=.8,at=0)=>[
- W(f*1.35,650,d,a*.64,at),B(260,1600,d*.65,a*.64,at+.008),G(f*.76,d*.9,a*.26,at+.006,.45),N(2800,6900,.009,a*.27,at)
+const petal=(f=1320,d=.22,a=.6,at=0)=>[
+ L(f,d,a*.60,at,.27),L(f*1.5,d*.76,a*.22,at+.008,.19),V(f*.5,d*.9,a*.12,at+.012)
 ];
-const rupture=(d=.28,a=.9,at=0)=>[
- B(150,1500,d,a,at),F(1350,d*.92,a*.66,at+.006),W(3600,480,d*.8,a*.43,at),G(1050,d*1.2,a*.21,at+.032,.25)
+const sweep=(f=1980,d=.18,a=.7,at=0)=>[
+ T(f,f*.56,d,a*.67,at,.48),A(2900,1100,d*.65,a*.18,at),L(f*.75,d*.5,a*.13,at+.016,.13)
 ];
-const bloom=(f=1100,d=.35,a=.8,at=0)=>[
- B(180,1200,d*.65,a*.65,at),P(f,f*1.21,d*.6,a*.33,at,.3),G(f*1.4,d,a*.24,at+.018),H(f*.76,d*1.2,a*.17,at+.025)
+const bloom=(f=880,d=.35,a=.7,at=0)=>[
+ T(f,f*1.025,d*.55,a*.39,at,.32),L(f*2,d,a*.34,at+.009,.32),V(f*1.5,d*1.1,a*.21,at+.014),A(1500,3300,d*.42,a*.13,at)
 ];
-const signal=(f=1100,d=.10,a=.5,at=0)=>[G(f,d,a*.55,at),P(f*.8,f*.84,d*.47,a*.28,at,.08),N(2200,4700,.009,a*.09,at)];
+const pop=(f=990,d=.14,a=.7,at=0)=>[
+ T(f,f*.62,d,a*.76,at,.52),L(f*1.76,d*.74,a*.15,at+.012,.17),A(2400,900,d*.64,a*.13,at)
+];
+const chime=(f=1320,d=.15,a=.5,at=0)=>[L(f,d,a*.76,at,.25),T(f*.5,f*.5,d*.45,a*.12,at,.10)];
 const specs=Object.create(null);
-function add(key,p,g,tail,layers,opt={}){specs[key]={p,g,tail,layers,jitter:.018,drive:1.16,hp:120,lp:6700,wet:.11,variants:1,focus:0,...opt};}
-// The rapid loop stays compact and centered. Three cached material variations
-// per common action vary the fracture/noise pattern, not only its playback pitch.
-add('shoot',0,.36,.032,[B(230,1200,.105,.88),P(920,770,.09,.39,0,.24),N(2300,6500,.012,.29),F(2300,.058,.17,.013)],{variants:3,jitter:.015,hp:145,wet:.07});
-add('hit',0,.29,.04,[B(300,1900,.084,.77),F(2100,.079,.46),G(1750,.099,.20,.003,.15),N(3400,6900,.009,.23)],{variants:3,jitter:.026,hp:170,wet:.06});
-add('kill',0,.43,.085,[...rupture(.18,.8),G(1880,.22,.23,.021,.45),N(3200,6000,.014,.18)],{variants:3,jitter:.024,hp:145,wet:.13});
-add('gem',0,.115,.02,[G(1760,.065,.45),P(1160,1450,.036,.12,0,.04)],{variants:3,jitter:.009,hp:300,lp:5900,wet:.08});
-add('dash',1,.40,.075,[W(450,3400,.14,.69),W(4300,630,.19,.53,.036),B(220,950,.13,.41,.022)],{hp:130,wet:.18});
-add('hurt',3,.55,.085,[B(190,1400,.14,.90),F(1050,.16,.60),P(650,560,.12,.24,0,.73),N(1800,5600,.019,.35)],{hp:120,lp:5600,wet:.09,focus:.76});
-add('shield',2,.39,.09,[G(920,.20,.58,0,.35),W(2100,3700,.09,.31),B(300,950,.09,.27)],{hp:180,wet:.19});
-// Existing event name, now a restrained electrical warning rather than a pulse drum.
-add('heartbeat',2,.23,.04,[P(680,730,.092,.44,0,.15),F(1900,.036,.19,.061),G(1460,.048,.11,.047)],{jitter:0,hp:250,lp:4300,wet:.04});
-// Glass, current, air and ruptures carry distinct weapon identities.
-add('bolt',1,.43,.055,[...arc(1150,.135,.84),F(3100,.056,.30,.023)],{variants:3,hp:145,wet:.10});
-add('nova',1,.50,.15,[W(550,3200,.17,.39),...bloom(860,.31,.83,.025),F(1450,.13,.30,.037)],{hp:110,wet:.23});
-add('sonic',1,.40,.075,[W(3400,480,.21,.87),B(250,1250,.17,.60,.018),P(710,990,.14,.19,.014,.1)],{hp:160,lp:5800,wet:.19});
-add('prism',1,.39,.095,[G(1320,.23,.48),G(1980,.18,.27,.036),W(2900,1550,.10,.28),B(330,1400,.078,.23)],{variants:3,hp:230,wet:.24});
-add('shard',1,.31,.047,[G(2250,.115,.55,0,.9),F(3400,.055,.21,.008),B(400,1600,.06,.28)],{variants:3,hp:250,wet:.12});
-add('meteor',1,.51,.15,[W(700,3100,.12,.45),...rupture(.30,.91,.036),P(620,790,.15,.22,.043,.61)],{hp:90,lp:6100,wet:.21});
-add('rail',1,.53,.12,[C(600,2200,.043,.26),...arc(1300,.24,.88,.034),W(4800,900,.20,.45,.035),G(2700,.27,.18,.044,.35)],{hp:125,wet:.22});
-add('frost',1,.33,.085,[G(2600,.20,.45),G(1830,.17,.24,.025),F(3600,.072,.24,.013),B(430,1300,.066,.20)],{variants:3,hp:260,lp:7000,wet:.23});
-add('well',1,.43,.17,[W(1800,330,.29,.68),B(160,1050,.32,.72),P(520,710,.23,.24,.035,.7),F(850,.17,.24,.15)],{hp:100,lp:4800,wet:.25});
-add('missile',1,.34,.045,[W(450,3100,.113,.72),B(250,1000,.089,.43),N(2400,5800,.012,.17)],{variants:3,hp:140,wet:.10});
-add('explosion',1,.49,.11,[...rupture(.245,.94),N(2200,5800,.019,.21)],{variants:3,hp:100,lp:6000,wet:.17});
-add('satellite',1,.50,.16,[C(850,2100,.049,.25),...arc(1450,.26,.83,.038),H(1040,.34,.14,.075),W(3400,1200,.23,.32,.04)],{hp:135,wet:.24});
-add('rift',1,.44,.12,[...cut(1850,.25,.83),F(930,.21,.35,.035),P(730,540,.14,.18,.02,.8)],{hp:115,lp:5900,wet:.20});
-add('fireworks',1,.39,.13,[...arc(1100,.12,.53),G(2400,.26,.23,.073),F(3300,.14,.35,.083),B(350,1500,.10,.22,.085)],{hp:175,wet:.23});
-add('cross',1,.45,.10,[...cut(2600,.18,.82),W(850,3700,.16,.38,.025),G(1590,.21,.18,.018,.3)],{hp:155,wet:.19});
-add('ultimatePulse',1,.34,.045,[...arc(920,.10,.70),N(2100,6100,.015,.15)],{variants:3,hp:165,wet:.09});
-add('elite',2,.45,.18,[C(570,1700,.15,.35),...rupture(.26,.65,.147),G(1320,.33,.19,.16,.35)],{hp:110,wet:.23,focus:.80});
-add('drive',2,.48,.19,[C(510,1700,.20,.48),W(650,3600,.24,.29),...bloom(1100,.34,.65,.207)],{jitter:0,hp:120,wet:.24,focus:.73});
-add('chest',2,.36,.15,[G(780,.13,.28,0,.2),...signal(1320,.16,.43,.045),...signal(1980,.20,.31,.13)],{jitter:0,hp:210,wet:.23});
-add('combo',2,.24,.055,[...signal(1370,.09,.5),B(450,1400,.049,.15)],{hp:250,wet:.13});
-add('comboBig',2,.38,.14,[...signal(1100,.15,.35),...bloom(1470,.24,.55,.075)],{jitter:0,hp:160,wet:.23});
-add('reroll',1,.23,.035,[F(1400,.058,.37),G(2200,.07,.32,.045,.3)],{hp:250,wet:.08});
-add('rare',2,.37,.20,[...signal(1320,.19,.43),G(1980,.29,.23,.076),H(990,.32,.16,.08)],{jitter:0,hp:220,wet:.28});
-add('mythic',3,.52,.28,[C(650,2400,.20,.34),...bloom(1320,.43,.72,.21),G(2640,.39,.21,.29)],{jitter:0,hp:130,wet:.31,focus:.62});
-add('select',1,.22,.035,[G(1100,.069,.48,0,.2),N(2400,5200,.009,.13)],{variants:3,jitter:.007,hp:300,lp:5800,wet:.10});
-add('menu',1,.175,.024,[G(880,.05,.37,0,.1),N(1800,4300,.007,.15)],{variants:3,jitter:.006,hp:280,lp:5200,wet:.08});
-add('start',2,.44,.21,[C(550,1600,.14,.37),...arc(1000,.19,.52,.145),...signal(1650,.25,.28,.235),H(825,.30,.16,.20)],{jitter:0,hp:125,wet:.24,focus:.73});
-add('levelup',3,.47,.22,[...signal(990,.16,.31),...signal(1320,.23,.35,.092),...bloom(1650,.30,.46,.19)],{jitter:0,hp:190,wet:.27,focus:.70});
-add('evolve',3,.54,.30,[C(480,2300,.25,.49),W(550,3400,.25,.28),...rupture(.29,.54,.257),...bloom(1320,.46,.66,.26)],{jitter:0,hp:105,wet:.29,focus:.58});
-add('styleUnlock',3,.43,.25,[C(880,1760,.16,.26),G(1320,.36,.32,.15),G(1980,.35,.24,.24),H(990,.40,.14,.20)],{jitter:0,hp:240,wet:.29,focus:.73});
-add('pilotArrival',2,.42,.19,[...signal(880,.10,.28),C(660,1760,.15,.26,.08),...bloom(1320,.30,.56,.22)],{jitter:0,hp:170,wet:.24});
-add('pilotElio',1,.28,.10,[G(1250,.17,.35,0,.4),W(850,2100,.12,.38),B(300,1200,.09,.26)],{hp:200,wet:.18});
-add('pilotOz',1,.39,.075,[...cut(2700,.14,.70),F(1300,.08,.24,.019)],{hp:155,wet:.13});
-add('pilotKai',1,.32,.045,[0,.055,.11].flatMap((at,i)=>arc(950+i*95,.066,.41,at)),{hp:170,wet:.10});
-add('pilotSera',1,.27,.15,[C(880,1760,.13,.25),G(2200,.25,.27,.10),H(1100,.25,.16,.09)],{hp:240,wet:.27});
-add('pilotMina',1,.27,.09,[P(1200,1630,.09,.24,0,.2),F(2400,.11,.29,.032),G(1720,.16,.18,.037,.5)],{hp:210,wet:.16});
-// Large threats have noisy physical mass and dissonant fields; their widening
-// afterimages remain behind the centered dry hit. No beat or tom pattern.
-add('boss',3,.55,.29,[C(420,1400,.22,.43,0,.6),F(800,.22,.25,.09),...rupture(.37,.84,.245),P(570,670,.26,.22,.27,.75)],{jitter:0,hp:90,lp:5700,wet:.28,focus:.58});
-add('devora',3,.57,.32,[C(1300,430,.23,.35,0,.75),F(660,.29,.54,.12),...rupture(.42,.84,.27),P(510,650,.30,.24,.29,.85)],{jitter:0,hp:85,lp:5400,wet:.29,focus:.56});
-add('nullEmperor',3,.59,.36,[C(440,1850,.32,.43,0,.6),W(1800,390,.27,.34,.12),...rupture(.39,.81,.345),H(660,.50,.19,.37),G(1030,.44,.19,.35,.2)],{jitter:0,hp:85,lp:5600,wet:.32,focus:.54});
-add('trueTrinity',3,.57,.28,[C(540,1620,.22,.32),...[.17,.25,.33].flatMap((at,i)=>arc(1050+i*240,.105,.35,at)),...bloom(1050,.40,.74,.435)],{jitter:0,hp:110,wet:.29,focus:.57});
-add('trueQuintet',3,.59,.30,[C(480,1900,.25,.35,0,.7),...[.15,.205,.26,.315,.37].flatMap((at,i)=>cut(1800+i*170,.081,.32,at)),...rupture(.38,.86,.45),G(1670,.38,.19,.46,.25)],{jitter:0,hp:90,wet:.29,focus:.55});
-add('eclipse',3,.56,.30,[C(1480,440,.27,.40,0,.65),W(620,3200,.29,.38,.12),...cut(1900,.35,.81,.39),F(750,.31,.36,.41)],{jitter:0,hp:95,lp:5900,wet:.30,focus:.57});
-add('eclipseReinforce',3,.51,.20,[...cut(2300,.12,.40),W(600,2900,.17,.38,.10),...rupture(.27,.69,.24)],{jitter:0,hp:115,wet:.25,focus:.65});
-add('eclipsePhase',3,.52,.23,[C(520,2300,.18,.39,0,.6),...cut(2600,.32,.81,.185),B(200,1200,.21,.39,.19)],{jitter:0,hp:105,wet:.26,focus:.61});
-add('eclipseLast',3,.59,.31,[C(1400,460,.22,.40,0,.7),W(700,3700,.24,.36,.10),...rupture(.40,.91,.33),...cut(2200,.23,.40,.42)],{jitter:0,hp:85,wet:.29,focus:.54});
-add('astraea',3,.54,.31,[C(660,2400,.23,.34),...arc(1430,.33,.66,.24),...bloom(1760,.41,.47,.29)],{jitter:0,hp:125,wet:.32,focus:.59});
-add('bossPhase3',3,.55,.26,[C(450,1850,.21,.43,0,.7),W(650,3400,.19,.27,.04),...rupture(.34,.86,.22)],{jitter:0,hp:95,wet:.27,focus:.57});
-add('bossDown',2,.51,.23,[...rupture(.32,.83),F(2400,.21,.30,.09),G(1380,.35,.20,.045,.25)],{jitter:.01,hp:100,wet:.25,focus:.65});
-add('bossBreak',3,.59,.30,[...rupture(.43,1),N(2300,6600,.025,.31),G(1760,.43,.23,.024,.2),F(3100,.25,.24,.16)],{jitter:0,hp:85,wet:.29,focus:.53});
-add('victory',3,.48,.32,[...signal(990,.24,.32),...signal(1320,.30,.33,.15),...signal(1980,.42,.29,.32),H(660,.65,.18,.16)],{jitter:0,hp:190,wet:.32,focus:.65});
-add('defeat',3,.40,.25,[G(1250,.29,.31,0,.25),P(880,570,.25,.22,.12,.2),F(1100,.27,.22,.19),H(620,.40,.15,.16)],{jitter:0,hp:150,lp:4900,wet:.27,focus:.76});
-add('death',3,.55,.29,[W(650,3900,.10,.31),...rupture(.38,.86,.075),P(850,450,.25,.26,.09,.7),F(2200,.18,.24,.29)],{jitter:0,hp:95,lp:5600,wet:.28,focus:.57});
-add('deathEcho',3,.27,.27,[F(1150,.28,.40),W(2300,580,.27,.31,.02),H(700,.38,.18,.036)],{jitter:0,hp:180,lp:4900,wet:.32});
-add('jackpotDuo',3,.56,.31,[C(660,1980,.18,.32),...arc(1180,.24,.52,.19),G(1760,.36,.28,.25),...bloom(1320,.39,.61,.38)],{jitter:0,hp:115,wet:.31,focus:.57});
-add('jackpotWhite',3,.53,.34,[C(880,2640,.22,.30),G(1760,.45,.37,.23),G(2640,.40,.26,.30),...bloom(1320,.41,.43,.24)],{jitter:0,hp:180,wet:.34,focus:.61});
-add('jackpotBlack',3,.60,.33,[C(1400,450,.21,.41,0,.72),W(620,3200,.23,.32,.08),...rupture(.42,.95,.29),P(620,770,.27,.24,.31,.78)],{jitter:0,hp:85,lp:5700,wet:.30,focus:.53});
-// Nine silhouettes: city beam / golden mirror / riot / ink / helix / silk /
-// stencil fracture / broken sync / silver claws. Release matches the cut-in.
+function add(key,p,g,tail,layers,opt={}){specs[key]={p,g,tail,layers,jitter:.006,drive:.78,hp:145,lp:6200,wet:.10,variants:1,focus:0,...opt};}
+// One compact pitched gesture per repeated action. Variants change articulation
+// and quiet details while keeping the pitch stable against the user's songs.
+add('shoot',0,.34,.022,[T(1420,1180,.074,.71,0,.38),T(710,670,.044,.10,0,.12),N(1800,4700,.009,.035)],{variants:3,jitter:.003,hp:180,wet:.045});
+add('hit',0,.22,.018,[T(1960,1680,.038,.69,0,.18),T(980,840,.026,.09,0,.10),N(2200,4900,.010,.044)],{variants:3,jitter:.004,hp:240,wet:.035});
+add('kill',0,.38,.028,[...pop(1060,.105,.76),L(1860,.082,.10,.018,.16)],{variants:3,jitter:.004,hp:180,wet:.075});
+add('gem',0,.10,.016,[L(2280,.044,.51,0,.16),T(1520,1540,.026,.09,0,.06)],{variants:3,jitter:.0015,hp:320,lp:5900,wet:.06});
+add('dash',1,.36,.045,[T(720,1850,.127,.45,0,.20),A(1700,3600,.11,.18),T(1440,2080,.07,.10,.02,.08)],{hp:180,wet:.13});
+add('hurt',3,.53,.045,[T(880,520,.115,.65,0,.60),T(1320,780,.072,.16,.005,.22),A(2600,900,.063,.09)],{jitter:0,hp:180,lp:4800,wet:.06,focus:.78});
+add('shield',2,.36,.095,[...petal(1320,.18,.60),T(660,990,.055,.13)],{hp:220,wet:.20});
+// Keep the existing event ID: one quiet warning, never a heartbeat drum pattern.
+add('heartbeat',2,.20,.020,[L(880,.065,.42,0,.12),T(440,440,.043,.06,0,.08)],{jitter:0,hp:250,lp:4200,wet:.04});
+add('bolt',1,.40,.035,[T(1960,980,.094,.64,0,.62),T(980,740,.064,.12,0,.19),N(2400,5800,.018,.065)],{variants:3,jitter:.004,hp:190,wet:.075});
+add('nova',1,.46,.12,[L(880,.115,.18),C(660,1320,.07,.18),...bloom(990,.28,.64,.045)],{jitter:.003,hp:160,wet:.22});
+add('sonic',1,.36,.07,[T(820,670,.14,.53,0,.22),V(1640,.17,.13),A(1900,650,.12,.10)],{hp:160,lp:5400,wet:.15});
+add('prism',1,.36,.08,[...petal(1320,.19,.62),T(1980,1760,.07,.12,.018,.12)],{variants:3,jitter:.002,hp:250,wet:.22});
+add('shard',1,.29,.026,[L(1760,.085,.61,0,.22),T(2640,1980,.043,.10,.006,.18)],{variants:3,jitter:.002,hp:300,wet:.11});
+add('meteor',1,.47,.09,[T(660,990,.045,.14),...pop(960,.20,.81,.016),L(1920,.18,.12,.035)],{hp:145,lp:5600,wet:.17});
+add('rail',1,.48,.11,[T(1320,1760,.032,.22),...dart(1760,.21,.73,.021),L(2640,.25,.18,.025),V(880,.25,.13,.029)],{jitter:.003,hp:180,wet:.22});
+add('frost',1,.31,.075,[L(1760,.17,.45,0,.20),L(2640,.12,.16,.011,.14),T(1320,1760,.054,.11)],{variants:3,jitter:.002,hp:280,wet:.21});
+add('well',1,.39,.12,[T(660,530,.24,.38,0,.43),V(990,.29,.24),A(1650,480,.20,.12),L(1320,.14,.13,.06,.16)],{hp:135,lp:4900,wet:.23});
+add('missile',1,.32,.028,[T(880,1760,.082,.55,0,.28),A(1000,3100,.067,.10),L(1760,.055,.08,.018)],{variants:3,jitter:.003,hp:185,wet:.075});
+add('explosion',1,.43,.055,[...pop(880,.17,.83),N(1500,5000,.032,.09)],{variants:3,jitter:.004,hp:150,lp:5500,wet:.12});
+add('satellite',1,.46,.14,[L(1320,.09,.16),...dart(1540,.24,.65,.027),V(770,.31,.18,.035),L(2310,.24,.14,.045)],{hp:175,wet:.23});
+add('rift',1,.41,.085,[...sweep(1760,.19,.75),T(660,880,.14,.12,.014,.32)],{hp:160,lp:5600,wet:.17});
+add('fireworks',1,.36,.12,[...pop(1320,.12,.54),L(2640,.20,.20,.046),V(1760,.20,.10,.058)],{hp:220,wet:.22});
+add('cross',1,.41,.08,[T(1980,1320,.16,.48,0,.43),T(990,1320,.12,.18,.018,.23),L(2640,.18,.12,.024)],{hp:190,wet:.18});
+add('ultimatePulse',1,.31,.03,[...dart(1320,.078,.66),L(1980,.065,.09,.006)],{variants:3,jitter:.002,hp:210,wet:.07});
+add('elite',2,.43,.16,[L(660,.10,.24),C(660,1320,.13,.23),...bloom(990,.30,.63,.145)],{jitter:0,hp:160,wet:.23,focus:.80});
+add('drive',2,.44,.18,[L(880,.10,.21),C(660,1760,.18,.29),...bloom(1320,.31,.61,.19)],{jitter:0,hp:180,wet:.25,focus:.73});
+add('chest',2,.34,.13,[...chime(880,.10,.29),...chime(1320,.14,.35,.065),...chime(1760,.21,.30,.13)],{jitter:0,hp:220,wet:.22});
+add('combo',2,.22,.04,[L(1320,.086,.53,0,.18),T(660,880,.037,.09)],{jitter:.002,hp:260,wet:.10});
+add('comboBig',2,.35,.13,[...chime(1320,.14,.36),...petal(1760,.23,.45,.078)],{jitter:0,hp:220,wet:.22});
+add('reroll',1,.21,.03,[T(1320,990,.045,.35,0,.15),L(1760,.070,.30,.043,.16)],{jitter:.002,hp:260,wet:.08});
+add('rare',2,.34,.18,[...chime(1320,.18,.37),...petal(1980,.28,.37,.082)],{jitter:0,hp:250,wet:.26});
+add('mythic',3,.49,.24,[L(880,.14,.19),C(660,1760,.17,.25),...bloom(1320,.36,.64,.18),L(2640,.32,.16,.27)],{jitter:0,hp:180,wet:.29,focus:.62});
+add('select',1,.20,.025,[L(1320,.060,.53,0,.16),T(660,880,.028,.07)],{variants:3,jitter:.0015,hp:280,wet:.08});
+add('menu',1,.16,.02,[T(990,1050,.040,.48,0,.14),L(1980,.029,.08)],{variants:3,jitter:.0015,hp:300,lp:5300,wet:.06});
+add('start',2,.41,.17,[...chime(880,.12,.30),...chime(1320,.17,.35,.075),...bloom(1760,.27,.42,.16)],{jitter:0,hp:190,wet:.23,focus:.73});
+add('levelup',3,.44,.19,[...chime(880,.12,.28),...chime(1320,.18,.32,.08),...petal(1760,.28,.52,.16)],{jitter:0,hp:220,wet:.26,focus:.70});
+add('evolve',3,.51,.27,[L(880,.12,.23),C(660,1760,.20,.31),...bloom(1320,.42,.72,.21),L(2640,.35,.16,.30)],{jitter:0,hp:170,wet:.28,focus:.58});
+add('styleUnlock',3,.40,.22,[...chime(1320,.19,.29),...chime(1760,.26,.30,.09),V(880,.41,.14,.12),L(2640,.32,.15,.18)],{jitter:0,hp:230,wet:.28,focus:.73});
+add('pilotArrival',2,.39,.17,[...chime(880,.10,.26),...chime(1320,.13,.26,.085),...bloom(1760,.27,.43,.17)],{jitter:0,hp:210,wet:.23});
+add('pilotElio',1,.26,.08,[...petal(1320,.17,.47),T(660,990,.074,.12)],{hp:240,wet:.17});
+add('pilotOz',1,.35,.05,[...sweep(2200,.13,.67),L(1100,.08,.11,.012)],{hp:200,wet:.12});
+add('pilotKai',1,.29,.03,[0,.055,.11].flatMap(at=>dart(1320,.053,.36,at)),{jitter:.002,hp:220,wet:.075});
+add('pilotSera',1,.25,.14,[...chime(1320,.18,.30),V(660,.25,.17),L(1980,.21,.18,.055)],{hp:240,wet:.24});
+add('pilotMina',1,.25,.075,[T(1320,1760,.077,.32,0,.20),L(2640,.12,.21,.029)],{hp:250,wet:.16});
+// Threats use compact falling calls and open harmonic fields. Each warning
+// begins immediately; longer spell flourishes stay behind the first signal.
+add('boss',3,.52,.24,[L(660,.12,.24),T(990,660,.17,.28),C(660,1320,.20,.27),...bloom(880,.35,.67,.215)],{jitter:0,hp:150,lp:5600,wet:.26,focus:.58});
+add('devora',3,.54,.25,[T(1320,660,.18,.34,0,.54),L(990,.17,.18),...bloom(660,.39,.72,.22),A(2200,750,.23,.13,.23)],{jitter:0,hp:135,lp:5200,wet:.27,focus:.56});
+add('nullEmperor',3,.56,.30,[L(660,.18,.24),C(440,1320,.28,.27),...bloom(880,.44,.74,.29),L(1760,.36,.21,.37)],{jitter:0,hp:130,lp:5700,wet:.30,focus:.54});
+add('trueTrinity',3,.54,.25,[L(880,.12,.20),...[.10,.18,.26].flatMap((at,i)=>chime([880,1320,1760][i],.15,.25,at)),...bloom(1320,.37,.60,.34)],{jitter:0,hp:170,wet:.28,focus:.57});
+add('trueQuintet',3,.56,.27,[L(660,.13,.21),...[.08,.14,.20,.26,.32].flatMap((at,i)=>chime([660,880,990,1320,1760][i],.12,.20,at)),...bloom(990,.40,.68,.39)],{jitter:0,hp:160,wet:.28,focus:.55});
+add('eclipse',3,.53,.27,[T(1760,660,.21,.29,0,.38),L(1320,.12,.19),C(660,1320,.25,.24),...bloom(990,.37,.65,.29),V(660,.40,.14,.32)],{jitter:0,hp:155,lp:5600,wet:.28,focus:.57});
+add('eclipseReinforce',3,.48,.18,[...chime(1320,.10,.28),T(990,660,.16,.28,.075,.36),...bloom(880,.27,.56,.20)],{jitter:0,hp:180,wet:.23,focus:.65});
+add('eclipsePhase',3,.49,.20,[L(880,.11,.22),C(660,1980,.16,.26),...sweep(2200,.26,.63,.17),V(1100,.32,.13,.18)],{jitter:0,hp:170,wet:.24,focus:.61});
+add('eclipseLast',3,.56,.28,[T(1760,660,.18,.33,0,.49),L(1320,.12,.18),C(660,1760,.24,.29),...bloom(880,.41,.76,.25)],{jitter:0,hp:145,wet:.27,focus:.54});
+add('astraea',3,.51,.28,[...chime(1320,.15,.25),C(880,2640,.20,.23),...bloom(1760,.38,.58,.21),V(880,.42,.15,.25)],{jitter:0,hp:200,wet:.30,focus:.59});
+add('bossPhase3',3,.52,.23,[L(880,.10,.22),T(1320,660,.17,.28,0,.50),C(660,1760,.18,.26),...bloom(990,.34,.69,.19)],{jitter:0,hp:160,wet:.25,focus:.57});
+add('bossDown',2,.48,.20,[...pop(1320,.23,.63),L(1760,.29,.24,.055),V(880,.34,.13,.045)],{jitter:0,hp:180,wet:.24,focus:.65});
+add('bossBreak',3,.56,.26,[T(1760,880,.26,.42,0,.43),L(2640,.33,.26,.014),...bloom(880,.37,.61,.085),A(2700,850,.23,.15)],{jitter:0,hp:155,wet:.27,focus:.53});
+add('victory',3,.45,.29,[...chime(880,.22,.29),...chime(1320,.27,.30,.15),...petal(1760,.40,.49,.30),V(660,.56,.13,.18)],{jitter:0,hp:200,wet:.30,focus:.65});
+add('defeat',3,.37,.21,[L(1320,.19,.27),T(990,660,.21,.26,.12,.25),V(880,.31,.13,.17)],{jitter:0,hp:190,lp:4900,wet:.24,focus:.76});
+add('death',3,.53,.16,[T(1980,660,.24,.56,0,.53),T(1320,440,.19,.21,.012,.22),L(2640,.18,.18,.018),A(2900,750,.15,.12,.009)],{jitter:0,hp:180,lp:5600,wet:.19,focus:.57});
+add('deathEcho',3,.24,.21,[T(1760,880,.23,.25,0,.17),L(1320,.28,.23,.016),V(660,.29,.10,.03)],{jitter:0,hp:220,lp:4900,wet:.26});
+add('jackpotDuo',3,.53,.27,[...chime(880,.13,.22),...chime(1320,.19,.27,.08),...bloom(1760,.35,.54,.18),L(2640,.31,.18,.27)],{jitter:0,hp:200,wet:.29,focus:.57});
+add('jackpotWhite',3,.50,.30,[...petal(1320,.26,.34),C(880,2640,.17,.21),...bloom(1760,.40,.50,.18),V(880,.43,.14,.23)],{jitter:0,hp:210,wet:.32,focus:.61});
+add('jackpotBlack',3,.57,.28,[T(1320,660,.17,.31,0,.47),L(990,.13,.17),C(660,1760,.20,.25),...bloom(880,.41,.76,.22)],{jitter:0,hp:155,lp:5700,wet:.28,focus:.53});
+// Every spell has an immediate signal: gameplay's first ultimate pulse is also
+// immediate. Its distinct bloom follows, with open intervals and short motifs.
 const finishers=[
- [C(550,2100,.20,.39),...arc(1270,.34,.80,.215),W(4400,780,.29,.47,.217),H(950,.44,.17,.255)],
- [C(880,2300,.22,.30),G(2640,.38,.28,.222),...cut(2900,.31,.85,.23),...bloom(1320,.39,.39,.25)],
- [C(660,2300,.20,.29),...[.08,.14,.20].flatMap((at,i)=>arc(1050+i*220,.085,.31,at)),...rupture(.35,.81,.29),F(2600,.22,.28,.37)],
- [C(1400,430,.22,.42,0,.69),W(1900,370,.23,.32),...rupture(.43,.91,.25),P(520,710,.29,.23,.28,.78),H(640,.46,.13,.32)],
- [C(550,2700,.26,.37),W(700,3600,.24,.34,.02),P(1600,770,.34,.37,.27,.5),...bloom(1100,.39,.60,.275),W(3600,1000,.28,.36,.29)],
- [C(660,1760,.23,.34,0,.5),W(950,2800,.20,.30,.03),...cut(2200,.37,.91,.24),F(1070,.28,.34,.25),G(1560,.38,.16,.29,.2)],
- [...[0,.075,.14,.195].flatMap((at,i)=>[F(2300-i*260,.061,.29,at),G(1200+i*190,.055,.16,at,.15)]),C(600,1800,.15,.24,.14),...cut(2700,.32,.86,.31),B(180,1400,.24,.45,.315)],
- [...[0,.04,.125,.20].flatMap((at,i)=>[P([1300,730,1750,960][i],850,.038,.27,at,.74),F(2400,.027,.24,at)]),C(950,2100,.12,.24,.18,.6),...rupture(.34,.78,.315),G(2400,.31,.20,.36,.25)],
- [C(660,1950,.17,.32),...[.18,.265,.35].flatMap((at,i)=>cut(3100-i*300,.17,.56,at)),G(2100,.32,.22,.37),B(200,1200,.22,.46,.35)]
+ [...chime(1320,.12,.27),C(880,2640,.18,.25),...dart(1760,.32,.59,.19),...bloom(1320,.38,.52,.205)],
+ [...petal(1320,.14,.32),C(880,1760,.18,.20),...petal(1760,.39,.65,.20),L(2640,.31,.19,.28),V(880,.40,.14,.23)],
+ [...chime(990,.10,.22),...[.07,.13,.19].flatMap((at,i)=>dart([990,1320,1760][i],.073,.30,at)),...bloom(1320,.35,.70,.27)],
+ [T(1320,660,.15,.28,0,.42),L(1760,.12,.17),C(660,1320,.20,.22),...bloom(880,.41,.74,.22),T(1760,880,.19,.17,.30,.25)],
+ [...chime(880,.12,.22),C(660,2640,.24,.28),...petal(1320,.37,.45,.25),T(1760,1320,.27,.26,.265,.24),V(880,.42,.16,.27)],
+ [L(1320,.12,.26),T(880,1320,.15,.18),C(660,1760,.20,.23),...sweep(2200,.31,.63,.22),...petal(1320,.36,.34,.26)],
+ [...[0,.07,.135,.19].flatMap((at,i)=>chime([990,1320,1760,1320][i],.058,.23,at)),C(880,1760,.13,.19,.14),...bloom(1320,.36,.69,.285)],
+ [...[0,.041,.122,.195].flatMap((at,i)=>dart([1320,990,1760,1320][i],.039,.28,at)),C(880,1980,.12,.18,.18),...bloom(990,.37,.70,.30),L(2640,.28,.14,.35)],
+ [...chime(1760,.11,.23),C(880,1980,.16,.21),...[.17,.255,.34].flatMap((at,i)=>sweep([2640,2200,1980][i],.135,.43,at)),...petal(1320,.32,.36,.37)]
 ];
-finishers.forEach((layers,i)=>add('finisher'+i,3,.57,[.27,.30,.26,.33,.31,.28,.25,.27,.28][i],layers,{jitter:0,hp:[110,160,105,85,120,115,120,105,160][i],lp:i===3?5600:6700,wet:.29,focus:.55}));
+finishers.forEach((layers,i)=>add('finisher'+i,3,.54,[.24,.27,.24,.28,.27,.25,.23,.25,.25][i],layers,{jitter:0,hp:[180,210,180,150,180,180,190,170,210][i],lp:i===3?5500:6300,wet:.27,focus:.58}));
 function resolve(name,opt={}){
  if(opt.cue&&Object.hasOwn(specs,opt.cue))return opt.cue;
  if(name==='jackpot')return ['jackpotDuo','jackpotWhite','jackpotBlack'][clamp(M.floor(finite(opt.jackpotType,0)),0,2)];
@@ -141,44 +141,42 @@ function* buildSteps(ac,key,variant=0){
  for(const [index,l] of spec.layers.entries()){
   const offset=M.round(l.at*RATE),len=M.min(dry.length-offset,M.ceil(l.d*RATE));
   const variation=spec.variants>1?[-.7,.45,.85][variant]:0;
-  const detune=1+variation*(l.k==='g'?.012:.038),materialGain=1+variation*((index&1)?-.065:.065);
-  let phase=0,mod=0,phase2=0,lo=0,hi=0,coarse=0,seed=seedFor(key+':'+variant+':'+index),f=(l.f||0)*detune;
+  const detune=1+variation*.0015,materialGain=1+variation*((index&1)?-.045:.045);
+  const brightness=1+variation*.08;
+  let phase=0,lo=0,hi=0,seed=seedFor(key+':'+variant+':'+index),f=(l.f||0)*detune;
   let band1=0,band2=0,n1=0,n2=0,b0=0,b2=0,a1=0,a2=0;
-  const cLo=1-M.exp(-TAU*(l.lo||220)/RATE),cHi=1-M.exp(-TAU*(l.hi||5600)/RATE);
+  const cLo=1-M.exp(-TAU*(l.lo||700)/RATE),cHi=1-M.exp(-TAU*(l.hi||5000)/RATE);
   const sweep=l.f?M.pow(l.end/l.f,1/M.max(1,len-1)):1;
-  const modes=l.k==='g'||l.k==='h'?[1,1.497+(.27*l.color),2.141+(.11*l.color),2.893]:null;
-  const phases=[0,0,0,0];
   for(let i=0;i<len;i++){
-   const u=i/M.max(1,len-1),t=i/RATE,edge=M.min(1,t/l.attack),end=M.min(1,(l.d-t)/.006);
+   const u=i/M.max(1,len-1),t=i/RATE,edge=M.min(1,t/(l.attack*(1+variation*.10))),end=M.min(1,(l.d-t)/.005);
    seed=(M.imul(seed,1664525)+1013904223)>>>0;
-   const noise=seed/2147483648-1;hi+=cHi*(noise-hi);lo+=cLo*(noise-lo);coarse+=.035*(noise-coarse);
-   const air=(hi-lo)*1.75;
+   const noise=seed/2147483648-1;hi+=cHi*(noise-hi);lo+=cLo*(noise-lo);
+   const air=(hi-lo)*1.65;
    let env=edge*end,x=0;
-   if(l.k==='b'){
-    // Aperiodic pressure: broad-band air with a rounded shoulder and no pitch.
-    env*=M.exp(-u*3.4)*(1-u)*(.84+.16*M.sin(u*M.PI));x=air*2.35;
-   }else if(l.k==='n'){
-    env*=M.exp(-u*5)*(1-u);x=air;
-   }else if(l.k==='w'||l.k==='f'){
-    if((i&31)===0){const w=TAU*f/RATE,alpha=M.sin(w)/(2*(l.k==='f'?.68:.54)),a0=1+alpha;b0=alpha/a0;b2=-b0;a1=-2*M.cos(w)/a0;a2=(1-alpha)/a0;}
+   if(l.k==='n'){
+    env*=M.exp(-u*5.2)*(1-u);x=air;
+   }else if(l.k==='a'){
+    if((i&31)===0){const w=TAU*f/RATE,alpha=M.sin(w)/(2*.58),a0=1+alpha;b0=alpha/a0;b2=-b0;a1=-2*M.cos(w)/a0;a2=(1-alpha)/a0;}
     x=b0*noise+b2*n2-a1*band1-a2*band2;n2=n1;n1=noise;band2=band1;band1=x;f*=sweep;
-    if(l.k==='f'){
-     // Irregular micro-fractures, not a periodic machine-gun gate.
-     const grain=.47+.53*M.min(1,M.abs(coarse)*7);x=x*2.2*grain+air*.17;
-     env*=M.exp(-u*3.2)*M.pow(1-u,1.1);
-    }else{env*=M.pow(M.sin(M.PI*(u*.86+.04)),.65)*M.exp(-u*1.25)*(1-u);x*=2.1;}
-   }else if(modes){
-    for(let m=0;m<4;m++){
-     phases[m]+=TAU*f*modes[m]/RATE;
-     x+=M.sin(phases[m]+(l.k==='g'?coarse*.06:0))*[.50,.25,.16,.09][m]*M.exp(-u*(l.k==='h'?.8:1.5+m*1.1));
-    }
-    env*=M.pow(1-u,l.k==='h'?1.3:1.8);if(l.k==='h')env*=M.sin(M.PI*M.min(1,u*4)*.5);f*=sweep;
+    env*=M.pow(M.sin(M.PI*(u*.89+.03)),.7)*M.exp(-u*1.9)*(1-u);x*=1.8;
    }else{
-    phase+=TAU*f/RATE;mod+=TAU*f*(l.k==='c'?1.013:1.47)/RATE;phase2+=TAU*f*2.003/RATE;f*=sweep;
-    const grit=l.color,field=M.sin(phase+M.sin(mod)*grit*(l.k==='c'?.9:1.35)+coarse*grit*.9);
-    x=field*.55+M.sin(phase2)*.13+air*(l.k==='c'?.32:.17);
-    if(l.k==='c')env*=M.pow(M.sin(u*M.PI*.5),1.6);
-    else env*=M.exp(-u*2.5)*M.pow(1-u,1.2);
+    phase+=TAU*f/RATE;f*=sweep;
+    // Smooth additive partials stay harmonically related. No hard-edged square,
+    // noisy phase modulation, or resonant bass pitch-drop in the rapid loop.
+    const color=l.color*brightness,bright=M.exp(-u*3.5);
+    // Taper each upper partial before Nyquist, including the highest spell bells.
+    const h2=clamp((RATE*.48-f*2)/(RATE*.08),0,1),h3=clamp((RATE*.48-f*3)/(RATE*.08),0,1),h4=clamp((RATE*.48-f*4)/(RATE*.08),0,1);
+    if(l.k==='l'){
+     x=.72*M.sin(phase)+(.12+color*.13)*M.sin(phase*2)*M.exp(-u*2.4)*h2+.075*M.sin(phase*3)*M.exp(-u*4.1)*h3+.035*M.sin(phase*4)*M.exp(-u*5.7)*h4;
+     env*=M.exp(-u*2.0)*M.pow(1-u,1.4);
+    }else if(l.k==='v'){
+     x=.67*M.sin(phase)+.18*M.sin(phase*2)*h2+.09*M.sin(phase*3)*h3;
+     env*=M.sin(M.PI*M.min(1,u*4)*.5)*M.pow(1-u,1.65);
+    }else{
+     x=.73*M.sin(phase)+(.075+color*.20)*M.sin(phase*2)*bright*h2+(.045+color*.12)*M.sin(phase*3)*bright*h3+.02*M.sin(phase*4)*bright*h4;
+     if(l.k==='c')env*=M.pow(M.sin(u*M.PI*.5),1.5);
+     else env*=M.exp(-u*2.7)*M.pow(1-u,1.1);
+    }
    }
    dry[offset+i]+=x*env*l.a*materialGain;
    if((i&511)===511)yield;
@@ -208,9 +206,9 @@ function* buildSteps(ac,key,variant=0){
   if((i&511)===511)yield;
  }
  yield;
- // Peak ceiling preserves transient shape; an RMS ceiling stops noisy ruptures
- // from being promoted to the same sustained loudness as a thin metallic click.
- const rms=M.sqrt(energy/(frames*2));const gain=M.min(.80/M.max(.1,peak),.22/M.max(.001,rms));
+ // Peak and RMS ceilings keep soft harmonic tones comfortable in dense volleys.
+ // Role gains below preserve the difference between a hit tick and a spell.
+ const rms=M.sqrt(energy/(frames*2));const gain=M.min(.78/M.max(.1,peak),(spec.p<2?.19:.21)/M.max(.001,rms));
  for(let i=0;i<frames;i++){left[i]*=gain;right[i]*=gain;if((i&511)===511)yield;}
  return buffer;
 }
