@@ -1,8 +1,18 @@
-# RUU//OVERRUN — PUBLIC BETA (v1.39.0)
+# RUU//OVERRUN — PUBLIC BETA (v1.40.0)
 
 JACKPOTØ31が制作するオリジナル・ブラウザサバイバルアクション。
 
 **[ゲームを遊ぶ](https://jackpot031.github.io/ruu-overrun/)** / **[公開開始v1.5.3からの更新履歴](./CHANGELOG.md)**
+
+## v1.40.0 — SLASH WIND / G SAMPLE ADOPTION
+
+- 試聴で選定したG「スラッシュ・ウィンド」をゲーム用効果音に採用。短い吸い込み、風を切る刃、交差する斬撃、広がる風の解放を音の軸にする。
+- 通常射撃・命中・撃破・回収と基準必殺技には、承認された試聴用WAVの48kHz・16bit・ステレオPCMを直接収録。最初のテイクは元の波形を保持し、役割ごとの音量関係を維持する。
+- その他の武器・警告・報酬・必殺技も同じ風と切断の素材から組み立てる。9種類の必殺技と3種類のJACKPOTは、間隔・重なり・広がりを変えて鳴り分ける。
+- タイトルとプレイ中の試聴はGの通常射撃音。AUDIOボタン／OキーでBGM・SFX音量を個別に変更でき、ミュートと設定保存も継続する。
+- 音源はページと同時に読み込み、必要なPCMを小分けに準備してキャッシュする。音源データが利用できない場合は、簡潔な風切り音で動作を継続する。
+
+検証: `node tests/audio-engine.test.cjs`、`node tests/audio-integration.test.cjs`、`node tests/audio-mixer.test.cjs`、`node tests/title-screen.test.cjs`。承認済み音源との一致、連続発音時の重なり、音量・ミュート・キャッシュを確認する。音源の再生成は `python tools/build_slash_samples.py`。
 
 ## v1.39.0 — SPELL RESONANCE / DANMAKU AUDIO
 
