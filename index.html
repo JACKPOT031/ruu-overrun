@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#070b17">
-<title>RUU//OVERRUN — RUU STYLE / JACKPOTØ31</title>
+<title>RUU//OVERRUN — KEY VISUAL / JACKPOTØ31</title>
 <style>
 :root{--cyan:#66fff1;--mint:#80ffb3;--pink:#ff5fcf;--gold:#ffe59e;--ink:#080c17;--line:#394963}
 *{box-sizing:border-box}html,body{margin:0;min-height:100%;background:#060a12;color:#effbff;font-family:"Yu Gothic","Hiragino Kaku Gothic ProN",Meiryo,system-ui,sans-serif}
@@ -361,12 +361,13 @@ a.ending-control,a.ending-art-link{text-decoration:none;display:inline-flex;alig
 @media(prefers-reduced-motion:reduce){.astral-deploy{animation:none}}
 </style>
 <link rel="stylesheet" href="public-features.css?v=1.32.1">
-<link rel="stylesheet" href="ruu-style.css?v=1.33.1">
+<link rel="stylesheet" href="ruu-style.css?v=1.34.0">
 <link rel="stylesheet" href="run-inspector.css?v=1.25.0">
+<link rel="stylesheet" href="title-screen.css?v=1.34.0">
 </head>
 <body>
 <div class="shell">
- <div class="upper"><div class="brand">JACKPOT<b>Ø</b>31 <span style="color:#667f95">/ ORIGINAL GAMES</span></div><div class="build">RUU//OVERRUN <b>v1.33.1</b> · RUU STYLE</div></div>
+ <div class="upper"><div class="brand">JACKPOT<b>Ø</b>31 <span style="color:#667f95">/ ORIGINAL GAMES</span></div><div class="build">RUU//OVERRUN <b>v1.34.0</b> · KEY VISUAL</div></div>
  <main class="frame" id="frame">
   <canvas id="game" width="1200" height="675" aria-label="ルーのサバイバルアクションゲーム"></canvas>
   <div class="hud" id="hud">
@@ -422,7 +423,8 @@ a.ending-control,a.ending-art-link{text-decoration:none;display:inline-flex;alig
  <script src="run-inspector.js?v=1.25.0"></script>
 <script src="survival-trials.js?v=1.23.1"></script>
 <script src="performance-engine.js?v=1.32.1"></script>
-<script src="ruu-style.js?v=1.33.1"></script>
+<script src="ruu-style.js?v=1.34.0"></script>
+<script src="title-screen.js?v=1.34.0"></script>
 <script>
 (()=>{
  'use strict';
@@ -707,8 +709,8 @@ const WALK_ATLAS=new Image();WALK_ATLAS.src='assets/ruu_walk_atlas.webp';
  const h=(color,blur=12)=>{ctx.shadowColor=color;ctx.shadowBlur=blur};
  function initDecor(){const rng=(i,s)=>((Math.sin(i*127.1+s*311.7)*43758.5453)%1+1)%1;for(let i=0;i<150;i++){stars.push({x:rng(i,3)*3800-1900,y:rng(i,9)*2700-1350,r:rand(.6,2.4),a:rand(.12,.45)})}for(let i=0;i<105;i++){runes.push({x:(rng(i,13)-.5)*6500,y:(rng(i,19)-.5)*6500,t:i%4,r:24+(i%5)*7})}}
  initDecor();
- function setOverlay(html){ui.menu.innerHTML=html;ui.overlay.classList.remove('hidden')}
- function hideOverlay(){ui.overlay.classList.add('hidden')}
+ function setOverlay(html,kind=''){window.RUU_TITLE_SCREEN?.layout(ui.frame,ui.overlay,kind);ui.menu.innerHTML=html;ui.overlay.classList.remove('hidden');if(kind)ui.overlay.scrollTop=0;}
+ function hideOverlay(){window.RUU_TITLE_SCREEN?.layout(ui.frame,ui.overlay);ui.overlay.classList.add('hidden')}
  const TITLE_ARTS=[
    {name:'OFFICIAL RUU',src:SPRITES.front.src},
    {name:'PATTERNS & TEXTURES',src:'assets/art_patterns.webp'},
@@ -872,7 +874,7 @@ const WALK_ATLAS=new Image();WALK_ATLAS.src='assets/ruu_walk_atlas.webp';
    state='won';
    const completeClear=!!g?.secretBossCleared;
    const t=formatTime(g.time);
-   setOverlay(`<div class="eyebrow">MISSION COMPLETE // EPILOGUE</div><h2 class="result-title">${g.mode==='challenge'?(g.challengeOutcome?.success?'TRIAL CLEARED':'TRIAL FAILED'):completeClear?'COMPLETE CLEAR':'SURVIVED'}</h2>${g.mode==='challenge'?'<div class="challenge-result-stamp">'+(g.challengeOutcome?.success?'CHALLENGE TITLE UNLOCKED':g.challengeOutcome?.reason||'条件未達成')+'</div>':''}<p class="intro">${completeClear?'完全クリアおめでとうございます。<br>結果カードを保存して、JACKPOTØ31のDMへ送ってね。':'旅は、まだ続いている。'}<br><span style="color:#e9c695">エンディングテーマ：さすらえば / JACKPOTØ31</span></p>${equippedTitle()?'<div class="equipped-title">✧ EQUIPPED TITLE / '+equippedTitle()+'</div>':''}${window.RUU_PILOTS?.status()?.name?'<div class="equipped-title">SUPPORT PILOT / '+window.RUU_PILOTS.status().name+'</div>':''}${window.RUU_STYLE?.resultHtml(g)||''}<div class="result-stats"><div>TIME<strong>${t}</strong></div><div>KILLS<strong>${g.kills}</strong></div><div>LEVEL<strong>${g.level}</strong></div><div>SCORE<strong>${Math.floor(g.score).toLocaleString('ja-JP')}</strong></div><div>RARE<strong>${g.rareFinds}</strong></div><div>RELICS<strong>${g.crates}</strong></div><div>MYTHIC<strong>${g.mythicFinds}</strong></div><div>MAX CHAIN<strong>${g.maxCombo||0}</strong></div></div><button class="primary" id="retryBtn">↻ もう一度</button><button class="primary" id="endingReplay" style="margin-left:12px">♫ EDをもう一度</button>${completeClear?`<a class="enemy-archive-btn ending-art-link" href="${COMPLETE_ENDING_POSTER}" target="_blank" rel="noopener">完全クリアイラストを拡大 ↗</a>`:''}<div class="help">RUU//OVERRUN v1.33.1 PUBLIC BETA · © JACKPOTØ31</div>`);
+   setOverlay(`<div class="eyebrow">MISSION COMPLETE // EPILOGUE</div><h2 class="result-title">${g.mode==='challenge'?(g.challengeOutcome?.success?'TRIAL CLEARED':'TRIAL FAILED'):completeClear?'COMPLETE CLEAR':'SURVIVED'}</h2>${g.mode==='challenge'?'<div class="challenge-result-stamp">'+(g.challengeOutcome?.success?'CHALLENGE TITLE UNLOCKED':g.challengeOutcome?.reason||'条件未達成')+'</div>':''}<p class="intro">${completeClear?'完全クリアおめでとうございます。<br>結果カードを保存して、JACKPOTØ31のDMへ送ってね。':'旅は、まだ続いている。'}<br><span style="color:#e9c695">エンディングテーマ：さすらえば / JACKPOTØ31</span></p>${equippedTitle()?'<div class="equipped-title">✧ EQUIPPED TITLE / '+equippedTitle()+'</div>':''}${window.RUU_PILOTS?.status()?.name?'<div class="equipped-title">SUPPORT PILOT / '+window.RUU_PILOTS.status().name+'</div>':''}${window.RUU_STYLE?.resultHtml(g)||''}<div class="result-stats"><div>TIME<strong>${t}</strong></div><div>KILLS<strong>${g.kills}</strong></div><div>LEVEL<strong>${g.level}</strong></div><div>SCORE<strong>${Math.floor(g.score).toLocaleString('ja-JP')}</strong></div><div>RARE<strong>${g.rareFinds}</strong></div><div>RELICS<strong>${g.crates}</strong></div><div>MYTHIC<strong>${g.mythicFinds}</strong></div><div>MAX CHAIN<strong>${g.maxCombo||0}</strong></div></div><button class="primary" id="retryBtn">↻ もう一度</button><button class="primary" id="endingReplay" style="margin-left:12px">♫ EDをもう一度</button>${completeClear?`<a class="enemy-archive-btn ending-art-link" href="${COMPLETE_ENDING_POSTER}" target="_blank" rel="noopener">完全クリアイラストを拡大 ↗</a>`:''}<div class="help">RUU//OVERRUN v1.34.0 PUBLIC BETA · © JACKPOTØ31</div>`);
    document.getElementById('retryBtn').onclick=()=>startGame(g?.mode||'normal',g?.challengeId||'');
    document.getElementById('endingReplay').onclick=()=>startEndingCinema(true);
  }
@@ -901,7 +903,43 @@ const WALK_ATLAS=new Image();WALK_ATLAS.src='assets/ruu_walk_atlas.webp';
  endingDom.progress.addEventListener('keydown',ev=>{if(ev.key==='ArrowRight'){ev.preventDefault();seekEnding(endingClock()+5)}else if(ev.key==='ArrowLeft'){ev.preventDefault();seekEnding(endingClock()-5)}});
  musicEls[ENDING_TRACK_INDEX].addEventListener('ended',()=>{if(state==='ending')finishEndingCinema()});
 
- function showStart(){state='start';ui.overlay.classList.remove('style-overlay');window.RUU_STYLE?.init();ui.hud.style.display='none';ui.pause.disabled=true;loadoutButton.disabled=true;quickLoadoutButton.hidden=true;musicIndicator.classList.remove('visible');musicMeter.classList.remove('visible');showMusicRetry(false);bossAlert.classList.remove('active');const best=getBest();const endlessBest=getBest('endless');setOverlay(`<div class="menu-grid"><div class="menu-copy"><div class="menu-tick">JACKPOT<strong>Ø</strong>31 / ORIGINAL GAME <span style="color:#dcc2a2">— v1.33.1 PUBLIC BETA</span></div><h1 class="menu-logo"><span class="ruu">RUU</span><span class="slashes">//</span>OVERRUN</h1><div class="menu-nameplate">RUU STYLE // WARDROBE UNLOCKED</div><div class="menu-separator"></div><p class="menu-intro">攻撃は自動。敵を倒して、武器を強化。<br><strong>押し寄せる侵食を生き抜き、最後の脅威を撃ち砕け。</strong><br><span style="color:#ddb2cc;font-size:.79em">一定確率で『星屑の鎧 -Guardian Genome-』のキャラクターが参戦。</span></p><div class="start-row"><button class="primary" id="startBtn" type="button">▶ START // DEPLOY  ·  ENTER</button><button class="enemy-archive-btn" id="enemyArchive" type="button">☷ DEVORA FILES</button><button class="enemy-archive-btn" id="achievementsBtn" type="button">✧ ACHIEVEMENTS</button><button class="enemy-archive-btn" id="ruuStyleBtn" type="button">♟ RUU STYLE · ${window.RUU_STYLE?.stats().unlocked||1}/9</button>${endingUnlocked()?`<button class="enemy-archive-btn" id="challengeBtn" type="button">✦ CHALLENGE MISSIONS</button><button class="enemy-archive-btn" id="endlessBtn" type="button" title="クリア後解放 / 自己ベスト ${endlessBest?.score||0}">∞ ENDLESS MODE</button>`:``}${endingUnlocked()?`<button class="enemy-archive-btn" id="endingTheater" type="button">♫ ENDING THEATER</button>`:``}${completeEndingUnlocked()?`<button class="enemy-archive-btn" id="completeEndingTheater" type="button">✦ COMPLETE ENDING</button>`:``}<div class="run-record">PERSONAL BEST<strong>${best?best.score.toLocaleString('ja-JP'):'— — —'}</strong></div></div><div class="menu-controls"><span class="key">WASD / ↑↓←→</span> MOVE　<span class="key">SPACE</span> DASH　<span class="key">1–3</span> UPGRADE　<span class="key">ESC</span> PAUSE</div></div><div class="hero-figure" id="heroArt"><div class="hero-hint">RUU / CHARACTER DATA</div></div></div>`);setupTitleGallery();const unlockBtn=document.getElementById('endingTheater');if(unlockBtn)unlockBtn.onclick=()=>startEndingCinema(true);const completeBtn=document.getElementById('completeEndingTheater');if(completeBtn)completeBtn.onclick=()=>startEndingCinema(true,true);document.getElementById('startBtn').addEventListener('click',()=>{try{startGame()}catch(e){console.error(e);const btn=document.getElementById('startBtn');if(btn){btn.textContent='START エラー — ENTER / 再読込';btn.title=String(e)}}});document.getElementById('enemyArchive').addEventListener('click',showDevoraFiles);document.getElementById('achievementsBtn').onclick=showAchievementArchive;document.getElementById('ruuStyleBtn').onclick=showStyleArchive;const challengeBtn=document.getElementById('challengeBtn');if(challengeBtn)challengeBtn.onclick=showChallengeArchive;const endlessBtn=document.getElementById('endlessBtn');if(endlessBtn)endlessBtn.onclick=()=>startGame('endless')}
+ function showStart(){
+   state='start';keys.clear();joy.active=false;ui.overlay.classList.remove('style-overlay');window.RUU_STYLE?.init();
+   ui.hud.style.display='none';ui.pause.disabled=true;loadoutButton.disabled=true;quickLoadoutButton.hidden=true;
+   musicIndicator.classList.remove('visible');musicMeter.classList.remove('visible');showMusicRetry(false);bossAlert.classList.remove('active');
+   const best=getBest(),endlessBest=getBest('endless'),titleScreen=window.RUU_TITLE_SCREEN;
+   if(titleScreen){
+     setOverlay(titleScreen.home({unlocked:window.RUU_STYLE?.stats().unlocked||1,best:best?.score,normal:endingUnlocked(),complete:completeEndingUnlocked()}),'home');
+   }else{
+     setOverlay(`<div class="menu-grid"><div class="menu-copy"><div class="menu-tick">JACKPOT<strong>Ø</strong>31 / ORIGINAL GAME <span style="color:#dcc2a2">— v1.34.0 PUBLIC BETA</span></div><h1 class="menu-logo"><span class="ruu">RUU</span><span class="slashes">//</span>OVERRUN</h1><div class="menu-nameplate">RUU STYLE // WARDROBE UNLOCKED</div><div class="menu-separator"></div><p class="menu-intro">攻撃は自動。敵を倒して、武器を強化。<br><strong>押し寄せる侵食を生き抜き、最後の脅威を撃ち砕け。</strong><br><span style="color:#ddb2cc;font-size:.79em">一定確率で『星屑の鎧 -Guardian Genome-』のキャラクターが参戦。</span></p><div class="start-row"><button class="primary" id="startBtn" type="button">▶ START // DEPLOY  ·  ENTER</button><button class="enemy-archive-btn" id="enemyArchive" type="button">☷ DEVORA FILES</button><button class="enemy-archive-btn" id="achievementsBtn" type="button">✧ ACHIEVEMENTS</button><button class="enemy-archive-btn" id="ruuStyleBtn" type="button">♟ RUU STYLE · ${window.RUU_STYLE?.stats().unlocked||1}/9</button>${endingUnlocked()?`<button class="enemy-archive-btn" id="challengeBtn" type="button">✦ CHALLENGE MISSIONS</button><button class="enemy-archive-btn" id="endlessBtn" type="button" title="クリア後解放 / 自己ベスト ${endlessBest?.score||0}">∞ ENDLESS MODE</button>`:``}${endingUnlocked()?`<button class="enemy-archive-btn" id="endingTheater" type="button">♫ ENDING THEATER</button>`:``}${completeEndingUnlocked()?`<button class="enemy-archive-btn" id="completeEndingTheater" type="button">✦ COMPLETE ENDING</button>`:``}<div class="run-record">PERSONAL BEST<strong>${best?best.score.toLocaleString('ja-JP'):'— — —'}</strong></div></div><div class="menu-controls"><span class="key">WASD / ↑↓←→</span> MOVE　<span class="key">SPACE</span> DASH　<span class="key">1–3</span> UPGRADE　<span class="key">ESC</span> PAUSE</div></div><div class="hero-figure" id="heroArt"><div class="hero-hint">RUU / CHARACTER DATA</div></div></div>`);
+     setupTitleGallery();
+   }
+   const bind=(id,fn)=>{const el=document.getElementById(id);if(el)el.onclick=fn;};
+   bind('startBtn',()=>{try{startGame()}catch(e){console.error(e);const btn=document.getElementById('startBtn');if(btn){btn.textContent='START エラー — ENTER / 再読込';btn.title=String(e)}}});
+   bind('enemyArchive',showDevoraFiles);bind('achievementsBtn',showAchievementArchive);bind('ruuStyleBtn',showStyleArchive);
+   bind('challengeBtn',showChallengeArchive);bind('endlessBtn',()=>startGame('endless'));
+   bind('endingTheater',()=>startEndingCinema(true));bind('completeEndingTheater',()=>startEndingCinema(true,true));
+   bind('titleExtrasBtn',showTitleExtras);bind('titleEndingBtn',showTitleEndings);bind('titleSettingsBtn',showTitleSettings);bind('titleGalleryBtn',showTitleGallery);
+ }
+ function showTitleSubscreen(kind){
+   const screen=window.RUU_TITLE_SCREEN;if(!screen)return showStart();
+   state='title-menu';keys.clear();joy.active=false;
+   let content;
+   if(kind==='extras')content=screen.extras(endingUnlocked(),getBest('endless')?.score);
+   else if(kind==='endings')content=screen.endings(endingUnlocked(),completeEndingUnlocked());
+   else if(kind==='settings')content=screen.settings();
+   else content=screen.gallery();
+   setOverlay(content,'sub');
+   const bind=(id,fn)=>{const el=document.getElementById(id);if(el)el.onclick=fn;};
+   bind('titleBack',showStart);bind('challengeBtn',showChallengeArchive);bind('endlessBtn',()=>startGame('endless'));
+   bind('endingTheater',()=>startEndingCinema(true));bind('completeEndingTheater',()=>startEndingCinema(true,true));
+   if(kind==='settings')screen.bindSettings(document);
+   if(kind==='gallery')setupTitleGallery();
+ }
+ function showTitleExtras(){showTitleSubscreen('extras')}
+ function showTitleEndings(){showTitleSubscreen('endings')}
+ function showTitleSettings(){showTitleSubscreen('settings')}
+ function showTitleGallery(){showTitleSubscreen('gallery')}
  function showStyleArchive(){
    if(!window.RUU_STYLE)return;
    const entering=state!=='style';state='style';keys.clear();joy.active=false;
@@ -1037,7 +1075,7 @@ const WALK_ATLAS=new Image();WALK_ATLAS.src='assets/ruu_walk_atlas.webp';
     if(win){sfx('victory');if(g.mode==='normal'){awardAchievement('clear');if(g.damageTaken===0)awardAchievement('flawless');}}else if(!deathSequenceDone)sfx('defeat');saveBest();pauseAllMusic();ui.pause.disabled=true;ui.bossbar.style.display='none';
    if(win){startEndingCinema(false);return;}
    state='lost';musicIndicator.classList.remove('visible');musicMeter.classList.remove('visible');
-   setOverlay(`<div class="eyebrow">${g.mode==='endless'?'∞ ENDLESS // SURVIVAL RECORD':'SIGNAL LOST // MISSION FAILED'}</div><h2 class="result-title defeat">${g.mode==='endless'?'ENDLESS OVER':g.mode==='challenge'?'TRIAL FAILED':'GAME OVER'}</h2>${g.mode==='challenge'?'<div class="challenge-result-stamp">'+(g.challengeOutcome?.reason||'未達成')+'</div>':''}<p class="intro">終わりじゃない。次は、もう少し遠くまで。</p>${equippedTitle()?'<div class="equipped-title">✧ EQUIPPED TITLE / '+equippedTitle()+'</div>':''}${window.RUU_PILOTS?.status()?.name?'<div class="equipped-title">SUPPORT PILOT / '+window.RUU_PILOTS.status().name+'</div>':''}${window.RUU_STYLE?.resultHtml(g)||''}<div class="result-stats"><div>TIME<strong>${formatTime(g.time)}</strong></div><div>KILLS<strong>${g.kills}</strong></div><div>LEVEL<strong>${g.level}</strong></div><div>SCORE<strong>${Math.floor(g.score).toLocaleString('ja-JP')}</strong></div><div>RARE<strong>${g.rareFinds}</strong></div><div>RELICS<strong>${g.crates}</strong></div><div>MYTHIC<strong>${g.mythicFinds}</strong></div><div>MAX CHAIN<strong>${g.maxCombo||0}</strong></div></div><button class="primary" id="retryBtn">↻ もう一度</button><div class="help">RUU//OVERRUN v1.33.1 PUBLIC BETA · © JACKPOTØ31</div>`);
+   setOverlay(`<div class="eyebrow">${g.mode==='endless'?'∞ ENDLESS // SURVIVAL RECORD':'SIGNAL LOST // MISSION FAILED'}</div><h2 class="result-title defeat">${g.mode==='endless'?'ENDLESS OVER':g.mode==='challenge'?'TRIAL FAILED':'GAME OVER'}</h2>${g.mode==='challenge'?'<div class="challenge-result-stamp">'+(g.challengeOutcome?.reason||'未達成')+'</div>':''}<p class="intro">終わりじゃない。次は、もう少し遠くまで。</p>${equippedTitle()?'<div class="equipped-title">✧ EQUIPPED TITLE / '+equippedTitle()+'</div>':''}${window.RUU_PILOTS?.status()?.name?'<div class="equipped-title">SUPPORT PILOT / '+window.RUU_PILOTS.status().name+'</div>':''}${window.RUU_STYLE?.resultHtml(g)||''}<div class="result-stats"><div>TIME<strong>${formatTime(g.time)}</strong></div><div>KILLS<strong>${g.kills}</strong></div><div>LEVEL<strong>${g.level}</strong></div><div>SCORE<strong>${Math.floor(g.score).toLocaleString('ja-JP')}</strong></div><div>RARE<strong>${g.rareFinds}</strong></div><div>RELICS<strong>${g.crates}</strong></div><div>MYTHIC<strong>${g.mythicFinds}</strong></div><div>MAX CHAIN<strong>${g.maxCombo||0}</strong></div></div><button class="primary" id="retryBtn">↻ もう一度</button><div class="help">RUU//OVERRUN v1.34.0 PUBLIC BETA · © JACKPOTØ31</div>`);
    document.getElementById('retryBtn').onclick=()=>startGame(g?.mode||'normal',g?.challengeId||'');
  }
 
@@ -2981,7 +3019,7 @@ ui.healthFill.style.width=`${100*p.hp/p.maxHp}%`;ui.healthText.textContent=`${Ma
  function playDash(){sfx('dash')}
 
   ui.mute.onclick=()=>{if(state==='ending'){endingDom.sound.click();return;}soundOn=!soundOn;ui.mute.textContent=soundOn?'♫ BGM ON':'♫ BGM OFF';if(soundOn){if(musicStarted&&state!=='paused'&&state!=='lost'&&state!=='won')resumeStageMusic();else musicLabel('♫ BGM ON')}else{pauseAllMusic();musicLabel('♫ BGM OFF // PRESS M');showMusicRetry(false)}};ui.pause.onclick=togglePause;loadoutButton.onclick=showRunInspector;quickLoadoutButton.onclick=showRunInspector;ui.mobileDash.addEventListener('pointerdown',ev=>{ev.preventDefault();dash()});
- window.addEventListener('keydown',ev=>{let k=ev.key.toLowerCase();if(state==='style'){if(k==='escape'&&!ev.repeat){ev.preventDefault();showStart();}return;}if(['arrowup','arrowdown','arrowleft','arrowright',' ','1','2','3'].includes(k))ev.preventDefault();if(state==='ending'&&k==='escape'&&!ev.repeat){endingDom.skip.click();return;}if(state==='dying'){if(!ev.repeat&&(k==='enter'||k==='escape')&&deathScene?.elapsed>.65)finishDeathSequence();return;}if(state==='bossbreak')return;if(k==='m'&&!ev.repeat)ui.mute.click();if(k==='n'&&!ev.repeat)sfxToggle.click();if(k==='v'&&!ev.repeat)animToggle.click();if(k==='g'&&!ev.repeat){sceneToggle.click();return}if(k==='b'&&!ev.repeat){trackSelect.selectedIndex=(trackSelect.selectedIndex+1)%(NORMAL_TRACK_COUNT+1);trackSelect.dispatchEvent(new Event('change'));return}if(k==='f'&&!ev.repeat){finisherSelect.selectedIndex=(finisherSelect.selectedIndex+1)%finisherSelect.options.length;finisherSelect.dispatchEvent(new Event('change'));return}if(k==='i'&&!ev.repeat){if(inspectorOpen)closeRunInspector();else showRunInspector();return}if(k==='escape'||k==='p'){if(!ev.repeat)togglePause();return}if(state==='start'&&k==='enter'){startGame();return}if(state==='levelup'&&k==='r'&&!ev.repeat){rerollUpgrades();return}if(state==='levelup'&&['1','2','3'].includes(k)){selectUpgrade(Number(k)-1);return}if(k===' '&&!ev.repeat){dash();return}keys.add(k)});
+ window.addEventListener('keydown',ev=>{let k=ev.key.toLowerCase();if(state==='title-menu'||(state==='start'&&!document.getElementById('startBtn'))){if(k==='escape'&&!ev.repeat){ev.preventDefault();showStart();}return;}if(state==='start'&&ev.target?.closest?.('button,input,select,textarea,a,[contenteditable]'))return;if(state==='style'){if(k==='escape'&&!ev.repeat){ev.preventDefault();showStart();}return;}if(['arrowup','arrowdown','arrowleft','arrowright',' ','1','2','3'].includes(k))ev.preventDefault();if(state==='ending'&&k==='escape'&&!ev.repeat){endingDom.skip.click();return;}if(state==='dying'){if(!ev.repeat&&(k==='enter'||k==='escape')&&deathScene?.elapsed>.65)finishDeathSequence();return;}if(state==='bossbreak')return;if(k==='m'&&!ev.repeat)ui.mute.click();if(k==='n'&&!ev.repeat)sfxToggle.click();if(k==='v'&&!ev.repeat)animToggle.click();if(k==='g'&&!ev.repeat){sceneToggle.click();return}if(k==='b'&&!ev.repeat){trackSelect.selectedIndex=(trackSelect.selectedIndex+1)%(NORMAL_TRACK_COUNT+1);trackSelect.dispatchEvent(new Event('change'));return}if(k==='f'&&!ev.repeat){finisherSelect.selectedIndex=(finisherSelect.selectedIndex+1)%finisherSelect.options.length;finisherSelect.dispatchEvent(new Event('change'));return}if(k==='i'&&!ev.repeat){if(inspectorOpen)closeRunInspector();else showRunInspector();return}if(k==='escape'||k==='p'){if(!ev.repeat)togglePause();return}if(state==='start'&&k==='enter'){startGame();return}if(state==='levelup'&&k==='r'&&!ev.repeat){rerollUpgrades();return}if(state==='levelup'&&['1','2','3'].includes(k)){selectUpgrade(Number(k)-1);return}if(k===' '&&!ev.repeat){dash();return}keys.add(k)});
  window.addEventListener('keyup',ev=>keys.delete(ev.key.toLowerCase()));window.addEventListener('blur',()=>{keys.clear();joy.active=false;if(state==='playing')showPaused()});
  c.addEventListener('pointerdown',ev=>{if(state==='dying'){if(deathScene?.elapsed>.65)finishDeathSequence();return;}if(state!=='playing'||ev.pointerType==='mouse')return;const r=c.getBoundingClientRect();let x=(ev.clientX-r.left)*W/r.width,y=(ev.clientY-r.top)*H/r.height;if(x<W*.68){joy={active:true,id:ev.pointerId,sx:x,sy:y,x,y};c.setPointerCapture(ev.pointerId)}});
  c.addEventListener('pointermove',ev=>{if(!joy.active||joy.id!==ev.pointerId)return;const r=c.getBoundingClientRect();joy.x=(ev.clientX-r.left)*W/r.width;joy.y=(ev.clientY-r.top)*H/r.height});
@@ -3060,8 +3098,8 @@ ui.healthFill.style.width=`${100*p.hp/p.maxHp}%`;ui.healthText.textContent=`${Ma
    level: Math.max(1, Math.floor(g?.level || 1)),
    durationSeconds: Math.max(0, Math.floor(g?.time || 0)),
    won: state === 'won',
-   version: '1.33.1',
-   operation: 'RUU STYLE',
+   version: '1.34.0',
+   operation: 'KEY VISUAL',
    styleName: window.RUU_STYLE?.name(g?.ruuStyle)||'DEFAULT',
     mode: g?.mode==='challenge'?'challenge':g?.mode==='endless'?'endless':'normal',
      challengeId:g?.challengeId||'',
@@ -3100,7 +3138,7 @@ ui.healthFill.style.width=`${100*p.hp/p.maxHp}%`;ui.healthText.textContent=`${Ma
  showStart();syncCanvasResolution();requestAnimationFrame(loop);
 })();
 </script>
-<script src="public-features.js?v=1.33.1"></script>
+<script src="public-features.js?v=1.34.0"></script>
 </body>
 </html>
 
