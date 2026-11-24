@@ -145,6 +145,7 @@ function observe(g,e,p){
 }
 function begin(g){
  if(!g||window.RUU_LOCAL_DEV_MODE)return;
+ clearNotice();
  g.collectionRun={newRelics:[],duplicateCount:0,shards:0,discoveries:0,loot:0,quintet:false,complete:false,flushAt:0};
  g.collectionStyle=selectedStyle();
  record(g,'weapon','pulse');
@@ -212,7 +213,7 @@ function onKill(g,e,rng=random){
  if(g.secretBossCleared&&!run.complete){run.complete=true;grant(g,'terminus')}
 }
 function onUpgrade(g,u){
- if(!u)return;
+ if(!allowed(g)||!u)return;
  if(u.type==='WEAPON'&&g.player?.mods?.[u.id]>0)record(g,'weapon',u.id);
  if(u.type==='FUSION'&&g.fusions?.[u.id])record(g,'evolution',u.id);
  const flags={evolve:'evolved',evoGravity:'evoGravity',evoPrism:'evoPrism',evoSat:'evoSat',evoRift:'evoRift',evoBloom:'evoBloom'};
@@ -284,7 +285,7 @@ function renderRelics(filter){
   const owned=!!data.relics[r.id],locked=r.secret&&!owned,t=tiers[r.tier],cost=t.cost;
   return '<article class="ruu-collect-item" style="--relic-color:'+t.color+'">'+icon(r,locked)+'<div class="ruu-collect-body"><small>'+t.name+'</small><b>'+esc(locked?'??? / CLASSIFIED':r.name)+'</b><p>'+esc(owned?r.desc:relicHint(r))+'</p><span>'+ (owned?'獲得済み / 累計 '+data.relics[r.id]:'未収集')+'</span>'+
    (!owned&&cost?'<button type="button" data-rc-exchange="'+r.id+'" '+(data.shards<cost?'disabled':'')+'>交換 '+cost+' SHARDS</button>':'')+'</div></article>';
- }).join('')+'</div><details class="ruu-collect-note"><summary>入手確率・交換について</summary>回収40%／エリート18%／中ボス45%／最終ボス55%／真DEVORA35%／裏ボス増援45%／ECLIPSE45%／敵ASTRAEA55%で収集品抽選。MYTHICは特殊戦闘のみ（五体の真DEVORA全滅・完全クリアの固有品は確定）。重複時COMMONから順に1／2／4／8／16 SHARDS。MYTHICは交換不可。</details>';
+ }).join('')+'</div><details class="ruu-collect-note"><summary>入手確率・交換について</summary>回収40%／エリート18%／中ボス45%／最終ボス55%で収集品抽選。さらに先の戦闘では種類別に35〜55%の抽選。MYTHICは特殊戦闘のみ（特定条件の達成品は確定）。重複時COMMONから順に1／2／4／8／16 SHARDS。MYTHICは交換不可。</details>';
 }
 function renderStyle(){
  const active=selectedStyle(),eclipse=unlockedStyle('eclipse');
