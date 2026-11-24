@@ -14,6 +14,17 @@ function fixture(){
 let count=0;function test(n,f){f();console.log('PASS',n);count++;}
 const near=(a,b)=>assert.ok(Math.abs(a-b)<1e-8,a+' vs '+b);
 test('actual SFX hook preserves cooldown, context and stereo location',()=>{const {box,sounds,old}=fixture();box.sfx('hit',{x:-300,y:400});box.sfx('hit',{x:300,y:400});assert.equal(sounds.length,1);near(sounds[0][1].pan,-.5);near(sounds[0][1].distance,500);assert.equal(sounds[0][1].jackpotType,2);assert.equal(sounds[0][1].finisherType,8);box.audio.ac.currentTime+=.11;box.sfx('hit',{x:300,y:400});near(sounds[1][1].pan,.5);assert.equal(old.length,0);});
+test('player muzzle stays centered while target impacts retain their own position',()=>{
+ const {box,sounds}=fixture(),bullets=[];
+ box.g.player={x:80,y:-20,damage:13,mods:{pulse:1,echo:0}};
+ let target={x:680,y:-20};
+ Object.assign(box,{nearestEnemy:()=>target,fireBullet:(...args)=>bullets.push(args),burst(){},addMuzzle(){},fxMax:false});
+ vm.runInContext(section('function attackPulse()','function strikeLightning()'),box);
+ box.attackPulse();near(sounds[0][1].pan,0);near(sounds[0][1].distance,0);near(bullets[0][2],580);
+ box.audio.ac.currentTime+=.2;target={x:-220,y:-20};box.attackPulse();
+ near(sounds[1][1].pan,0);near(sounds[1][1].distance,0);near(bullets[1][2],-580);
+ box.sfx('hit',target);near(sounds[2][1].pan,-.5);near(sounds[2][1].distance,300);
+});
 test('different boss warnings do not mask each other; repeated cue cooldown',()=>{const {box,sounds}=fixture();box.sfx('boss',{cue:'devora'});box.sfx('boss',{cue:'nullEmperor'});box.sfx('boss',{cue:'devora'});assert.equal(sounds.length,2);box.sfxEnabled=false;box.sfx('gem');assert.equal(sounds.length,2);});
 test('old audio fallback remains usable when new module unavailable',()=>{const {box,old}=fixture();delete box.window.RUU_AUDIO;box.sfx('hit');assert.equal(old.length,1);});
 test('selected BGM volume in battle, exclusive song, ending and resume',()=>{const {box,musicEls,levels}=fixture();box.startStageMusic();near(musicEls[0].volume,.37);box.setExclusiveTrack(14);near(musicEls[14].volume,.37);box.playEndingSong(true);near(musicEls[15].volume,.37);box.soundOn=true;box.state='playing';box.resumeStageMusic();near(musicEls[0].volume,.37);levels.bgm=0;box.soundOn=false;box.setExclusiveTrack(12);near(musicEls[12].volume,0);box.playEndingSong(true);near(musicEls[15].volume,0);});
@@ -42,13 +53,28 @@ test('death keeps a relative fade when volume changes, including zero and mute r
 test('major cue focus is short, smoothed and respects the selected BGM level',()=>{
  const {box,musicEls,levels}=fixture();box.soundOn=true;
  box.focusMusicForCue('shoot');near(box.musicFocus.target,1);
- box.focusMusicForCue('signature');near(box.musicFocus.target,.72);
- box.updateMusicFocus(.016);assert.ok(box.musicFocus.level<1&&box.musicFocus.level>.72);
+ box.focusMusicForCue('signature');near(box.musicFocus.target,.76);
+ box.updateMusicFocus(.016);assert.ok(box.musicFocus.level<1&&box.musicFocus.level>.76);
  levels.bgm=.4;box.applyMusicVolumes();near(musicEls[0].volume,.4*box.musicFocus.level);
- box.updateMusicFocus(.4);box.updateMusicFocus(.4);assert.ok(box.musicFocus.level>.9);
- box.updateMusicFocus(3);assert.ok(Math.abs(musicEls[0].volume-.4)<.00001);
+ for(let i=0;i<20;i++)box.updateMusicFocus(.016);
+ assert.ok(box.musicFocus.level<.78,'opening gesture has room through the release');
+ box.focusMusicForCue('jackpot');near(box.musicFocus.target,.76,'weaker overlapping accent must not release focus early');
+ for(let i=0;i<160;i++)box.updateMusicFocus(.016);
+ assert.ok(Math.abs(musicEls[0].volume-.4)<.001);
  levels.sfx=0;box.musicFocus.target=1;box.focusMusicForCue('boss');near(box.musicFocus.target,1);
  levels.sfx=.8;box.sfxEnabled=false;box.focusMusicForCue('jackpot');near(box.musicFocus.target,1);
  box.sfxEnabled=true;box.state='ending';box.focusMusicForCue('signature');near(box.musicFocus.target,1);
 });
+test('exclusive song entrance uses gentle focus and repeated combat never pumps music',()=>{
+ const {box,musicEls,levels}=fixture();box.soundOn=true;
+ box.focusMusicForCue('jackpot');near(box.musicFocus.target,.86);
+ box.updateMusicFocus(.025);levels.bgm=0;box.applyMusicVolumes();near(musicEls[0].volume,0);
+ levels.bgm=.23;
+ for(let i=0;i<220;i++){
+  for(const cue of ['shoot','hit','kill','rail','explosion','gem'])box.focusMusicForCue(cue);
+  box.updateMusicFocus(.016);
+ }
+ near(box.musicFocus.target,1);assert.ok(Math.abs(musicEls[0].volume-.23)<.0001);near(levels.bgm,.23);
+});
 console.log(count+' audio integration suites passed');
+
