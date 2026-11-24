@@ -41,7 +41,7 @@ function start(e,g,api,q){
  }
  api?.wave?.(e.x,e.y,290,COLOR);
  api?.burst?.(e.x,e.y,COLOR,q==='lite'?23:53,265);
- api?.sfx?.('boss');
+ api?.sfx?.('boss',{cue:'bossPhase3'});
  api?.text?.(e.x,e.y-e.r-36,'PHASE III // LIMIT BREAK',COLOR,20);
  api?.toast?.(e.kind==='final'?'NULL EMPEROR // THIRD FORM':'DEVORA // THIRD FORM',true);
  g.shake=Math.max(g.shake||0,12);g.scenePulse=Math.max(g.scenePulse||0,1.1);

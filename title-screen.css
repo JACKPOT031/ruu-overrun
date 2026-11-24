@@ -39,3 +39,12 @@
 .kv-foot span{display:block;line-height:1.5;letter-spacing:.035em}.kv-foot span+span{font-size:8px;letter-spacing:.09em;color:#d7c4dc}.kv-signal i{animation:kv-signal-breathe 2.8s ease-in-out infinite alternate}@keyframes kv-signal-breathe{from{opacity:.55}to{opacity:1}}
 @media(min-width:901px){.kv-shade{mask-image:linear-gradient(#000 0%,#000 55%,transparent 82%)}.kv-community .ruu-public-start label{grid-column:auto;align-self:center}.kv-community .ruu-nickname{grid-column:auto}.kv-community .ruu-mini-btn{grid-column:auto}.kv-community .ruu-mini-btn:only-of-type{grid-column:1/-1}.kv-foot{max-width:47%}}
 @media(prefers-reduced-motion:reduce){.kv-signal i{animation:none}}
+
+/* v1.35.0 — audio mixer, native keyboard/touch sliders. */
+.kv-audio-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin-top:12px;padding-top:12px;border-top:1px solid #98769a66}
+.kv-volume>span{display:flex;gap:8px;align-items:center;justify-content:space-between}
+.kv-volume output{color:#ffb5e0;font:800 12px ui-monospace,monospace;font-variant-numeric:tabular-nums}
+.kv-volume input[type=range]{width:100%;min-width:0;margin:5px 0;min-height:26px;accent-color:#ee78c8;cursor:pointer}
+.kv-volume input:focus-visible{outline:2px solid #ffc8ed;outline-offset:2px}
+.kv-audio-grid .kv-detail{margin:0;align-self:center;font-size:11px}
+@media(max-width:900px){.kv-audio-grid{grid-template-columns:1fr}.kv-volume input[type=range]{min-height:40px}}
