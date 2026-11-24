@@ -4,11 +4,11 @@ const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('nod
 const root=process.argv[2]||path.resolve(__dirname,'..');
 const src=fs.readFileSync(path.join(root,'index.html'),'utf8');
 function section(a,b){const i=src.indexOf(a),j=src.indexOf(b,i+a.length);assert.ok(i>=0&&j>i,a);return src.slice(i,j);}
-const code=[section('const SFX_GAP=','function updateMusic()'),section('function setExclusiveTrack(index)','musicEls.forEach((el,i)=>{'),section('function startBossBreak(e)','function endGame(win)')].join('\n');
+const code=[section('const SFX_GAP=','function updateMusic()'),section('function musicTrackEnvelope(el)','musicEls.forEach((el,i)=>{'),section('function startDeathSequence()','let bossBreakScene=null;'),section('function startBossBreak(e)','function endGame(win)')].join('\n');
 function fixture(){
  const levels={bgm:.37,sfx:.8},sounds=[],old=[],noop=()=>{};
  const musicEls=Array.from({length:16},()=>({volume:1,paused:false,readyState:2,play(){this.paused=false;},pause(){this.paused=true;}}));
- const box={window:{RUU_AUDIO:{volume:k=>levels[k],resolve:(name,o)=>o.cue||name,play:(name,a,o)=>{sounds.push([name,o]);return true;}},RUU_PREMIUM:{playSound:name=>{old.push(name);return true;}},RUU_EXPANSION:{bossStart:()=>({duration:1}),tick:noop,endBoss:noop}},audio:{ac:{state:'running',currentTime:5}},sfxEnabled:true,sfxCooldown:Object.create(null),g:{player:{x:0,y:0},jackpotType:2,finisherType:8,time:40,bossBreaks:0},state:'playing',levels,activeTrack:0,musicEls,musicRequest:0,musicStarted:true,musicFade:null,mixSlot:0,musicMode:'0',mixRunIndex:0,musicSeq:0,pendingMusic:null,soundOn:false,ENDING_TRACK_INDEX:15,NORMAL_TRACK_COUNT:12,ENDING_AUDIO_CUE:151.687,ENDING_TITLE:'ED',endingState:{paused:false},endingClock:()=>0,MUSIC_TRACKS:musicEls.map((_,i)=>({title:'song'+i})),musicIndicator:{classList:{add:noop}},musicMeter:{classList:{add:noop}},ui:{pause:{}},keys:new Set(),joy:{active:false},bossBreakScene:null,fxPreset:'lite',clamp:(v,a,b)=>Math.max(a,Math.min(b,v)),cancelPendingMusic:noop,ensureTrackLoaded:i=>musicEls[i],activeMusic:()=>musicEls[box.activeTrack],musicLabel:noop,musicOnScreen:noop,showMusicRetry:noop,nowTrackName:()=>'',pauseAllMusic:()=>{musicEls.forEach(e=>e.pause());box.musicFade=null;},unloadTrack:noop};
+ const box={window:{RUU_AUDIO:{volume:k=>levels[k],resolve:(name,o)=>o.cue||name,play:(name,a,o)=>{sounds.push([name,o]);return true;}},RUU_PREMIUM:{playSound:name=>{old.push(name);return true;}},RUU_EXPANSION:{bossStart:()=>({duration:1}),tick:noop,endBoss:noop}},audio:{ac:{state:'running',currentTime:5}},sfxEnabled:true,musicFocus:{level:1,target:1,hold:0},deathScene:null,deathSequenceDone:false,sfxCooldown:Object.create(null),g:{player:{x:0,y:0},jackpotType:2,finisherType:8,time:40,bossBreaks:0},state:'playing',levels,activeTrack:0,musicEls,musicRequest:0,musicStarted:true,musicFade:null,mixSlot:0,musicMode:'0',mixRunIndex:0,musicSeq:0,pendingMusic:null,soundOn:false,ENDING_TRACK_INDEX:15,NORMAL_TRACK_COUNT:12,ENDING_AUDIO_CUE:151.687,ENDING_TITLE:'ED',endingState:{paused:false},endingClock:()=>0,MUSIC_TRACKS:musicEls.map((_,i)=>({title:'song'+i})),musicIndicator:{classList:{add:noop},style:{}},musicMeter:{classList:{add:noop}},ui:{pause:{},hud:{style:{}},toasts:{}},bossAlert:{classList:{remove:noop}},saveBest:noop,keys:new Set(),joy:{active:false},bossBreakScene:null,fxPreset:'lite',clamp:(v,a,b)=>Math.max(a,Math.min(b,v)),cancelPendingMusic:noop,ensureTrackLoaded:i=>musicEls[i],activeMusic:()=>musicEls[box.activeTrack],musicLabel:noop,musicOnScreen:noop,showMusicRetry:noop,nowTrackName:()=>'',pauseAllMusic:()=>{musicEls.forEach(e=>e.pause());box.musicFade=null;},unloadTrack:noop};
  vm.createContext(box);vm.runInContext(code,box);return {box,sounds,old,musicEls,levels};
 }
 let count=0;function test(n,f){f();console.log('PASS',n);count++;}
@@ -19,4 +19,36 @@ test('old audio fallback remains usable when new module unavailable',()=>{const 
 test('selected BGM volume in battle, exclusive song, ending and resume',()=>{const {box,musicEls,levels}=fixture();box.startStageMusic();near(musicEls[0].volume,.37);box.setExclusiveTrack(14);near(musicEls[14].volume,.37);box.playEndingSong(true);near(musicEls[15].volume,.37);box.soundOn=true;box.state='playing';box.resumeStageMusic();near(musicEls[0].volume,.37);levels.bgm=0;box.soundOn=false;box.setExclusiveTrack(12);near(musicEls[12].volume,0);box.playEndingSong(true);near(musicEls[15].volume,0);});
 test('crossfade and boss cinematic use selected level, never reset it to 80%',()=>{const {box,musicEls}=fixture();box.musicFade={from:musicEls[0],to:musicEls[1],elapsed:.94,duration:2};box.updateMusicFade(.06);near(musicEls[0].volume,.185);near(musicEls[1].volume,.185);box.musicFade.elapsed=1.98;box.updateMusicFade(.06);near(musicEls[1].volume,.37);near(musicEls[0].volume,.37);box.activeTrack=1;musicEls[1].paused=false;box.startBossBreak({kind:'boss'});near(musicEls[1].volume,.37*.39/.8);box.updateBossBreak(1);near(musicEls[1].volume,.37);});
 test('actual JACKPOT MODE and finisher hooks avoid preselection duplicate audio',()=>{assert.match(src,/if\(u\.type!=='JACKPOT_MODE'\)sfx\(/);assert.match(src,/if\(!window\.RUU_AUDIO\)sfx\(index===1/);assert.match(src,/g\.jackpotType=index;g\.jackpotTime=j\.duration/);assert.match(src,/setExclusiveTrack\(j\.song\);toast\([^;\n]+\);sfx\('jackpot'\)/);assert.match(src,/msg\.startsWith\('RUU STYLE UNLOCKED \/\/ '\)\)sfx\('styleUnlock'\)/);});
+test('changing the mix mid-crossfade preserves both envelopes through boss break',()=>{
+ const {box,musicEls,levels}=fixture();
+ box.activeTrack=1;box.musicFade={from:musicEls[0],to:musicEls[1],elapsed:.5,duration:2};
+ levels.bgm=.2;box.applyMusicVolumes();near(musicEls[0].volume,.15);near(musicEls[1].volume,.05);
+ box.startBossBreak({kind:'boss'});near(musicEls[0].volume,.15*.39/.8);near(musicEls[1].volume,.05*.39/.8);
+ levels.bgm=.64;box.applyMusicVolumes();near(musicEls[0].volume,.48*.39/.8);near(musicEls[1].volume,.16*.39/.8);
+ box.updateMusicFade(.06);near(musicEls[0].volume,.64*.72*.39/.8);near(musicEls[1].volume,.64*.28*.39/.8);
+ box.updateBossBreak(1);near(musicEls[0].volume,.64*.72);near(musicEls[1].volume,.64*.28);
+ levels.bgm=0;box.updateMusicFade(.06);near(musicEls[0].volume,0);near(musicEls[1].volume,0);
+});
+test('death keeps a relative fade when volume changes, including zero and mute resume',()=>{
+ const {box,musicEls,levels}=fixture();box.activeTrack=1;
+ box.musicFade={from:musicEls[0],to:musicEls[1],elapsed:1,duration:2};box.applyMusicVolumes();
+ box.startDeathSequence();assert.equal(box.state,'dying');assert.equal(box.deathScene.source,musicEls[1]);near(box.deathScene.startGain,.5);
+ box.updateDeathSequence(.875);levels.bgm=.24;box.applyMusicVolumes();near(musicEls[1].volume,.24*.5*Math.pow(.5,1.5));
+ near(musicEls[0].volume,0);levels.bgm=0;box.applyMusicVolumes();near(musicEls[1].volume,0);
+ levels.bgm=.5;box.pauseAllMusic();box.soundOn=true;box.resumeStageMusic();assert.equal(box.activeTrack,1);assert.equal(musicEls[1].paused,false);
+ near(musicEls[1].volume,.5*.5*Math.pow(.5,1.5));
+ box.updateDeathSequence(.875);box.pauseAllMusic();box.resumeStageMusic();assert.ok(musicEls.every(el=>el.paused));near(musicEls[1].volume,0);
+});
+test('major cue focus is short, smoothed and respects the selected BGM level',()=>{
+ const {box,musicEls,levels}=fixture();box.soundOn=true;
+ box.focusMusicForCue('shoot');near(box.musicFocus.target,1);
+ box.focusMusicForCue('signature');near(box.musicFocus.target,.72);
+ box.updateMusicFocus(.016);assert.ok(box.musicFocus.level<1&&box.musicFocus.level>.72);
+ levels.bgm=.4;box.applyMusicVolumes();near(musicEls[0].volume,.4*box.musicFocus.level);
+ box.updateMusicFocus(.4);box.updateMusicFocus(.4);assert.ok(box.musicFocus.level>.9);
+ box.updateMusicFocus(3);assert.ok(Math.abs(musicEls[0].volume-.4)<.00001);
+ levels.sfx=0;box.musicFocus.target=1;box.focusMusicForCue('boss');near(box.musicFocus.target,1);
+ levels.sfx=.8;box.sfxEnabled=false;box.focusMusicForCue('jackpot');near(box.musicFocus.target,1);
+ box.sfxEnabled=true;box.state='ending';box.focusMusicForCue('signature');near(box.musicFocus.target,1);
+});
 console.log(count+' audio integration suites passed');

@@ -2,7 +2,7 @@
 (()=>{
 'use strict';
 const ART='assets/title-keyvisual.webp?v=1.34.0';
-const version='v1.35.0';
+const version='v1.36.0';
 const btn=(id,label,sub,extra='')=>`<button id="${id}" type="button" class="kv-button ${extra}"><span>${label}</span><small>${sub}</small></button>`;
 const safeCount=(n,limit)=>Math.min(limit,Math.max(0,Math.floor(Number(n)||0)));
 const score=n=>Number.isFinite(n)&&n>=0?Math.floor(n).toLocaleString('ja-JP'):'—';
@@ -14,7 +14,7 @@ function home({unlocked=1,best=null,normal=false,complete=false}={}){
  <div class="kv-edition"><i>///</i> ${version} <span>PUBLIC BETA</span></div>
  <div class="menu-copy kv-rail">
   <div class="kv-brand">JACKPOT<b>Ø</b>31 <span>/ ORIGINAL GAME</span></div>
-  <div class="kv-signal"><i></i> SOUND OVERDRIVE // RUU STYLE</div>
+  <div class="kv-signal"><i></i> CYBER IMPACT // RUU STYLE</div>
   <p class="kv-intro">押し寄せる侵食を生き抜き、<br>最後の脅威を撃ち砕け。</p>
   <button id="startBtn" class="kv-button kv-start" type="button"><span>▶ START GAME</span><small>NORMAL // DEPLOY　[ENTER]</small></button>
   <nav class="kv-nav" aria-label="メインメニュー">
@@ -41,7 +41,7 @@ function endings(normal,complete){return panel('EPILOGUE ARCHIVE','ENDING THEATE
 function gallery(){return panel('ARTWORK COLLECTION','VISUAL ARCHIVE','ルーの公式ビジュアルとアートワーク。',`<div class="kv-gallery"><div class="hero-figure" id="heroArt"><div class="hero-hint">RUU // VISUAL ARCHIVE</div></div></div>`);}
 const toggles=[['mute','BGM / 楽曲'],['sfxToggle','SFX / 効果音'],['animToggle','ANIMATION / 歩行'],['sceneToggle','SCENE / 背景'],['fxMode','VISUAL FX / 画質']];
 const selects=[['trackSelect','SOUNDTRACK / 通常BGM'],['finisherSelect','SIGNATURE FINISHER / 必殺技']];
-function settings(){return panel('SYSTEM CONFIGURATION','SETTINGS','実際のゲーム設定を変更。画面下のコントロールと共通です。',`<div class="kv-settings">${toggles.map(([id,label])=>`<div class="kv-setting"><span>${label}</span><button type="button" class="kv-button" data-kv-toggle="${id}">—</button></div>`).join('')}${selects.map(([id,label])=>`<label class="kv-setting"><span>${label}</span><select data-kv-select="${id}"></select></label>`).join('')}</div>${window.RUU_AUDIO?.settingsMarkup()||''}<p class="kv-detail">WASD / 矢印：移動　SPACE：ダッシュ　ESC：ポーズ　I：装備・支援効果　1–3：強化選択。スマホは左側ドラッグで移動。</p>`);}
+function settings(){return panel('SYSTEM CONFIGURATION','SETTINGS','実際のゲーム設定を変更。画面下のコントロールと共通です。',`<div class="kv-settings">${toggles.map(([id,label])=>`<div class="kv-setting"><span>${label}</span><button type="button" class="kv-button" data-kv-toggle="${id}">—</button></div>`).join('')}${selects.map(([id,label])=>`<label class="kv-setting"><span>${label}</span><select data-kv-select="${id}"></select></label>`).join('')}</div>${window.RUU_AUDIO?.settingsMarkup()||''}<p class="kv-detail">WASD / 矢印：移動　SPACE：ダッシュ　ESC：ポーズ　I：装備・支援効果　1–3：強化選択　O：音量パネル。スマホは左側ドラッグで移動。</p>`);}
 let cleanup=()=>{};
 function layout(frame,overlay,kind=''){
  cleanup();cleanup=()=>{};
