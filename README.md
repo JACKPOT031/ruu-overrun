@@ -1,8 +1,14 @@
-# RUU//OVERRUN — PUBLIC BETA (v1.33.0)
+# RUU//OVERRUN — PUBLIC BETA (v1.33.1)
 
 JACKPOTØ31が制作するオリジナル・ブラウザサバイバルアクション。
 
 **[ゲームを遊ぶ](https://jackpot031.github.io/ruu-overrun/)** / **[公開開始v1.5.3からの更新履歴](./CHANGELOG.md)**
+
+## v1.33.1 — RUU STYLE / DESIRE COLLECTION
+
+- DESIREの解放条件を「異なる3種類のJACKPOT MODEを累計で発動」に緩和。別々のプレイ・モードでの発動も集計し、同じ種類の重複はカウントしない。クリア不要。
+- 種類ごとにlocalStorageへ即時記録する。従来の解放済み衣装・選択衣装・進捗は維持。旧版の最大種類数は下限として保持するが、未記録だった過去の種類は推測せず、新しい記録と重複加算しない。
+- JACKPOT出現率・効果・他の衣装解放条件・戦闘性能は変更しない。
 
 ## v1.33.0 — RUU STYLE / WARDROBE UNLOCKED
 
@@ -12,7 +18,7 @@ JACKPOTØ31が制作するオリジナル・ブラウザサバイバルアクシ
 |---|---|
 | DEFAULT | 初期衣装 |
 | ECLIPSE | 完全クリア |
-| DESIRE | 1プレイで異なる3種類のJACKPOT MODE発動 |
+| DESIRE | 異なる3種類のJACKPOT MODEを累計で発動（v1.33.1以降） |
 | NEO JAPONISM | NORMAL累計5回クリア（完全クリアを含む） |
 | WHITE RESONANCE | NORMAL初クリア |
 | NOIR DIVIDE | 異なる4種類の複合攻撃を累計で獲得 |
