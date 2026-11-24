@@ -1,125 +1,106 @@
-/* RUU//OVERRUN v1.39.0 — SPELL RESONANCE
-   Original harmonic arcade shots, spell bells and concise gameplay feedback.
+/* RUU//OVERRUN v1.40.0 — SLASH WIND
+   Approved G wind/cut PCM, with source-derived gameplay arrangements.
    PCM is cached in small idle slices; playback never consumes combat randomness. */
 (()=>{
 'use strict';
 const M=Math;
-const KEY='RUU_AUDIO_MIX_V1', RATE=24000, TAU=2*M.PI, LIMIT=24, ROUTINE=16;
+const KEY='RUU_AUDIO_MIX_V1', RATE=48000, TAU=2*M.PI, LIMIT=24, ROUTINE=16;
 const clamp=(n,a,b)=>M.max(a,M.min(b,n));
 const finite=(n,d)=>Number.isFinite(n)?n:d;
 const levels={bgm:.8,sfx:.8};
 try{const saved=JSON.parse(localStorage.getItem(KEY)||'null');if(saved)for(const k of ['bgm','sfx'])levels[k]=clamp(finite(saved[k],levels[k]),0,1);}catch{}
 function volume(k){return levels[k]??.8;}
 function setVolume(k,n){if(!Object.hasOwn(levels,k)||!Number.isFinite(n))return false;levels[k]=clamp(n,0,1);try{localStorage.setItem(KEY,JSON.stringify(levels));}catch{}return true;}
-// Original arcade/danmaku palette. A rounded harmonic pulse and a soft bell
-// carry each action; air is only a quiet accent. There are no imported samples.
-const T=(f,end,d,a,at=0,color=.32)=>({k:'t',f,end,d,a,at,color,attack:.0016});
-const L=(f,d,a,at=0,color=.30)=>({k:'l',f,end:f,d,a,at,color,attack:.0014});
-const V=(f,d,a,at=0)=>({k:'v',f,end:f*1.004,d,a,at,color:.18,attack:.014});
-const C=(f,end,d,a,at=0)=>({k:'c',f,end,d,a,at,color:.26,attack:.006});
-const A=(f,end,d,a,at=0)=>({k:'a',f,end,d,a,at,color:.2,attack:.004});
-const N=(lo,hi,d,a,at=0)=>({k:'n',lo,hi,d,a,at,attack:.0008});
-const dart=(f=1320,d=.10,a=.7,at=0)=>[
- T(f,f*.82,d,a*.76,at,.37),T(f*.5,f*.52,d*.63,a*.12,at,.15),N(1600,4700,.009,a*.045,at)
-];
-const petal=(f=1320,d=.22,a=.6,at=0)=>[
- L(f,d,a*.60,at,.27),L(f*1.5,d*.76,a*.22,at+.008,.19),V(f*.5,d*.9,a*.12,at+.012)
-];
-const sweep=(f=1980,d=.18,a=.7,at=0)=>[
- T(f,f*.56,d,a*.67,at,.48),A(2900,1100,d*.65,a*.18,at),L(f*.75,d*.5,a*.13,at+.016,.13)
-];
-const bloom=(f=880,d=.35,a=.7,at=0)=>[
- T(f,f*1.025,d*.55,a*.39,at,.32),L(f*2,d,a*.34,at+.009,.32),V(f*1.5,d*1.1,a*.21,at+.014),A(1500,3300,d*.42,a*.13,at)
-];
-const pop=(f=990,d=.14,a=.7,at=0)=>[
- T(f,f*.62,d,a*.76,at,.52),L(f*1.76,d*.74,a*.15,at+.012,.17),A(2400,900,d*.64,a*.13,at)
-];
-const chime=(f=1320,d=.15,a=.5,at=0)=>[L(f,d,a*.76,at,.25),T(f*.5,f*.5,d*.45,a*.12,at,.10)];
+// The five approved audition sounds are the source of the whole palette.
+// Direct cues bypass envelopes, filtering, normalization and pitch variation.
+const CAL=1.4, SOURCE_FRAMES={shoot:7584,hit:3984,kill:15600,gem:8736,signature:117600};
+const S=(source,at=0,gain=1,opt={})=>({source,at,gain,rate:1,from:0,reverse:false,width:1,pan:0,...opt});
+const cut=(at=0,gain=1,rate=1,pan=0)=>S('shoot',at,gain,{rate,pan});
+const flick=(at=0,gain=1,rate=1,pan=0)=>S('hit',at,gain,{rate,pan});
+const brush=(at=0,gain=1,rate=1,pan=0)=>S('gem',at,gain,{rate,pan});
+const wake=(at=0,gain=1,rate=1,pan=0)=>S('kill',at,gain,{rate,pan});
+const wind=(at=0,gain=.7,span=.66,opt={})=>S('signature',at,gain,{from:1.12,span,...opt});
+const intake=(at=0,gain=.5,span=.12,opt={})=>S('kill',at,gain,{span,reverse:true,...opt});
 const specs=Object.create(null);
-function add(key,p,g,tail,layers,opt={}){specs[key]={p,g,tail,layers,jitter:.006,drive:.78,hp:145,lp:6200,wet:.10,variants:1,focus:0,...opt};}
-// One compact pitched gesture per repeated action. Variants change articulation
-// and quiet details while keeping the pitch stable against the user's songs.
-add('shoot',0,.34,.022,[T(1420,1180,.074,.71,0,.38),T(710,670,.044,.10,0,.12),N(1800,4700,.009,.035)],{variants:3,jitter:.003,hp:180,wet:.045});
-add('hit',0,.22,.018,[T(1960,1680,.038,.69,0,.18),T(980,840,.026,.09,0,.10),N(2200,4900,.010,.044)],{variants:3,jitter:.004,hp:240,wet:.035});
-add('kill',0,.38,.028,[...pop(1060,.105,.76),L(1860,.082,.10,.018,.16)],{variants:3,jitter:.004,hp:180,wet:.075});
-add('gem',0,.10,.016,[L(2280,.044,.51,0,.16),T(1520,1540,.026,.09,0,.06)],{variants:3,jitter:.0015,hp:320,lp:5900,wet:.06});
-add('dash',1,.36,.045,[T(720,1850,.127,.45,0,.20),A(1700,3600,.11,.18),T(1440,2080,.07,.10,.02,.08)],{hp:180,wet:.13});
-add('hurt',3,.53,.045,[T(880,520,.115,.65,0,.60),T(1320,780,.072,.16,.005,.22),A(2600,900,.063,.09)],{jitter:0,hp:180,lp:4800,wet:.06,focus:.78});
-add('shield',2,.36,.095,[...petal(1320,.18,.60),T(660,990,.055,.13)],{hp:220,wet:.20});
-// Keep the existing event ID: one quiet warning, never a heartbeat drum pattern.
-add('heartbeat',2,.20,.020,[L(880,.065,.42,0,.12),T(440,440,.043,.06,0,.08)],{jitter:0,hp:250,lp:4200,wet:.04});
-add('bolt',1,.40,.035,[T(1960,980,.094,.64,0,.62),T(980,740,.064,.12,0,.19),N(2400,5800,.018,.065)],{variants:3,jitter:.004,hp:190,wet:.075});
-add('nova',1,.46,.12,[L(880,.115,.18),C(660,1320,.07,.18),...bloom(990,.28,.64,.045)],{jitter:.003,hp:160,wet:.22});
-add('sonic',1,.36,.07,[T(820,670,.14,.53,0,.22),V(1640,.17,.13),A(1900,650,.12,.10)],{hp:160,lp:5400,wet:.15});
-add('prism',1,.36,.08,[...petal(1320,.19,.62),T(1980,1760,.07,.12,.018,.12)],{variants:3,jitter:.002,hp:250,wet:.22});
-add('shard',1,.29,.026,[L(1760,.085,.61,0,.22),T(2640,1980,.043,.10,.006,.18)],{variants:3,jitter:.002,hp:300,wet:.11});
-add('meteor',1,.47,.09,[T(660,990,.045,.14),...pop(960,.20,.81,.016),L(1920,.18,.12,.035)],{hp:145,lp:5600,wet:.17});
-add('rail',1,.48,.11,[T(1320,1760,.032,.22),...dart(1760,.21,.73,.021),L(2640,.25,.18,.025),V(880,.25,.13,.029)],{jitter:.003,hp:180,wet:.22});
-add('frost',1,.31,.075,[L(1760,.17,.45,0,.20),L(2640,.12,.16,.011,.14),T(1320,1760,.054,.11)],{variants:3,jitter:.002,hp:280,wet:.21});
-add('well',1,.39,.12,[T(660,530,.24,.38,0,.43),V(990,.29,.24),A(1650,480,.20,.12),L(1320,.14,.13,.06,.16)],{hp:135,lp:4900,wet:.23});
-add('missile',1,.32,.028,[T(880,1760,.082,.55,0,.28),A(1000,3100,.067,.10),L(1760,.055,.08,.018)],{variants:3,jitter:.003,hp:185,wet:.075});
-add('explosion',1,.43,.055,[...pop(880,.17,.83),N(1500,5000,.032,.09)],{variants:3,jitter:.004,hp:150,lp:5500,wet:.12});
-add('satellite',1,.46,.14,[L(1320,.09,.16),...dart(1540,.24,.65,.027),V(770,.31,.18,.035),L(2310,.24,.14,.045)],{hp:175,wet:.23});
-add('rift',1,.41,.085,[...sweep(1760,.19,.75),T(660,880,.14,.12,.014,.32)],{hp:160,lp:5600,wet:.17});
-add('fireworks',1,.36,.12,[...pop(1320,.12,.54),L(2640,.20,.20,.046),V(1760,.20,.10,.058)],{hp:220,wet:.22});
-add('cross',1,.41,.08,[T(1980,1320,.16,.48,0,.43),T(990,1320,.12,.18,.018,.23),L(2640,.18,.12,.024)],{hp:190,wet:.18});
-add('ultimatePulse',1,.31,.03,[...dart(1320,.078,.66),L(1980,.065,.09,.006)],{variants:3,jitter:.002,hp:210,wet:.07});
-add('elite',2,.43,.16,[L(660,.10,.24),C(660,1320,.13,.23),...bloom(990,.30,.63,.145)],{jitter:0,hp:160,wet:.23,focus:.80});
-add('drive',2,.44,.18,[L(880,.10,.21),C(660,1760,.18,.29),...bloom(1320,.31,.61,.19)],{jitter:0,hp:180,wet:.25,focus:.73});
-add('chest',2,.34,.13,[...chime(880,.10,.29),...chime(1320,.14,.35,.065),...chime(1760,.21,.30,.13)],{jitter:0,hp:220,wet:.22});
-add('combo',2,.22,.04,[L(1320,.086,.53,0,.18),T(660,880,.037,.09)],{jitter:.002,hp:260,wet:.10});
-add('comboBig',2,.35,.13,[...chime(1320,.14,.36),...petal(1760,.23,.45,.078)],{jitter:0,hp:220,wet:.22});
-add('reroll',1,.21,.03,[T(1320,990,.045,.35,0,.15),L(1760,.070,.30,.043,.16)],{jitter:.002,hp:260,wet:.08});
-add('rare',2,.34,.18,[...chime(1320,.18,.37),...petal(1980,.28,.37,.082)],{jitter:0,hp:250,wet:.26});
-add('mythic',3,.49,.24,[L(880,.14,.19),C(660,1760,.17,.25),...bloom(1320,.36,.64,.18),L(2640,.32,.16,.27)],{jitter:0,hp:180,wet:.29,focus:.62});
-add('select',1,.20,.025,[L(1320,.060,.53,0,.16),T(660,880,.028,.07)],{variants:3,jitter:.0015,hp:280,wet:.08});
-add('menu',1,.16,.02,[T(990,1050,.040,.48,0,.14),L(1980,.029,.08)],{variants:3,jitter:.0015,hp:300,lp:5300,wet:.06});
-add('start',2,.41,.17,[...chime(880,.12,.30),...chime(1320,.17,.35,.075),...bloom(1760,.27,.42,.16)],{jitter:0,hp:190,wet:.23,focus:.73});
-add('levelup',3,.44,.19,[...chime(880,.12,.28),...chime(1320,.18,.32,.08),...petal(1760,.28,.52,.16)],{jitter:0,hp:220,wet:.26,focus:.70});
-add('evolve',3,.51,.27,[L(880,.12,.23),C(660,1760,.20,.31),...bloom(1320,.42,.72,.21),L(2640,.35,.16,.30)],{jitter:0,hp:170,wet:.28,focus:.58});
-add('styleUnlock',3,.40,.22,[...chime(1320,.19,.29),...chime(1760,.26,.30,.09),V(880,.41,.14,.12),L(2640,.32,.15,.18)],{jitter:0,hp:230,wet:.28,focus:.73});
-add('pilotArrival',2,.39,.17,[...chime(880,.10,.26),...chime(1320,.13,.26,.085),...bloom(1760,.27,.43,.17)],{jitter:0,hp:210,wet:.23});
-add('pilotElio',1,.26,.08,[...petal(1320,.17,.47),T(660,990,.074,.12)],{hp:240,wet:.17});
-add('pilotOz',1,.35,.05,[...sweep(2200,.13,.67),L(1100,.08,.11,.012)],{hp:200,wet:.12});
-add('pilotKai',1,.29,.03,[0,.055,.11].flatMap(at=>dart(1320,.053,.36,at)),{jitter:.002,hp:220,wet:.075});
-add('pilotSera',1,.25,.14,[...chime(1320,.18,.30),V(660,.25,.17),L(1980,.21,.18,.055)],{hp:240,wet:.24});
-add('pilotMina',1,.25,.075,[T(1320,1760,.077,.32,0,.20),L(2640,.12,.21,.029)],{hp:250,wet:.16});
-// Threats use compact falling calls and open harmonic fields. Each warning
-// begins immediately; longer spell flourishes stay behind the first signal.
-add('boss',3,.52,.24,[L(660,.12,.24),T(990,660,.17,.28),C(660,1320,.20,.27),...bloom(880,.35,.67,.215)],{jitter:0,hp:150,lp:5600,wet:.26,focus:.58});
-add('devora',3,.54,.25,[T(1320,660,.18,.34,0,.54),L(990,.17,.18),...bloom(660,.39,.72,.22),A(2200,750,.23,.13,.23)],{jitter:0,hp:135,lp:5200,wet:.27,focus:.56});
-add('nullEmperor',3,.56,.30,[L(660,.18,.24),C(440,1320,.28,.27),...bloom(880,.44,.74,.29),L(1760,.36,.21,.37)],{jitter:0,hp:130,lp:5700,wet:.30,focus:.54});
-add('trueTrinity',3,.54,.25,[L(880,.12,.20),...[.10,.18,.26].flatMap((at,i)=>chime([880,1320,1760][i],.15,.25,at)),...bloom(1320,.37,.60,.34)],{jitter:0,hp:170,wet:.28,focus:.57});
-add('trueQuintet',3,.56,.27,[L(660,.13,.21),...[.08,.14,.20,.26,.32].flatMap((at,i)=>chime([660,880,990,1320,1760][i],.12,.20,at)),...bloom(990,.40,.68,.39)],{jitter:0,hp:160,wet:.28,focus:.55});
-add('eclipse',3,.53,.27,[T(1760,660,.21,.29,0,.38),L(1320,.12,.19),C(660,1320,.25,.24),...bloom(990,.37,.65,.29),V(660,.40,.14,.32)],{jitter:0,hp:155,lp:5600,wet:.28,focus:.57});
-add('eclipseReinforce',3,.48,.18,[...chime(1320,.10,.28),T(990,660,.16,.28,.075,.36),...bloom(880,.27,.56,.20)],{jitter:0,hp:180,wet:.23,focus:.65});
-add('eclipsePhase',3,.49,.20,[L(880,.11,.22),C(660,1980,.16,.26),...sweep(2200,.26,.63,.17),V(1100,.32,.13,.18)],{jitter:0,hp:170,wet:.24,focus:.61});
-add('eclipseLast',3,.56,.28,[T(1760,660,.18,.33,0,.49),L(1320,.12,.18),C(660,1760,.24,.29),...bloom(880,.41,.76,.25)],{jitter:0,hp:145,wet:.27,focus:.54});
-add('astraea',3,.51,.28,[...chime(1320,.15,.25),C(880,2640,.20,.23),...bloom(1760,.38,.58,.21),V(880,.42,.15,.25)],{jitter:0,hp:200,wet:.30,focus:.59});
-add('bossPhase3',3,.52,.23,[L(880,.10,.22),T(1320,660,.17,.28,0,.50),C(660,1760,.18,.26),...bloom(990,.34,.69,.19)],{jitter:0,hp:160,wet:.25,focus:.57});
-add('bossDown',2,.48,.20,[...pop(1320,.23,.63),L(1760,.29,.24,.055),V(880,.34,.13,.045)],{jitter:0,hp:180,wet:.24,focus:.65});
-add('bossBreak',3,.56,.26,[T(1760,880,.26,.42,0,.43),L(2640,.33,.26,.014),...bloom(880,.37,.61,.085),A(2700,850,.23,.15)],{jitter:0,hp:155,wet:.27,focus:.53});
-add('victory',3,.45,.29,[...chime(880,.22,.29),...chime(1320,.27,.30,.15),...petal(1760,.40,.49,.30),V(660,.56,.13,.18)],{jitter:0,hp:200,wet:.30,focus:.65});
-add('defeat',3,.37,.21,[L(1320,.19,.27),T(990,660,.21,.26,.12,.25),V(880,.31,.13,.17)],{jitter:0,hp:190,lp:4900,wet:.24,focus:.76});
-add('death',3,.53,.16,[T(1980,660,.24,.56,0,.53),T(1320,440,.19,.21,.012,.22),L(2640,.18,.18,.018),A(2900,750,.15,.12,.009)],{jitter:0,hp:180,lp:5600,wet:.19,focus:.57});
-add('deathEcho',3,.24,.21,[T(1760,880,.23,.25,0,.17),L(1320,.28,.23,.016),V(660,.29,.10,.03)],{jitter:0,hp:220,lp:4900,wet:.26});
-add('jackpotDuo',3,.53,.27,[...chime(880,.13,.22),...chime(1320,.19,.27,.08),...bloom(1760,.35,.54,.18),L(2640,.31,.18,.27)],{jitter:0,hp:200,wet:.29,focus:.57});
-add('jackpotWhite',3,.50,.30,[...petal(1320,.26,.34),C(880,2640,.17,.21),...bloom(1760,.40,.50,.18),V(880,.43,.14,.23)],{jitter:0,hp:210,wet:.32,focus:.61});
-add('jackpotBlack',3,.57,.28,[T(1320,660,.17,.31,0,.47),L(990,.13,.17),C(660,1760,.20,.25),...bloom(880,.41,.76,.22)],{jitter:0,hp:155,lp:5700,wet:.28,focus:.53});
-// Every spell has an immediate signal: gameplay's first ultimate pulse is also
-// immediate. Its distinct bloom follows, with open intervals and short motifs.
+function add(key,p,layers,opt={}){specs[key]={p,g:CAL,layers,tail:.012,variants:1,jitter:0,focus:0,...opt};}
+for(const key of ['shoot','hit','kill','gem'])add(key,0,[],{direct:key,variants:3});
+add('dash',1,[intake(0,.30,.08),cut(.018,.72,1.04,.35)],{g:CAL*.90});
+add('hurt',3,[flick(0,1.25,.91),S('kill',.014,.52,{span:.12,lp:3400}),S('hit',.074,.28,{span:.042,reverse:true})],{g:CAL*1.12,focus:.76});
+add('shield',2,[brush(0,.72),intake(.032,.36,.11,{pan:-.25}),cut(.08,.38,1.18,.22)],{g:CAL*.92});
+// Existing low-health event: one dry breath warning, with no drum pattern.
+add('heartbeat',2,[S('hit',0,.62,{rate:.82,lp:2700}),S('gem',.016,.22,{span:.08,reverse:true})],{g:CAL*.65});
+add('bolt',1,[cut(0,.95,1.13),flick(.015,.30,1.18)],{variants:3,g:CAL*.92});
+add('nova',1,[flick(0,.52,.88),intake(.01,.32,.08),wake(.045,.80,.94)],{g:CAL*.97});
+add('sonic',1,[S('kill',0,.76,{span:.21,rate:.89,lp:3800}),brush(.034,.30,1.11)],{g:CAL*.86});
+add('prism',1,[brush(0,.90,1.12,-.25),cut(.026,.36,1.21,.25)],{variants:3,g:CAL*.86});
+add('shard',1,[S('shoot',0,.64,{span:.095,rate:1.20}),flick(.004,.32,1.16)],{variants:3,g:CAL*.79});
+add('meteor',1,[flick(0,.64,.91),wake(.025,.94,.88,-.20)],{g:CAL*.98});
+add('rail',1,[intake(0,.29,.09),cut(.028,.89,.90,.26),wind(.058,.43,.31)],{g:CAL*.97});
+add('frost',1,[brush(0,.76,.94,.20),S('gem',.048,.29,{span:.105,rate:1.14,reverse:true,pan:-.25})],{variants:3,g:CAL*.82});
+add('well',1,[S('kill',0,.68,{rate:.77,lp:2600,width:.60}),intake(.112,.44,.17,{rate:.86,lp:3100})],{g:CAL*.87});
+add('missile',1,[intake(0,.32,.052),cut(.01,.68,1.17,.12)],{variants:3,g:CAL*.82});
+add('explosion',1,[wake(0,.97,.94),flick(.012,.34,.85)],{variants:3,g:CAL*.92});
+add('satellite',1,[cut(0,.61,.95,-.30),cut(.065,.42,1.10,.30),wind(.12,.37,.30)],{g:CAL*.92});
+add('rift',1,[intake(0,.27,.075,{pan:-.18}),cut(.018,.78,.91,.24),wake(.071,.35,1.18)],{g:CAL*.88});
+add('fireworks',1,[brush(0,.63,1.06,-.22),flick(.028,.40,1.17,.22),S('kill',.074,.38,{span:.18,rate:1.12})],{g:CAL*.84});
+add('cross',1,[cut(0,.61,1.04,-.34),cut(.034,.56,1.13,.34)],{g:CAL*.87});
+add('ultimatePulse',1,[S('shoot',0,.64,{span:.11,rate:1.11}),flick(.008,.17,1.10)],{variants:3,g:CAL*.72});
+add('elite',2,[flick(0,.51,.88),intake(.026,.46,.16),wake(.17,.71,.94)],{g:CAL*.96,focus:.80});
+add('drive',2,[cut(0,.44,1.09),intake(.058,.45,.18),wind(.235,.68,.55)],{g:CAL*.97,focus:.73});
+add('chest',2,[brush(0,.76,1.10,-.22),brush(.092,.57,.93,.22),cut(.17,.31,1.17)],{g:CAL*.86});
+add('combo',2,[S('gem',0,.61,{span:.10,rate:1.13}),flick(0,.17,1.21)],{g:CAL*.72});
+add('comboBig',2,[brush(0,.82,1.08),cut(.072,.43,1.14,.20)],{g:CAL*.89});
+add('reroll',1,[S('gem',0,.56,{span:.08,reverse:true}),S('shoot',.049,.33,{span:.09,rate:1.19})],{g:CAL*.74});
+add('rare',2,[brush(0,.87,1.04,-.20),brush(.073,.47,1.18,.20),wind(.15,.29,.33)],{g:CAL*.88});
+add('mythic',3,[cut(0,.42),intake(.04,.46,.18),wake(.20,.67),wind(.28,.62,.63)],{g:CAL*1.02,focus:.62});
+add('select',1,[S('gem',0,.62,{span:.10,rate:1.13}),S('hit',.009,.17,{span:.045})],{variants:3,g:CAL*.66});
+add('menu',1,[S('hit',0,.34,{span:.049,rate:1.17}),S('gem',.007,.21,{span:.055,rate:1.16})],{variants:3,g:CAL*.58});
+add('start',2,[flick(0,.37),brush(.046,.61),cut(.14,.56,.96),wind(.22,.31,.37)],{g:CAL*.94,focus:.73});
+add('levelup',3,[brush(0,.74,.98),brush(.081,.48,1.15),cut(.17,.43,1.02),wind(.21,.34,.40)],{g:CAL*.94,focus:.70});
+add('evolve',3,[cut(0,.43),intake(.035,.48,.18),wake(.21,.67),wind(.30,.67,.72)],{g:CAL*1.02,focus:.58});
+add('styleUnlock',3,[brush(0,.77,.95,-.22),brush(.09,.47,1.17,.22),wind(.18,.36,.48)],{g:CAL*.92,focus:.73});
+add('pilotArrival',2,[flick(0,.34),brush(.036,.64),cut(.12,.45,1.09),wind(.20,.30,.35)],{g:CAL*.89});
+add('pilotElio',1,[brush(0,.74,1.08),cut(.042,.30,1.18)],{g:CAL*.79});
+add('pilotOz',1,[cut(0,.83,1.19,-.22),flick(.017,.32,.94,.22)],{g:CAL*.88});
+add('pilotKai',1,[0,.054,.108].map((at,i)=>S('shoot',at,.37,{span:.067,rate:1.18,pan:i===1?.24:-.24})),{g:CAL*.84});
+add('pilotSera',1,[brush(0,.65,.90,-.15),wind(.083,.25,.26,{rate:1.06,pan:.16})],{g:CAL*.77});
+add('pilotMina',1,[S('gem',0,.57,{reverse:true,span:.11}),cut(.062,.35,1.16,.22)],{g:CAL*.78});
+// Warnings retain the approved air texture. Their timing and darker releases
+// distinguish danger from the quick foreground cuts, without pitched alarms.
+add('boss',3,[flick(0,.70,.88),intake(.025,.52,.17),wake(.19,.77,.92),wind(.27,.60,.55)],{g:CAL*1.01,focus:.58});
+add('devora',3,[S('kill',0,.61,{span:.18,rate:.82,lp:2900}),intake(.11,.48,.20,{lp:3200}),wind(.31,.79,.62,{rate:.91,lp:3900})],{g:CAL*1.04,focus:.56});
+add('nullEmperor',3,[flick(0,.65,.80),intake(.03,.55,.23,{rate:.87,lp:2700}),wind(.31,.89,.74,{rate:.90,lp:3500}),wake(.35,.35,.85)],{g:CAL*1.05,focus:.54});
+add('trueTrinity',3,[...[0,.105,.21].map((at,i)=>cut(at,.37,1+i*.07,i%2?.28:-.28)),wind(.32,.74,.65),wake(.34,.33)],{g:CAL*1.02,focus:.57});
+add('trueQuintet',3,[...[0,.075,.15,.225,.30].map((at,i)=>S('shoot',at,.31,{span:.10,rate:1+i*.04,pan:i%2?.25:-.25})),wind(.41,.79,.69),wake(.43,.31)],{g:CAL*1.03,focus:.55});
+add('eclipse',3,[cut(0,.46,.87),intake(.057,.47,.23,{lp:3400}),wind(.30,.73,.68,{rate:.95,lp:4200})],{g:CAL*1.01,focus:.57});
+add('eclipseReinforce',3,[flick(0,.54),cut(.079,.51,.96),wake(.19,.65,.95)],{g:CAL*.98,focus:.65});
+add('eclipsePhase',3,[cut(0,.47,1.06,-.26),intake(.036,.39,.15),cut(.20,.65,1.14,.26),wind(.25,.50,.44)],{g:CAL*.98,focus:.61});
+add('eclipseLast',3,[wake(0,.54,.86),intake(.08,.47,.20),wind(.29,.85,.72,{rate:.93,lp:3900}),flick(.30,.42)],{g:CAL*1.05,focus:.54});
+add('astraea',3,[brush(0,.72),cut(.063,.43,1.18,-.25),intake(.14,.33,.13,{pan:.25}),wind(.28,.62,.72,{rate:1.08}),brush(.38,.34)],{g:CAL*.99,focus:.59});
+add('bossPhase3',3,[flick(0,.65,.88),cut(.052,.45,.92),intake(.11,.40,.14),wind(.26,.77,.59)],{g:CAL*1.02,focus:.57});
+add('bossDown',2,[wake(0,.81,.91,-.24),brush(.08,.43,.95,.24),wind(.19,.34,.36)],{g:CAL*.96,focus:.65});
+add('bossBreak',3,[wake(0,.94,.87,-.25),cut(.047,.42,1.09,.25),wind(.12,.69,.69)],{g:CAL*1.04,focus:.53});
+add('victory',3,[brush(0,.74),cut(.12,.45,1.14,-.20),brush(.24,.68,.94,.20),wind(.37,.55,.68)],{g:CAL*.94,focus:.65});
+add('defeat',3,[S('kill',0,.55,{rate:.80,lp:3100}),wind(.19,.39,.46,{rate:.82,lp:2600})],{g:CAL*.88,focus:.76});
+add('death',3,[flick(0,1.04,.90),S('kill',.018,.87,{rate:.78,lp:3700}),wind(.17,.51,.46,{rate:.84,lp:2900})],{g:CAL*1.08,focus:.57});
+add('deathEcho',3,[wind(0,.38,.48,{rate:.87,lp:2600,width:.60})],{g:CAL*.75});
+add('jackpotDuo',3,[cut(0,.53,1.05,-.28),cut(.092,.51,.96,.28),brush(.18,.41),wind(.29,.75,.78)],{g:CAL*1.01,focus:.57});
+add('jackpotWhite',3,[brush(0,.79,1.07,-.24),intake(.055,.40,.16),cut(.21,.53,1.16,.24),wind(.26,.65,.76,{rate:1.08})],{g:CAL*.98,focus:.61});
+add('jackpotBlack',3,[wake(0,.61,.84,-.20),intake(.093,.48,.18,{lp:3100}),wind(.29,.86,.76,{rate:.91,lp:3800}),flick(.31,.36,.89)],{g:CAL*1.04,focus:.53});
+// Finisher 0 is the complete, unmodified G audition signature (2.45 seconds).
+// The other eight are distinct compact arrangements of its wind/cut materials.
+add('finisher0',3,[],{direct:'signature',focus:.58});
 const finishers=[
- [...chime(1320,.12,.27),C(880,2640,.18,.25),...dart(1760,.32,.59,.19),...bloom(1320,.38,.52,.205)],
- [...petal(1320,.14,.32),C(880,1760,.18,.20),...petal(1760,.39,.65,.20),L(2640,.31,.19,.28),V(880,.40,.14,.23)],
- [...chime(990,.10,.22),...[.07,.13,.19].flatMap((at,i)=>dart([990,1320,1760][i],.073,.30,at)),...bloom(1320,.35,.70,.27)],
- [T(1320,660,.15,.28,0,.42),L(1760,.12,.17),C(660,1320,.20,.22),...bloom(880,.41,.74,.22),T(1760,880,.19,.17,.30,.25)],
- [...chime(880,.12,.22),C(660,2640,.24,.28),...petal(1320,.37,.45,.25),T(1760,1320,.27,.26,.265,.24),V(880,.42,.16,.27)],
- [L(1320,.12,.26),T(880,1320,.15,.18),C(660,1760,.20,.23),...sweep(2200,.31,.63,.22),...petal(1320,.36,.34,.26)],
- [...[0,.07,.135,.19].flatMap((at,i)=>chime([990,1320,1760,1320][i],.058,.23,at)),C(880,1760,.13,.19,.14),...bloom(1320,.36,.69,.285)],
- [...[0,.041,.122,.195].flatMap((at,i)=>dart([1320,990,1760,1320][i],.039,.28,at)),C(880,1980,.12,.18,.18),...bloom(990,.37,.70,.30),L(2640,.28,.14,.35)],
- [...chime(1760,.11,.23),C(880,1980,.16,.21),...[.17,.255,.34].flatMap((at,i)=>sweep([2640,2200,1980][i],.135,.43,at)),...petal(1320,.32,.36,.37)]
+ [cut(0,.43,1.12,-.32),brush(.065,.66,1.09,.28),cut(.19,.46,1.19,-.28),wind(.29,.73,.72,{rate:1.05}),brush(.36,.30)],
+ [cut(0,.43,1.12,-.24),cut(.075,.41,1.17,.24),cut(.145,.40,1.22,-.24),wake(.22,.55,1.08),wind(.31,.64,.60)],
+ [S('kill',0,.57,{rate:.82,lp:3100}),intake(.11,.46,.15,{lp:2900}),wind(.28,.81,.73,{rate:.90,lp:3700})],
+ [cut(0,.43,1.07,-.35),intake(.035,.39,.17,{pan:.35}),cut(.205,.46,.98,.35),cut(.31,.37,1.17,-.35),wind(.39,.69,.63)],
+ [brush(0,.66,.91),cut(.034,.33,.95,-.24),intake(.09,.38,.17,{pan:.24}),wind(.27,.69,.79,{rate:1.04}),brush(.37,.28)],
+ [...[0,.081,.162,.243].map((at,i)=>S('shoot',at,.34,{span:.098,rate:1.12,pan:i%2?.28:-.28})),wake(.325,.48,1.10),wind(.38,.65,.60)],
+ [...[0,.045,.14,.22].map((at,i)=>S(i===1?'hit':'shoot',at,.37,{span:.092,rate:1.18,pan:i%2?.26:-.26})),intake(.23,.27,.11),wind(.35,.74,.67)],
+ [cut(0,.53,1.12,-.34),cut(.135,.49,1.02,.34),cut(.27,.47,.94,-.34),wake(.32,.47,1.08,.24),wind(.41,.68,.67)]
 ];
-finishers.forEach((layers,i)=>add('finisher'+i,3,.54,[.24,.27,.24,.28,.27,.25,.23,.25,.25][i],layers,{jitter:0,hp:[180,210,180,150,180,180,190,170,210][i],lp:i===3?5500:6300,wet:.27,focus:.58}));
+finishers.forEach((layers,i)=>add('finisher'+(i+1),3,layers,{g:CAL,focus:.58}));
 function resolve(name,opt={}){
  if(opt.cue&&Object.hasOwn(specs,opt.cue))return opt.cue;
  if(name==='jackpot')return ['jackpotDuo','jackpotWhite','jackpotBlack'][clamp(M.floor(finite(opt.jackpotType,0)),0,2)];
@@ -136,80 +117,95 @@ function filter(kind,f,q=.7071){
 }
 function filtered(f,x){const y=f.b0*x+f.z1;f.z1=f.b1*x-f.a1*y+f.z2;f.z2=f.b2*x-f.a2*y;return y;}
 const cacheKey=(key,variant)=>key+':'+variant;
-function* buildSteps(ac,key,variant=0){
- const spec=specs[key],duration=M.max(...spec.layers.map(l=>l.at+l.d)),dry=new Float32Array(M.ceil(duration*RATE)+1);
- for(const [index,l] of spec.layers.entries()){
-  const offset=M.round(l.at*RATE),len=M.min(dry.length-offset,M.ceil(l.d*RATE));
-  const variation=spec.variants>1?[-.7,.45,.85][variant]:0;
-  const detune=1+variation*.0015,materialGain=1+variation*((index&1)?-.045:.045);
-  const brightness=1+variation*.08;
-  let phase=0,lo=0,hi=0,seed=seedFor(key+':'+variant+':'+index),f=(l.f||0)*detune;
-  let band1=0,band2=0,n1=0,n2=0,b0=0,b2=0,a1=0,a2=0;
-  const cLo=1-M.exp(-TAU*(l.lo||700)/RATE),cHi=1-M.exp(-TAU*(l.hi||5000)/RATE);
-  const sweep=l.f?M.pow(l.end/l.f,1/M.max(1,len-1)):1;
-  for(let i=0;i<len;i++){
-   const u=i/M.max(1,len-1),t=i/RATE,edge=M.min(1,t/(l.attack*(1+variation*.10))),end=M.min(1,(l.d-t)/.005);
-   seed=(M.imul(seed,1664525)+1013904223)>>>0;
-   const noise=seed/2147483648-1;hi+=cHi*(noise-hi);lo+=cLo*(noise-lo);
-   const air=(hi-lo)*1.65;
-   let env=edge*end,x=0;
-   if(l.k==='n'){
-    env*=M.exp(-u*5.2)*(1-u);x=air;
-   }else if(l.k==='a'){
-    if((i&31)===0){const w=TAU*f/RATE,alpha=M.sin(w)/(2*.58),a0=1+alpha;b0=alpha/a0;b2=-b0;a1=-2*M.cos(w)/a0;a2=(1-alpha)/a0;}
-    x=b0*noise+b2*n2-a1*band1-a2*band2;n2=n1;n1=noise;band2=band1;band1=x;f*=sweep;
-    env*=M.pow(M.sin(M.PI*(u*.89+.03)),.7)*M.exp(-u*1.9)*(1-u);x*=1.8;
-   }else{
-    phase+=TAU*f/RATE;f*=sweep;
-    // Smooth additive partials stay harmonically related. No hard-edged square,
-    // noisy phase modulation, or resonant bass pitch-drop in the rapid loop.
-    const color=l.color*brightness,bright=M.exp(-u*3.5);
-    // Taper each upper partial before Nyquist, including the highest spell bells.
-    const h2=clamp((RATE*.48-f*2)/(RATE*.08),0,1),h3=clamp((RATE*.48-f*3)/(RATE*.08),0,1),h4=clamp((RATE*.48-f*4)/(RATE*.08),0,1);
-    if(l.k==='l'){
-     x=.72*M.sin(phase)+(.12+color*.13)*M.sin(phase*2)*M.exp(-u*2.4)*h2+.075*M.sin(phase*3)*M.exp(-u*4.1)*h3+.035*M.sin(phase*4)*M.exp(-u*5.7)*h4;
-     env*=M.exp(-u*2.0)*M.pow(1-u,1.4);
-    }else if(l.k==='v'){
-     x=.67*M.sin(phase)+.18*M.sin(phase*2)*h2+.09*M.sin(phase*3)*h3;
-     env*=M.sin(M.PI*M.min(1,u*4)*.5)*M.pow(1-u,1.65);
-    }else{
-     x=.73*M.sin(phase)+(.075+color*.20)*M.sin(phase*2)*bright*h2+(.045+color*.12)*M.sin(phase*3)*bright*h3+.02*M.sin(phase*4)*bright*h4;
-     if(l.k==='c')env*=M.pow(M.sin(u*M.PI*.5),1.5);
-     else env*=M.exp(-u*2.7)*M.pow(1-u,1.1);
+const asset=window.RUU_SLASH_SAMPLES;
+const assetReady=asset?.sampleRate===RATE&&asset.channels===2&&asset.format==='s16le'&&typeof atob==='function'&&Object.entries(SOURCE_FRAMES).every(([key,frames])=>{
+ const cue=asset.cues?.[key];return cue?.frames===frames&&typeof cue.pcm==='string'&&cue.pcm.length===M.ceil(frames*4/3)*4;
+});
+const sources=new Map();let sourceStatus=assetReady?'approved-g':'wind-fallback',fallbackReported=false;
+function sampleSource(){return sourceStatus;}
+function reportFallback(){
+ sourceStatus='wind-fallback';if(fallbackReported)return;fallbackReported=true;
+ if(typeof console!=='undefined'&&typeof console.warn==='function')console.warn('RUU audio: approved G sample data unavailable; using the wind-only fallback.');
+}
+function* sourceSteps(key){
+ let src=sources.get(key);
+ if(!src){const frames=SOURCE_FRAMES[key];src={frames,a:[new Float32Array(frames),new Float32Array(frames)],position:0,bytes:0,done:false,failed:!assetReady};sources.set(key,src);}
+ if(src.done)return src;
+ if(!src.failed){
+  try{
+   const pcm=asset.cues[key].pcm;
+   // 2048 base64 characters = 384 complete stereo frames. No large atob call
+   // can block the first shot or an idle deadline while decoding the long cut.
+   while(src.bytes<pcm.length){
+    const binary=atob(pcm.slice(src.bytes,src.bytes+2048));
+    if(binary.length%4||src.position+binary.length/4>src.frames)throw Error('Invalid G PCM');
+    for(let i=0;i<binary.length;i+=4){
+     const l=binary.charCodeAt(i)|(binary.charCodeAt(i+1)<<8),r=binary.charCodeAt(i+2)|(binary.charCodeAt(i+3)<<8);
+     src.a[0][src.position]=(l<<16>>16)/32768;src.a[1][src.position]=(r<<16>>16)/32768;src.position++;
     }
+    src.bytes+=2048;yield;
    }
-   dry[offset+i]+=x*env*l.a*materialGain;
+   if(src.position!==src.frames)throw Error('Incomplete G PCM');
+   src.done=true;return src;
+  }catch{src.failed=true;src.position=0;}
+ }
+ // A missing/corrupt asset must never fall through to the old pitched effects.
+ // This deterministic, quiet band of air is diagnostic fallback only.
+ reportFallback();
+ let seed=seedFor('wind-fallback:'+key),low=0,high=0,trail=0;
+ const peak={shoot:.17,hit:.10,kill:.20,gem:.075,signature:.22}[key];
+ const lo=1-M.exp(-TAU*650/RATE),hi=1-M.exp(-TAU*4400/RATE);
+ for(let i=0;i<src.frames;i++){
+  seed=(M.imul(seed,1664525)+1013904223)>>>0;const noise=seed/2147483648-1;
+  low+=lo*(noise-low);high+=hi*(noise-high);const u=i/(src.frames-1);
+  const env=M.min(1,i/(RATE*.002),(src.frames-1-i)/(RATE*.018))*M.exp(-u*4.2);
+  const air=(high-low)*env*peak;trail+=.16*(air-trail);
+  src.a[0][i]=air+trail*.025;src.a[1][i]=air-trail*.015;
+  if((i&511)===511)yield;
+ }
+ src.a[0][0]=src.a[1][0]=src.a[0][src.frames-1]=src.a[1][src.frames-1]=0;src.done=true;return src;
+}
+function* buildSteps(ac,key,variant=0){
+ const spec=specs[key],variation=variant===0?1:variant===1?.978:1.018,width=variant===0?1:variant===1?.97:1.025;
+ if(spec.direct){
+  const src=yield* sourceSteps(spec.direct),buffer=ac.createBuffer(2,src.frames,RATE),left=buffer.getChannelData(0),right=buffer.getChannelData(1);
+  for(let i=0;i<src.frames;i++){
+   if(variant===0){left[i]=src.a[0][i];right[i]=src.a[1][i];}
+   else{const mid=(src.a[0][i]+src.a[1][i])*.5,side=(src.a[0][i]-src.a[1][i])*.5*width;left[i]=(mid+side)*variation;right[i]=(mid-side)*variation;}
+   if((i&511)===511)yield;
+  }
+  return buffer;
+ }
+ const layers=[];
+ for(const l of spec.layers){
+  const src=yield* sourceSteps(l.source),start=M.round(l.from*RATE),span=M.min(src.frames-start,M.round((l.span??(src.frames/RATE-l.from))*RATE));
+  layers.push({...l,src,start,span,length:M.max(1,M.ceil(span/l.rate)),offset:M.round(l.at*RATE)});
+ }
+ const frames=M.max(...layers.map(l=>l.offset+l.length))+M.ceil(spec.tail*RATE),buffer=ac.createBuffer(2,frames,RATE);
+ const left=buffer.getChannelData(0),right=buffer.getChannelData(1);
+ for(const l of layers){
+  const lp=l.lp?[filter('low',l.lp),filter('low',l.lp)]:null;
+  for(let i=0;i<l.length;i++){
+   const pos=clamp(l.start+(l.reverse?l.span-1-i*l.rate:i*l.rate),l.start,l.start+l.span-1),j=M.floor(pos),fraction=pos-j,next=M.min(j+1,l.src.frames-1);
+   let a=l.src.a[0][j]+(l.src.a[0][next]-l.src.a[0][j])*fraction,b=l.src.a[1][j]+(l.src.a[1][next]-l.src.a[1][j])*fraction;
+   if(lp){a=filtered(lp[0],a);b=filtered(lp[1],b);}
+   const mid=(a+b)*.5,side=(a-b)*.5*l.width,env=M.min(1,i/(RATE*.0015),(l.length-1-i)/(RATE*.008));
+   left[l.offset+i]+=(mid+side)*(1-l.pan*.25)*l.gain*env;
+   right[l.offset+i]+=(mid-side)*(1+l.pan*.25)*l.gain*env;
    if((i&511)===511)yield;
   }
   yield;
  }
- const hp=filter('high',spec.hp),lp=filter('low',spec.lp),reflection=new Float32Array(dry.length);
- let low=0;const lowCoef=1-M.exp(-TAU*950/RATE);
- for(let i=0;i<dry.length;i++){
-  const v=filtered(lp,filtered(hp,M.tanh(dry[i]*spec.drive)));
-  dry[i]=v*M.min(1,i/(RATE*.0008),(dry.length-1-i)/(RATE*.006));
-  low+=lowCoef*(dry[i]-low);reflection[i]=dry[i]-low;
-  if((i&511)===511)yield;
- }
- yield;
- const frames=dry.length+M.ceil(spec.tail*RATE),buffer=ac.createBuffer(2,frames,RATE);
- const left=buffer.getChannelData(0),right=buffer.getChannelData(1);
- // Positive, decorrelated upper-band reflections leave the dry center and body
- // intact in mono. Large events get a deeper room, ordinary fire only a short edge.
- const taps=[[.011,.62,.17],[.019,.18,.58],[.031,.32,.11],[.043,.12,.30],[.067,.23,.08],[.089,.08,.20],[.127,.13,.04],[.173,.04,.10],[.229,.055,.025],[.281,.025,.05]].filter(t=>t[0]<spec.tail);
- const delays=taps.map(([d,l,r])=>[M.round(d*RATE),l*spec.wet,r*spec.wet]);let peak=0,energy=0;
+ let peak=0;
+ for(let i=0;i<frames;i++){peak=M.max(peak,M.abs(left[i]),M.abs(right[i]));if((i&511)===511)yield;}
+ // Only derived arrangements get a downward ceiling. G's five direct sounds
+ // keep their original PCM and relative levels; CAL is their shared mix gain.
+ const scale=M.min(1,.58/M.max(.001,peak))*variation;
  for(let i=0;i<frames;i++){
-  const v=i<dry.length?dry[i]:0;let l=v,r=v;
-  for(const [d,a,b] of delays){const j=i-d;if(j>=0&&j<dry.length){l+=reflection[j]*a;r+=reflection[j]*b;}}
-  const fade=M.min(1,(frames-1-i)/M.round(.008*RATE));
-  left[i]=l*fade;right[i]=r*fade;peak=M.max(peak,M.abs(left[i]),M.abs(right[i]));energy+=left[i]*left[i]+right[i]*right[i];
+  const mid=(left[i]+right[i])*.5,side=(left[i]-right[i])*.5*width;
+  left[i]=(mid+side)*scale;right[i]=(mid-side)*scale;
   if((i&511)===511)yield;
  }
- yield;
- // Peak and RMS ceilings keep soft harmonic tones comfortable in dense volleys.
- // Role gains below preserve the difference between a hit tick and a spell.
- const rms=M.sqrt(energy/(frames*2));const gain=M.min(.78/M.max(.1,peak),(spec.p<2?.19:.21)/M.max(.001,rms));
- for(let i=0;i<frames;i++){left[i]*=gain;right[i]*=gain;if((i&511)===511)yield;}
  return buffer;
 }
 const engines=new WeakMap();
@@ -306,7 +302,7 @@ function prime(engine){
  }
  schedule(next);
 }
-function stats(engine){const b=engines.get(engine);return {active:b?.voices.size||0,peak:b?.peakVoices||0,cache:b?.cache.size||0,dropped:b?.dropped||0};}
+function stats(engine){const b=engines.get(engine);return {active:b?.voices.size||0,peak:b?.peakVoices||0,cache:b?.cache.size||0,dropped:b?.dropped||0,source:sourceStatus,sourceBytes:[...sources.values()].reduce((n,s)=>n+s.frames*8,0)};}
 function settingsMarkup(){
  return '<div class="kv-audio-grid">'+['bgm','sfx'].map(k=>'<label class="kv-setting kv-volume"><span>'+ (k==='bgm'?'BGM VOLUME / 楽曲音量':'SFX VOLUME / 効果音量')+' <output id="mix-'+k+'-value">'+M.round(volume(k)*100)+'%</output></span><input type="range" min="0" max="100" step="1" value="'+M.round(volume(k)*100)+'" data-audio-volume="'+k+'" aria-label="'+(k==='bgm'?'BGM音量':'効果音音量')+'"></label>').join('')+'<button type="button" class="kv-button" id="audioPreview"><span>♫ SFX PREVIEW</span><small>効果音の試聴</small></button><p class="kv-detail">BGM・SFXのON/OFFとは別に音量を保存します。</p></div>';
 }
@@ -320,5 +316,5 @@ function bindSettings(doc,onChange,onPreview){
  }
  const button=find('audioPreview');if(button)button.onclick=()=>onPreview?.();
 }
-window.RUU_AUDIO={volume,setVolume,masterGain,resolve,play,prime,stopAll,syncMaster,settingsMarkup,bindSettings,stats};
+window.RUU_AUDIO={volume,setVolume,masterGain,resolve,play,prime,stopAll,syncMaster,settingsMarkup,bindSettings,stats,sampleSource};
 })();
