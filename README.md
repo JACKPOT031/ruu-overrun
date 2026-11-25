@@ -1,8 +1,14 @@
-# RUU//OVERRUN — PUBLIC BETA (v1.40.0)
+# RUU//OVERRUN — PUBLIC BETA (v1.40.1)
 
 JACKPOTØ31が制作するオリジナル・ブラウザサバイバルアクション。
 
 **[ゲームを遊ぶ](https://jackpot031.github.io/ruu-overrun/)** / **[公開開始v1.5.3からの更新履歴](./CHANGELOG.md)**
+
+## v1.40.1 — NEON FRONTLINE
+
+- 新しいキービジュアルを採用。ルー、デヴォーラ、タイトルロゴを隠さない全体表示と、画像下部の独立したメニューへ変更。
+- PCは横並びの操作パネル、スマホは縦にスクロールできるレイアウト。既存のメニュー、ランキング、自己ベスト、設定を維持。
+- 効果音・楽曲・ゲーム進行・報酬・解放条件は変更なし。
 
 ## v1.40.0 — SLASH WIND / G SAMPLE ADOPTION
 
