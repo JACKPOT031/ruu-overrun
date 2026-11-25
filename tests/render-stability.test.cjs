@@ -44,7 +44,7 @@ function fixture(phase='playing'){
     paintCount:0,paintTotalMs:0,perfTick:1000,nextPaintDue:2000,renderInterval:1000/30,
     renderScale:1,autoQuality:1,fxPreset:'auto',musicFade:null,canvasResizePending:false,autoHealthyWindows:0,
     update(){updates++},updateBossBreak(){},updateDeathSequence(){},updateEndingCinema(){},
-    updateMusicFade(){},resetFpsMeter(){},render(){draws++;bitmap='DRAWN';events.push('render')},
+    updateMusicFade(){},updateMusicFocus(){},resetFpsMeter(){},render(){draws++;bitmap='DRAWN';events.push('render')},
     drawJoy(){},recordFpsSample(){},updateMusicUI(){},
     requestAnimationFrame(){events.push('yield:'+bitmap)}
   };
