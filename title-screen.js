@@ -1,36 +1,39 @@
 /* RUU//OVERRUN v1.34.0 — KEY VISUAL / title UI only. */
 (()=>{
 'use strict';
-const ART='assets/title-keyvisual.webp?v=1.34.0';
-const version='v1.40.0';
+const ART='assets/title-keyvisual.webp?v=1.40.1';
+const version='v1.40.1';
 const btn=(id,label,sub,extra='')=>`<button id="${id}" type="button" class="kv-button ${extra}"><span>${label}</span><small>${sub}</small></button>`;
 const safeCount=(n,limit)=>Math.min(limit,Math.max(0,Math.floor(Number(n)||0)));
 const score=n=>Number.isFinite(n)&&n>=0?Math.floor(n).toLocaleString('ja-JP'):'—';
 function home({unlocked=1,best=null,normal=false,complete=false}={}){
  return `<section class="kv-home" aria-label="RUU//OVERRUN タイトル画面">
- <img class="kv-art" src="${ART}" alt="月光の下、弾幕を駆けるルー。RUU//OVERRUN" fetchpriority="high" draggable="false">
- <div class="kv-shade" aria-hidden="true"></div><div class="kv-edge" aria-hidden="true"></div>
  <h1 class="kv-sr">RUU//OVERRUN</h1>
- <div class="kv-edition"><i>///</i> ${version} <span>PUBLIC BETA</span></div>
+ <div class="kv-hero"><img class="kv-art" src="${ART}" alt="ネオンの弾幕を駆け、デヴォーラに銃口を向けるルー。RUU//OVERRUN" width="1672" height="941" fetchpriority="high" draggable="false"></div>
  <div class="menu-copy kv-rail">
-  <div class="kv-brand">JACKPOT<b>Ø</b>31 <span>/ ORIGINAL GAME</span></div>
-  <div class="kv-signal"><i></i> SLASH WIND // RUU STYLE</div>
-  <p class="kv-intro">押し寄せる侵食を生き抜き、<br>最後の脅威を撃ち砕け。</p>
-  <button id="startBtn" class="kv-button kv-start" type="button"><span>▶ START GAME</span><small>NORMAL // DEPLOY　[ENTER]</small></button>
-  <nav class="kv-nav" aria-label="メインメニュー">
-   ${btn('ruuStyleBtn','RUU STYLE',`${safeCount(unlocked,9)||1} / 9　衣装`)}
-   ${btn('achievementsBtn','ACHIEVEMENTS','実績・称号')}
-   ${btn('enemyArchive','DEVORA FILES','敵・支援機図鑑')}
-   ${btn('titleExtrasBtn','EXTRA MODES',normal?'追加モード':'クリア後解放')}
-   ${btn('titleEndingBtn','ENDING THEATER',complete?'通常・完全クリアED':normal?'エンディング':'クリア後解放')}
-   ${btn('titleSettingsBtn','SETTINGS','音楽・描画設定')}
-   ${btn('titleGalleryBtn','VISUAL ARCHIVE','イラストギャラリー','kv-wide')}
-  </nav>
+  <header class="kv-dock-head">
+   <div class="kv-brand">JACKPOT<b>Ø</b>31 <span>/ ORIGINAL GAME</span></div>
+   <div class="kv-record"><span>PERSONAL BEST</span><strong>${score(best)}</strong></div>
+   <div class="kv-edition"><i>///</i> ${version} <span>NEON FRONTLINE</span></div>
+  </header>
+  <div class="kv-main">
+   <div class="kv-primary">
+    <p class="kv-intro">押し寄せる侵食を生き抜き、最後の脅威を撃ち砕け。</p>
+    <button id="startBtn" class="kv-button kv-start" type="button"><span>▶ START GAME</span><small>NORMAL // DEPLOY　[ENTER]</small></button>
+   </div>
+   <nav class="kv-nav" aria-label="メインメニュー">
+    ${btn('ruuStyleBtn','RUU STYLE',`${safeCount(unlocked,9)||1} / 9　衣装`)}
+    ${btn('achievementsBtn','ACHIEVEMENTS','実績・称号')}
+    ${btn('enemyArchive','DEVORA FILES','敵・支援機図鑑')}
+    ${btn('titleExtrasBtn','EXTRA MODES',normal?'追加モード':'クリア後解放')}
+    ${btn('titleEndingBtn','ENDING THEATER',complete?'通常・完全クリアED':normal?'エンディング':'クリア後解放')}
+    ${btn('titleSettingsBtn','SETTINGS','音楽・描画設定')}
+    ${btn('titleGalleryBtn','VISUAL ARCHIVE','イラストギャラリー','kv-wide')}
+   </nav>
+  </div>
   <div id="titleCommunity" class="kv-community"></div>
-  <div class="kv-keyhint">WASD / ↑↓←→　MOVE　·　SPACE　DASH</div>
+  <footer class="kv-foot"><span>攻撃は自動。一定確率で『星屑の鎧 -Guardian Genome-』のキャラクターが参戦。</span><span class="kv-keyhint"><span class="kv-desktop-keys">WASD / ↑↓←→ MOVE · SPACE DASH　|　</span>MUSIC &amp; VISUAL ART // JACKPOTØ31</span></footer>
  </div>
- <div class="kv-record"><span>PERSONAL BEST</span><strong>${score(best)}</strong><small>NORMAL / SURVIVAL RECORD</small></div>
- <div class="kv-foot"><span>攻撃は自動。一定確率で『星屑の鎧 -Guardian Genome-』のキャラクターが参戦。</span><span>MUSIC &amp; VISUAL ART // JACKPOTØ31</span></div>
  </section>`;
 }
 const back='<button type="button" class="kv-button kv-back" id="titleBack"><span>← TITLE</span><small>タイトルに戻る</small></button>';

@@ -48,3 +48,47 @@
 .kv-volume input:focus-visible{outline:2px solid #ffc8ed;outline-offset:2px}
 .kv-audio-grid .kv-detail{margin:0;align-self:center;font-size:11px}
 @media(max-width:900px){.kv-audio-grid{grid-template-columns:1fr}.kv-volume input[type=range]{min-height:40px}}
+
+/* v1.40.1 — NEON FRONTLINE. Title only: full artwork above a real menu dock. */
+#frame.kv-title-active{aspect-ratio:auto;min-height:0;background:#100b16;border-color:#b365a0;box-shadow:0 20px 65px #0009,0 0 40px #e82d9325}
+#frame.kv-title-active #game{position:absolute;top:0;left:0;width:100%;height:auto;aspect-ratio:16/9;visibility:hidden;pointer-events:none}
+#overlay.kv-title-overlay{position:relative;inset:auto;display:block;padding:0;overflow:visible;background:#100b16}
+#overlay.kv-title-overlay.hidden{display:none}
+#overlay.kv-title-overlay #menu{width:100%;height:auto;max-width:none;max-height:none;margin:0;padding:0}
+.kv-home{display:flex;flex-direction:column;height:auto;min-height:0;padding:0;background:#100b16;text-align:left}
+.kv-hero{position:relative;isolation:isolate;width:100%;aspect-ratio:1672/941;overflow:hidden;background:#120b18;flex:none}
+.kv-hero:before{content:'';position:absolute;inset:-16px;background:url('assets/title-keyvisual.webp?v=1.40.1') center/cover no-repeat;filter:blur(22px) brightness(.34);z-index:-1}
+.kv-hero .kv-art{position:relative;display:block;inset:auto;width:100%;height:100%;aspect-ratio:auto;object-fit:contain;object-position:center;z-index:auto}
+.kv-home .menu-copy.kv-rail{position:relative;inset:auto;width:100%;max-width:none;min-width:0;display:flex;flex-direction:column;gap:10px;margin:0;padding:12px 18px 10px;background:linear-gradient(118deg,#1d1122,#111019 64%);border-top:1px solid #fa69cb90}
+.kv-dock-head{display:flex;align-items:center;justify-content:space-between;gap:12px;min-width:0}
+.kv-home .kv-brand{font-size:11px;white-space:normal}
+.kv-home .kv-brand b{color:#ff6dc9}
+.kv-home .kv-record{position:static;inset:auto;display:flex;flex-direction:row;align-items:baseline;gap:7px;width:auto;max-width:none;margin:0;padding:0;text-align:left;background:none;border:0;white-space:nowrap}
+.kv-home .kv-record span{font-size:9px;letter-spacing:.06em;color:#d6b4cb}
+.kv-home .kv-record strong{font-size:19px;color:#fff0fa}
+.kv-home .kv-edition{position:static;inset:auto;margin:0;padding:4px 7px;flex:none;background:#29172b;border-color:#a56b99;color:#f4ddec;font-size:10px;white-space:nowrap}
+.kv-home .kv-edition span{display:inline;font-size:9px}
+.kv-main{display:grid;grid-template-columns:minmax(210px,.95fr) minmax(0,2.4fr);gap:14px;align-items:stretch}
+.kv-primary{display:flex;flex-direction:column;gap:8px;justify-content:center;min-width:0}
+.kv-home .kv-intro{margin:0;color:#eee2ec;font-size:13px;line-height:1.5;font-weight:700;text-shadow:none}
+.kv-home .kv-start{min-height:61px;width:100%;padding:11px 13px;background:linear-gradient(115deg,#9c1e62,#5c214f);box-shadow:0 0 18px #d02c8060;border-radius:3px}
+.kv-home .kv-start:hover,.kv-home .kv-start:focus-visible{background:linear-gradient(115deg,#c92a80,#7e296c)}
+.kv-home .kv-start span{font-size:clamp(17px,1.9vw,25px);letter-spacing:.065em}
+.kv-home .kv-start small{font-size:10px}
+.kv-home .kv-nav{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.kv-home .kv-nav .kv-button{min-height:47px;padding:8px 9px;font-size:11px;letter-spacing:.015em;line-height:1.15;background:linear-gradient(105deg,#261b31,#1c1726);border-color:#79516f;border-left:2px solid #b56ca9;border-radius:3px}
+.kv-home .kv-nav .kv-button small{font-size:10px;margin-top:4px;color:#d8c4d8}
+.kv-home .kv-nav .kv-button:hover,.kv-home .kv-nav .kv-button:focus-visible{background:#4a2344;border-color:#ff9bda}
+.kv-home .kv-nav .kv-wide{grid-column:span 2;flex-direction:column;align-items:flex-start;justify-content:center;gap:0}
+.kv-home .kv-community:empty{display:none}
+.kv-home .kv-community .ruu-public-start{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:0;color:#f6e5f4}
+.kv-home .kv-community .ruu-public-start label{font-size:10px;flex:none;color:#d6a8c9}
+.kv-home .kv-community .ruu-nickname{width:150px;min-width:95px;max-width:100%;min-height:34px;font-size:12px;flex:0 1 150px;background:#17121f;border-color:#8b6383}
+.kv-home .kv-community .ruu-mini-btn{min-height:34px;padding:6px 9px;font-size:11px;background:#2b2032;border-color:#95688b;text-align:center;flex:none}
+.kv-home .kv-community .ruu-public-start span{font-size:10px!important;color:#c5afc5!important;line-height:1.3;flex:1 1 160px}
+.kv-home .kv-foot{position:static;inset:auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:5px 12px;width:auto;max-width:none;margin:0;padding:8px 0 0;border-top:1px solid #8e5d7e40;font-size:10px;color:#c4b2c7;text-shadow:none;letter-spacing:0}
+.kv-home .kv-foot span,.kv-home .kv-foot span+span{font-size:10px;line-height:1.45;letter-spacing:0;color:#c4b2c7}
+.kv-home .kv-foot .kv-keyhint{display:block;font-size:9px}.kv-home .kv-foot .kv-desktop-keys{display:inline;font-size:9px}
+@media(min-width:901px){.kv-hero{max-height:max(270px,calc(100vh - 270px));max-height:max(270px,calc(100svh - 270px))}}
+@media(max-width:900px){.kv-home .menu-copy.kv-rail{padding:12px;gap:10px}.kv-main{grid-template-columns:1fr;gap:10px}.kv-home .kv-nav{grid-template-columns:repeat(2,minmax(0,1fr))}.kv-home .kv-nav .kv-button{min-height:49px;padding:9px 10px;font-size:12px}.kv-home .kv-nav .kv-wide{grid-column:1/-1}.kv-home .kv-start{min-height:55px}.kv-home .kv-intro{font-size:12px}.kv-home .kv-record{gap:5px}.kv-home .kv-record strong{font-size:17px}.kv-home .kv-edition span{display:none}.kv-home .kv-brand span{display:none}.kv-home .kv-community .ruu-public-start label{flex:1 0 100%}.kv-home .kv-community .ruu-nickname{flex:1 1 120px;min-height:42px}.kv-home .kv-community .ruu-mini-btn{min-height:42px}.kv-home .kv-community .ruu-public-start span{flex:1 0 100%}.kv-home .kv-foot .kv-desktop-keys{display:none}}
+@media(max-width:370px){.kv-dock-head{gap:6px}.kv-home .kv-brand{font-size:10px}.kv-home .kv-record span{font-size:8px}.kv-home .kv-record strong{font-size:15px}.kv-home .kv-edition{font-size:9px;padding:4px}.kv-home .kv-nav .kv-button{font-size:11px}}
